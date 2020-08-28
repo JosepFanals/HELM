@@ -13,7 +13,7 @@ The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solvi
 ### Relevant files:
 
 
-* MIH_original.py: main program for the original formulation of the HELM, also called canonical embedding.
+*MIH_original.py: main program for the original formulation of the HELM, also called canonical embedding.
 * MIH_propi.py: main program for the alternative approach to the embedding of equations. The thesis details its advantages and disadvantages in comparison to the canonical embedding.
 * Funcions.py: contains the tools explained above.
 
