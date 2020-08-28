@@ -1,0 +1,333 @@
+% !TEX program = lualatex
+\documentclass[11pt, a4paper]{report} % report per treballs
+%%%%%%%%%%%%%%%%%%%%%%%% PAQUETS %%%%%%%%%%%%%%%%%%%%%%%%
+%\usepackage[utf8]{inputenc} % com es codifica, no fa falta si tinc lualatex
+\usepackage[left=3cm,top=2.5cm,right=2cm,bottom=2.5cm,bindingoffset=0.0cm]{geometry} % marges. bindingoffset és el marge per on es posaria l'espiral
+\usepackage{lipsum} % per posar dummy text
+\usepackage{parskip} % per no tenir indentation i gestionar espais de paràgrafs
+\usepackage{setspace} % per l'espai entre línies
+\setstretch{1.5} % espaiat entre línies
+\setlength\parskip{1.5em plus 0.1em minus 0.1em} % espaiat dels paràgrafs
+\usepackage{graphicx} % per afegir imatges
+\graphicspath{ {./Images/} } % carpeta on buscar les imatges
+\usepackage{subcaption} % per una figura al costat de l'altra, subfigures
+\usepackage[catalan]{babel} % llengua: català
+\usepackage[font=footnotesize, labelsep=period]{caption} % captions més petites i separar amb punt
+\renewcommand{\thefigure}{\arabic{figure}} % per tenir Figura 1. en lloc de Figura 1.1
+\renewcommand{\thetable}{\arabic{table}} % per tenir Taula 1. en lloc de Taula 1.1
+\renewcommand{\theequation}{\arabic{equation}} % per tenir 1 en lloc de capítol.1
+\renewcommand{\labelenumii}{\theenumii} % per a numerar amb 1.1, 1.2...
+\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+\renewcommand{\labelenumiii}{\theenumiii} % per a numerar amb 1.1.1, 1.1.2...
+\renewcommand{\theenumiii}{\theenumii\arabic{enumiii}.}
+\usepackage{chngcntr} % per canviar el comptador
+\counterwithout{equation}{chapter} % sense incloure el chapter a l'equació
+\counterwithout{figure}{chapter} % sense incloure el chapter a l'equació
+\counterwithout{table}{chapter} % sense incloure el chapter a l'equació
+%\renewcommand{\theequation}{Eq. \arabic{equation}} % per tenir Eq. 1. en lloc d'1
+\usepackage{enumitem,amssymb} % per a fer una checklist
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$} % quadrats a la checklist
+\usepackage{fancyhdr} % pel heading
+\fancyhf{} % per header i footer
+% \rhead{\footnotesize Resolució del flux de càrregues amb mètode d'incrustació holomòrfica} % dalt a la dreta
+% \lhead{\footnotesize Memòria} % dalt a l'esquerra
+% \rfoot{\footnotesize \thepage} % baix a la dreta
+\lhead{\footnotesize Resolució del flux de càrregues amb mètode d'incrustació holomòrfica} % dalt a la dreta
+\rhead{\footnotesize Memòria} % dalt a l'esquerra
+\rfoot{\footnotesize \thepage} % baix a la dreta
+
+\pagestyle{fancy} % heading i footer tipus fancy per defecte
+\fancypagestyle{plain}{} % per tenir fancy a la 1ra pàgina del TOC i dels capítols
+\usepackage{titlesec} % per configurar format de capítols i seccions
+% \titleformat{\chapter}[block] % tractar-ho com un block
+%   {\bfseries}{\thechapter.}{0.5em}{\normalsize} % separació respecte el .
+
+\titleformat{\chapter}[block] % tractar-ho com un block
+  {\bfseries}{\thechapter.}{0.5em}{\MakeUppercase} % separació respecte el .
+
+% \titleformat{\chapter}[block] 
+% {\normalfont\fontsize{11}{5}\bfseries}{\thechapter.}{0.5em}{\MakeUppercase} % canviat
+
+\titlespacing*{\chapter}{0pt}{-33pt}{0.0em} % esquerra, amunt, avall. -33pt ajustats a mà
+
+\titleformat{\section}[block] % tractar-ho com un block
+  {\bfseries}{\thesection.}{0.5em}{\normalsize} % separació respecte el . 
+
+% \titlespacing*{\section}{0pt}{1.5em}{1.5em} % esquerra, amunt, avall. 
+%\setlength{\headsep}{0cm}
+
+\titlespacing*{\section}{0pt}{1.5em}{1.5em} % esquerra, amunt, avall. 
+
+\titleformat{\subsection}[block] % tractar-ho com un block
+  {\bfseries}{\thesubsection.}{0.5em}{\normalsize} % separació respecte el .
+
+\titlespacing*{\subsection}{0pt}{1.5em}{1.5em} % esquerra, amunt, avall. 
+
+\usepackage[dotinlabels]{titletoc} % punts després de Capítol 1.
+\usepackage{amsmath}
+\makeatletter % per la separació de les equacions, 13pt estan ajustats a mà
+\g@addto@macro\normalsize{%
+  \setlength{\abovedisplayskip}{11pt}% 
+  \setlength{\belowdisplayskip}{11pt}%
+  \setlength{\abovedisplayshortskip}{11pt}%
+  \setlength{\belowdisplayshortskip}{11pt}%
+}
+\makeatother 
+\setlength{\intextsep}{20pt} % separació de la figura o taula amb el text fent servir !h. Abans era 20 pt
+\setlength{\textfloatsep}{27pt} % separació de la figura o taula amb el text sense fer servir !h
+\setlength\abovecaptionskip{5pt} % separació de la caption amb la figura o taula
+\usepackage{listings} % per a posar codi
+\usepackage{xcolor} % per a posar color al codi
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codered}{rgb}{0.6,0.0,0.0}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{Python}{
+    language        = Python,
+    basicstyle      = \scriptsize\ttfamily,
+    keywordstyle    = \color{blue},
+    keywordstyle    = [2] \color{teal}, % just to check that it works
+    numberstyle     = \color{codepurple},
+    stringstyle     = \color{red},
+    commentstyle    = \color{codegreen},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=2pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=Python} % agafo l'estil definit
+\usepackage{pgfplots} % per a graficar amb LaTeX
+\pgfplotsset{samples=2000} % número màxim de punts d'una corba que genera ell, canviar
+\pgfplotsset{compat=1.16} % perquè si no el pgfplot dóna error
+\usepackage{import} % per a les imatges d'Inkscape
+\usepackage{xifthen} % per a les imatges d'Inkscape
+\usepackage{pdfpages} % per a les imatges d'Inkscape
+\usepackage{transparent} % per a les imatges d'Inkscape
+\usepackage[RPvoltages]{circuitikz} % per tal que no salti warning
+\usetikzlibrary{arrows, decorations.markings, arrows.meta} % per a dibuixar fletxes d'intensitat
+\usepackage{siunitx} % per a canviar el separador de decimals
+\sisetup{output-decimal-marker = {,}} % separador amb coma i no amb punt
+\usepackage{mathtools} % pels delimitadors de part entera
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil} % part entera i es trunca amunt
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor} % part entera i es trunca envall
+\usepgfplotslibrary{groupplots} % per a varis gràfiques, tipus 2 x 2
+\usepackage[hidelinks]{hyperref} % per a tenir TOC clickable
+\hypersetup{ % tots els hiperenllaços de color negre
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\makeatletter % per a tenir (Eq. x) entre parèntesis
+\def\tagform@#1{\maketag@@@{(\ignorespaces{Eq.~#1}\unskip)}}
+\makeatother
+
+\lstset{ % per tenir accents als comentaris del codi
+     literate=%
+     {à}{{\`a}}1
+     {è}{{\`e}}1 
+     {ì}{{\`i}}1 
+     {ò}{{\`o}}1 
+     {ù}{{\`u}}1
+     {À}{{\`A}}1 
+     {È}{{\`E}}1 
+     {Ì}{{\`I}}1 
+     {Ò}{{\`O}}1 
+     {Ù}{{\`U}}1
+     {á}{{\'a}}1 
+     {é}{{\'e}}1 
+     {í}{{\'i}}1 
+     {ó}{{\'o}}1 
+     {ú}{{\'u}}1
+     {Á}{{\'A}}1 
+     {É}{{\'E}}1 
+     {Í}{{\'I}}1 
+     {Ó}{{\'O}}1 
+     {Ú}{{\'U}}1
+     {ä}{{\"a}}1 
+     {ë}{{\"e}}1 
+     {ï}{{\"i}}1 
+     {ö}{{\"o}}1 
+     {ü}{{\"u}}1
+     {Ä}{{\"A}}1 
+     {Ë}{{\"E}}1 
+     {Ï}{{\"I}}1 
+     {Ö}{{\"O}}1 
+     {Ü}{{\"U}}1
+}
+\usepackage{steinmetz} % per posar la fase, en forma polar
+\pgfplotsset{compat=1.15}\usepgfplotslibrary{groupplots}
+% \usepgfplotslibrary{external} % per no tenir problemes de memòria al pgfplots
+% \tikzexternalize % per no tenir problemes de memòria al pgfplots
+
+\makeatletter
+% \renewcommand*\l@chapter{\@dottedtocline{1}{0em}{1.5em}}
+\renewcommand*\l@chapter{\@dottedtocline{1}{0em}{1.5em}}
+\makeatother
+
+
+% \renewcommand{\familydefault}{\sfdefault} % font sans serif
+%\usepackage[helvet]{sfmath} % font sans serif
+%\usepackage{arevmath} % matemàtiques amb sans serif que queda bé
+%\usepackage{mathastext} % no estic segur de si cal
+%\usepackage{helvet} % nou
+%\usepackage[T1]{fontenc}
+
+
+% \usepackage{arev}
+% \renewcommand{\rmdefault}{phv}
+% \usepackage{mathastext}
+% \usepackage{helvet}
+
+% \renewcommand{\familydefault}{\sfdefault}
+% \usepackage[scaled=1]{helvet}
+% \usepackage[helvet]{sfmath}
+% \everymath={\sf}
+
+\usepackage{polyglossia} % tipus babel per provar si va la l·l. Sí, posar \l.l
+\setdefaultlanguage{catalan}
+\urlstyle{same} % per les url de la bibliografia
+\usetikzlibrary{shapes.geometric} % pels diagrames, si no, el diamond no el coneixia
+\usetikzlibrary{patterns} % per la regió shaded
+\usepackage{float} % per fixar H a les figures
+\usepackage{amssymb} % pel checkmark
+\usepackage{pifont} % per l'altre checkmark
+\newcommand{\cmark}{\ding{51}}% correcte
+\newcommand{\xmark}{\ding{55}}% incorrecte
+
+%%%%%%%%%%%%%%%%%%%%%%%% MACROS %%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\beq}[2]{\begin{equation} % escriure equacions amb beq
+    #1
+    \label{#2}
+\end{equation}}
+\newcommand{\f}[2]{\frac{#1}{#2}}
+\newcommand{\vs}[0]{
+  
+\vspace{-1.5em}}
+\newcommand{\·}{\hspace{-1pt}·\hspace{-1pt}}
+\newcommand{\incfig}[2]{% busca la imatge de l'Inkscape
+    \def\svgwidth{#2\columnwidth}
+    \import{./Inputs/}{#1.pdf_tex}
+}
+
+\newcommand{\tikzcuboid}[4]{% width, height, depth, scale
+\begin{tikzpicture}[scale=#4]
+\foreach \x in {0,...,#1}
+{   \draw (\x ,0  ,#3 ) -- (\x ,#2 ,#3 );
+    \draw (\x ,#2 ,#3 ) -- (\x ,#2 ,0  );
+}
+\foreach \x in {0,...,#2}
+{   \draw (#1 ,\x ,#3 ) -- (#1 ,\x ,0  );
+    \draw (0  ,\x ,#3 ) -- (#1 ,\x ,#3 );
+}
+\foreach \x in {0,...,#3}
+{   \draw (#1 ,0  ,\x ) -- (#1 ,#2 ,\x );
+    \draw (0  ,#2 ,\x ) -- (#1 ,#2 ,\x );
+}
+\end{tikzpicture}
+}
+
+\newcommand{\tikzcube}[2]{% length, scale
+\tikzcuboid{#1}{#1}{#1}{#2}
+}
+%%%%%%%%%%%%%%%%%%%%%%%% INPUTS %%%%%%%%%%%%%%%%%%%%%%%%
+\catcode`\·=13 \def\cdottext{\ensuremath\cdot} \let·\cdottext % per tenir la l geminada com l·l
+
+\usepackage{arev}
+\renewcommand{\rmdefault}{phv}
+\usepackage{mathastext}
+\usepackage{helvet}
+
+% \usepackage[]{microtype} % per tenir millor greyness
+% \microtypesetup{protrusion=false} % per complir amb els marges
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Resolució del flux de càrregues amb mètode d'incrustació holomòrfica}
+\author{Josep Fanals}
+\date{\today}
+
+%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+% \setstretch{2.2}
+% \tableofcontents
+% \setstretch{1.5} % espaiat entre línies
+% \setlength\parskip{1.5em plus 0.1em minus 0.1em} % espaiat dels paràgrafs
+
+\topskip=2pt
+
+\setstretch{2.25}
+\tableofcontents
+\addtocontents{toc}{\vspace{5pt}}
+
+\setstretch{1.5} % espaiat entre línies
+\setlength\parskip{1.5em plus 0.1em minus 0.1em} % espaiat dels paràgrafs
+
+\topskip=11pt
+
+\def\arraystretch{1.25} % separació entre ítems de les taules
+
+%%%%%%%%%%%%%%%%%%%%%%%% ESCRIT %%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{INTRODUCCIÓ}
+\input{Chapters/Introducc.tex}
+
+\chapter{EL PROBLEMA DEL FLUX DE CÀRREGUES}
+\input{Chapters/Flux.tex}
+
+\chapter{MÈTODE D'INCRUSTACIÓ HOLOMÒRFICA}
+\input{Chapters/MIH.tex}
+
+\chapter{AVALUACIÓ DE LES SÈRIES}
+\input{Chapters/Calcul.tex}  
+
+\chapter{APROXIMANTS DE THÉVENIN I APROXIMANTS SIGMA}
+\input{Chapters/Sigma.tex}
+
+\chapter{PADÉ-WEIERSTRASS}
+\input{Chapters/P-W.tex}
+
+\chapter{CIRCUIT DE CORRENT CONTINU I CÀRREGA NO LINEAL}
+\input{Chapters/Nolineals.tex}
+
+\chapter{PROGRAMA}
+\input{Chapters/Programa.tex}
+
+\chapter{RESULTATS AMB XARXES DE TEST INICIALS}
+\input{Chapters/Xarxes1.tex}
+
+\chapter{RESULTATS AMB AUGMENT DE CÀRREGA DE XARXES DE TEST}
+\input{Chapters/Xarxes2.tex}
+
+\chapter{RESUM DEL PRESSUPOST}
+\input{Chapters/Pressupost.tex}
+
+\chapter{CONCLUSIONS}
+\input{Chapters/Conclusions.tex}
+
+\chapter{RELACIÓ DE DOCUMENTS}
+\input{Chapters/Relacio.tex}
+
+\chapter{BIBLIOGRAFIA}
+\input{Chapters/Bibliografia.tex}
+
+\chapter{GLOSSARI}
+\input{Chapters/Glossari.tex}
+
+\appendix
+
+\chapter{EXPRESSIONS DE CÀLCUL}
+\input{Chapters/Unitaris.tex}
+
+\chapter{CODI}
+\input{Chapters/Codi.tex}
+
+\end{document}

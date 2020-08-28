@@ -1,0 +1,549 @@
+Fins aquest punt s'ha plantejat el mètode d'incrustació holomòrfica per resoldre sistemes elèctrics de potència trifàsics (com a tal, de transport i distribució). Com s'ha presentat, aquests contenen busos PQ, PV i molt habitualment un únic bus oscil·lant. S'han modelitzat els elements que hi intervenen, com les línies de transmissió i els transformadors que uneixen busos. 
+
+No obstant això, hi ha sistemes que treballen amb corrent continu. Per exemple, a vegades s'utilitza el corrent continu d'alta tensió (HVDC). Altres inclouen elements com bateries, equips d'electrònica de potència, plaques solars fotovoltaiques, etc. Això motiva ampliar el camp d'aplicació del mètode d'incrustació holomòrfica descrit amb anterioritat. 
+
+En aquest capítol es tracten un parell d'exemples que permeten il·lustrar l'aplicació del MIH en sistemes d'altra mena. Un d'ells resulta un circuit simple que inclou un díode i una càrrega a potència constant. S'alimenta a partir d'una font de tensió contínua. L'altre exemple incorpora una làmpada de descàrrega alimentada amb alterna, en què es contemplen els harmònics.
+
+\section{Circuit de corrent continu}
+Per aplicar el mètode d'incrustació holomòrfica en una situació en què s'opera amb corrent continu es parteix d'un circuit com el de la Figura \ref{fig:circuit2}. 
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{circuitikz}[scale=1.00,transform shape]
+    \ctikzset{voltage/distance from node=.02}% defines arrow's distance from nodes
+    \ctikzset{voltage/distance from line=.02}% defines arrow's distance from wires
+    \ctikzset{voltage/bump b/.initial=1}% defines arrow's curvature
+    \draw
+       (0,0) to [R, l=$R_1$] (4,0)
+       to [short] (8,0)
+       to [R, l=$R_2$] (8,-5)
+       to [short] (0,-5)
+       (0,-5) to [battery, l_=$E$] (0,0)
+       (3.5,-2) to [open,v^=$V_D$] (3.5,0)
+       (3.5,-5) to [open,v^=$V_L$] (3.5,-2.5)
+       (4,0) to [diode, l=$D$] (4,-2)
+       to [short, i=$I_D$] (4, -3)
+       to [short] (3.8, -3)
+       to [short] (3.8, -4.5)
+       to [short] (4.2, -4.5)
+       to [short] (4.2, -3)
+       to [short] (4, -3)
+       %to [R, l=$P_L$] (4,-5)  
+       (4, -4.5) to (4, -5)
+    ;
+    \draw (4.2, -3.5) node[anchor=north west] {$P_L$};
+    \end{circuitikz}
+    \caption{Esquema del circuit de corrent continu}
+    \label{fig:circuit2}
+    \end{center}
+    \end{figure}
+
+Com s'observa, està conformat per una bateria, dues resistències, un díode i una càrrega connectada a la banda del càtode del díode que demana una potència constant. Les seves dades apareixen a la Taula \ref{tab:Diode1}.
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{ll}
+    \hline
+    Magnitud & Valor\\
+    \hline
+    \hline
+    $E$ & 5,0 V\\
+    $R_1$ & 2,0 $\Omega$\\
+    $R_2$ & 3,0 $\Omega$\\
+    $P_L$ & 1,2 W\\
+    \hline 
+    \end{tabular}
+    \caption{Valors dels components del circuit de corrent continu}
+    \label{tab:Diode1}
+    \end{center}
+  \end{table}
+
+\subsection{Formulació}
+La resolució d'un circuit d'aquesta mena, igual que amb el flux de potències dels sistemes de potència trifàsics, busca obtenir les tensions a tots els busos. Una vegada aquestes són conegudes, la resta de variables es calculen sense complicació. D'entrada el díode es modelitza per mitjà de l'equació de Shockley. S'ha assumit que es tracta d'un díode de germani:
+\begin{equation}
+    I_D=I_s\biggl(e^{\frac{V_D}{V_T}}-1\biggr)\ , 
+    \label{eq:shock1}
+\end{equation}
+on:
+
+$I_D$: intensitat que circula a través del díode.
+\vs
+$I_s$: corrent de saturació. En aquest exemple s'ha escollit de 5 $\mu$A.
+\vs
+$V_D$: tensió que cau sobre el díode.
+\vs
+$V_T$: tensió tèrmica, d'uns 26 mV.
+
+Hi ha dues equacions més que caracteritzen el circuit. Una és la referent al balanç d'intensitat al nus que connecta les tres branques del circuit:
+\begin{equation}
+    I_D+\frac{V_D+V_L}{R_2}=\frac{E-(V_D+V_L)}{R_1}\ .
+    \label{eq:sumat1}
+\end{equation}
+La darrera equació té a veure amb la càrrega a potència constant, que precisament, es defineix per la seva potència:
+\begin{equation}
+    P_L=V_LI_D\ .
+    \label{eq:sumat2}
+\end{equation}
+En aquest punt cap expressió està incrustada. El següent pas consisteix a definir les incògnites $V_D$, $V_L$ i $I_D$ com a sèries. Així, l'Equació \ref{eq:sumat2} esdevé:
+\begin{equation}
+    P_L=V_L(s)I_D(s)\ .
+    \label{eq:pl1}
+\end{equation}
+D'aquesta equació interessa aïllar la tensió. El seu primer coeficient segueix:
+\begin{equation}
+    V_L[0]=\frac{P_L}{I_D[0]}\ .
+    \label{eq:pl2}
+\end{equation}
+La resta de termes que la conformen obeeixen:
+\begin{equation}
+    V_L[i]=\frac{-\sum_{k=0}^{i-1}V_L[k]I_D[i-k]}{I_D[0]}\ .
+    \label{eq:pl3}
+\end{equation}
+Per altra banda, l'Equació \ref{eq:sumat1} s'incrusta de manera que l'ús les tensions $V_D$ i $V_L$ queda retardat:
+\begin{equation}
+    I_D(s)+s\frac{V_D(s)+V_L(s)}{R_2}=\frac{E}{R_1}-s\frac{V_D(s)+V_L(s)}{R_1}\ .
+    \label{eq:sumat4}
+\end{equation}
+Per tant, el primer terme de la intensitat $I_D$ només depèn de la tensió $E$ i la resistència $R_1$. Expressat en forma de coeficients, primerament s'obté:
+\begin{equation}
+    I_D[0]=\frac{E}{R_1}\ ,
+    \label{eq:sumat5}
+\end{equation}
+mentre que als següents ordres:
+\begin{equation}
+    I_D[i]=-(V_D[i-1]+V_L[i-1])\biggl(\frac{1}{R_1}+\frac{1}{R_2}\biggr)\ ,
+    \label{eq:sumat6}
+\end{equation}
+on $i\geq 1$. 
+
+L'última equació que cal convertir és la de Shockley. Tot i no ser l'única manera d'atacar el problema, es deriva l'Equació \ref{eq:shock1} respecte a la variable $s$. Tant $I_s$ com $V_T$ són constants, així que:
+\begin{equation}
+    \frac{I'_D(s)}{I_s}=\frac{V'_D(s)}{V_T}e^{\frac{V_D(s)}{V_T}}\ ,
+    \label{eq:shock2}
+\end{equation}
+on $I'_D(s)$ i $V'_D(s)$ fan referència a les sèries $I_D(s)$ i $V_D(s)$ derivades. 
+
+Tal com anuncia l'Equació \ref{eq:shock1}, $e^{\frac{V_D(s)}{V_T}}=\frac{I_D(s)}{I_s}+1$. Això se substitueix a l'Equació \ref{eq:shock2} i si es desenvolupa s'arriba a:
+\begin{equation}
+    I'_D(s)V_T=V'_D(s)I_s+V'_D(s)I_D(s)\ .
+    \label{eq:shock3}
+\end{equation}
+En forma de factors s'aïlla la tensió del díode i queda:
+\begin{equation}
+    V_D[i]=\frac{iV_TI_D[i]-\sum_{k=0}^{i-1}kV_D[k]I_D[i-k]}{i(I_s+I_D[0])}\ ,
+    \label{eq:shock4}
+\end{equation}
+que s'utilitza per a $i\geq 1$ i el seu càlcul fa ús de les sèries inicials, no de les derivades. El primer terme de $V_D(s)$ no es calcula a través de l'Equació \ref{eq:shock3}, sinó que s'obté de l'equació de Shockley, on es fixa que $s=0$. Així:
+\begin{equation}
+    V_D[0]=V_T\ln\biggl(1+\frac{I_D[0]}{I_s}\biggr)\ .
+    \label{eq:shock6}
+\end{equation}
+D'aquesta manera, el càlcul de les incògnites passa primer per utilitzar l'Equació \ref{eq:sumat5} per llavors obtenir els primers termes de les tensions amb les Equacions \ref{eq:pl2} i \ref{eq:shock6}. Seguidament es calcula el següent terme de la intensitat $I_D$ amb l'Equació \ref{eq:sumat6}. Per la tensió de la càrrega a potència constant s'empra l'Equació \ref{eq:pl3}, mentre que per la tensió del díode es recorre a l'Equació \ref{eq:shock4}. El càlcul continua fins que l'error assolit és satisfactori.
+
+\subsection{Resultats}
+Les solucions obtingudes pel problema són, amb cinc decimals: $I_D=$\ 1,60056 A, $V_L=$\ 0,74973 V i $V_D=$\ 0,32958 V. Val la pena avaluar la convergència de les sèries i determinar si l'aplicació d'algun mètode de continuació analítica resulta beneficiós. Per exemple, la Figura \ref{fig:dombdiode1} representa el gràfic de Domb-Sykes per a la sèrie $V_D(s)$.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|\f{V_D[i]}{V_D[i-1]}|$},xlabel={$i$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/dombdiode1.csv};
+        %\legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic de Domb-Sykes per a la tensió $V_D(s)$}
+    \label{fig:dombdiode1}
+    \end{center}
+\end{figure}
+
+Com que l'eix vertical indica la inversa del radi de convergència, es dedueix que aquest és lleugerament superior a la unitat, pel que no és estrictament necessari utilitzar mètodes de continuació analítica. Cal afegir que el radi de convergència pràcticament esdevé igual en les sèries $I_D(s)$ i $V_L(s)$.
+
+Així i tot, a causa de la proximitat del radi de convergència a la unitat, es valora com varia la tensió en funció de l'ordre. Per un costat es recorre als aproximants de Padé com a mètode de continuació analítica, i per l'altre, es calcula el resultat final de la forma més directa possible: amb la suma dels coeficients que la conformen. La Figura \ref{fig:sumapadediode} mostra la diferència entre la tensió obtinguda a aquell ordre i la tensió final $V_D$. Aquesta diferència es denota per $\Delta V_D$.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|\Delta V_D|$ (V)},xlabel={Profunditat},domain=0:5, ymode = log, ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=1pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sumadiode2.csv};
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/padediode2.csv};
+        \legend{Suma, ,Padé} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Error de tensió segons la profunditat, amb Padé i amb la suma de termes}
+    \label{fig:sumapadediode}
+    \end{center}
+\end{figure}
+
+Tal com s'observa, la solució obtinguda amb els aproximants de Padé tendeix cap a la solució final a major ritme que quan s'utilitza la suma de termes. Així doncs, la continuació analítica resulta beneficiosa, en el sentit que permet calcular menys coeficients. D'aquesta manera amb uns 20 termes s'aconsegueix un error d'uns $10^{-10}$ V mentre que amb la suma de coeficients aquest error val uns $10^{-5}$ V. 
+
+És clar que buscar solucions tan exactes no té gaire sentit des d'un punt de vista pràctic, ja que per exemple les resistències presenten toleràncies, varien amb la temperatura... Amb aquest exercici s'ha volgut, des d'un enfocament més teòric, mostrar que convé aplicar la continuació analítica fins i tot quan es resolen circuits amb elements que no estan presents a les típiques xarxes de test de sistemes de potència.
+
+La Figura \ref{fig:sumapadediode} posa de manifest un concepte important a l'hora de cercar el mínim error: la precisió. Tal com apunta Trias (2018), en representar els errors segons la profunditat de les sèries, sovint s'arriba a una gràfica que recorda a un pal d'hoquei: hi ha una primera part on l'error decau linealment (amb escala logarítmica) i llavors pràcticament es manté horitzontal. Amb els aproximants de Padé, a vegades els coeficients que formen la funció racional contenen errors de precisió importants. Tanmateix, això no és massa preocupant. En el càlcul del valor final d'aquella sèrie es produeix un fenomen d'autocorrecció d'errors.
+
+Aquest fet també es fa evident en els sistemes elèctrics de potència com a tal. Rao (2017) detalla casos en què això succeeix; assoleix errors de l'ordre de $10^{-14}$ a la xarxa IEEE118. A més, els mètodes recurrents també esdevenen numèricament estables, en el sentit que els errors no es propaguen al llarg dels càlculs.
+
+\section{Càrrega no lineal}
+Hi ha càrregues que quan se'ls aplica una tensió sinusoidal no consumeixen una intensitat que segueix exactament un perfil sinusoidal. Aquest és el cas de rectificadors, variadors de freqüència, làmpades de descàrrega... S'anomenen càrregues no lineals. Quan la intensitat que consumeixen passa a través d'una impedància, provoquen tensions que tampoc són totalment sinusoidals. En descompondre aquestes formes d'ona en una suma de sinusoidals, hi ha una component fonamental i multitud de components harmòniques.
+
+Els harmònics són problemàtics perquè redueixen l'eficiència del sistema elèctric, causen vibracions en motors, pertorben xarxes de comunicació, entre d'altres. Des d'una visió econòmica, poden provocar el disparament intempestiu d'interruptors, el que aturaria la producció d'una línia industrial per exemple. També comporten un augment de les pèrdues. Aleshores, pot fer falta pujar el nivell de potència contractada. 
+
+La resolució de sistemes formats per càrregues no lineals porta una complexitat afegida. A part de solucionar el sistema per la seva freqüència fonamental de 50 Hz, també s'ha d'obtenir la solució pels harmònics. Tot seguit es desenvolupa una variació del mètode d'incrustació holomòrfica per resoldre un sistema amb una làmpada de descàrrega. Es planteja com un dels procediments més simples: la penetració harmònica. Considera que el comportament de la càrrega no lineal només depèn de magnituds a la freqüència fonamental (Rashid, 2018). 
+
+Per a la modelització de la làmpada de descàrrega s'utilitza un model descrit per Mesas (2009), que la caracteritza a partir de paràmetres invariants:
+\begin{equation}
+    I_{1,N}=\sqrt{1-v^2_{A,N}(2-\lambda^2)}\ ,
+    \label{eq:NL1}
+\end{equation}
+on:
+
+$I_{1,N}$: mòdul de la component fonamental d'intensitat. 
+\vs 
+$v_{A,N}$: paràmetre invariant. Té a veure amb l'amplitud de la tensió que utilitza el model.
+\vs
+$\lambda$: constant que val $\frac{2\sqrt{2}}{\pi}$.
+
+S'assumeix que la tensió fonamental de la làmpada de descàrrega no necessàriament compta amb un angle nul. Així, la fase d'aquesta intensitat, que es denota per $\theta_1$, es defineix com:
+\begin{equation}
+    \theta_1=\theta_{V_c}-\frac{\pi}{2}+\arctan\left(\frac{v_{A,N}\sqrt{\lambda^2-v^2_{A,N}}}{1-v^2_{A,N}}\right)\ ,
+    \label{eq:NL2}
+\end{equation}
+on $\theta_{V_c}$ representa la fase de la tensió fonamental d'alimentació de la làmpada. 
+
+Quan es busquen les intensitats harmòniques es recorre a:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        I_{h,N}&=\frac{\lambda v_{A,N}}{h^2},\\
+        \theta_h&=\theta_{V_c}+h\arcsin\left(\frac{v_{A,N}}{h}\right)\ ,
+    \end{split}
+\end{cases}
+    \label{eq:NL3}
+\end{equation}
+on:
+
+$h$: ordre de l'harmònic.
+\vs
+$I_{h,N}$: mòdul d'intensitat de l'harmònic $h$.
+\vs
+$\theta_h$: fase de la intensitat harmònica.
+
+Es planteja el circuit d'exemple de la Figura \ref{fig:F1NL1} on hi ha la làmpada de descàrrega $NL$.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{circuitikz}[scale=1.00,transform shape]
+    \ctikzset{voltage/distance from node=.02}% defines arrow's distance from nodes
+    \ctikzset{voltage/distance from line=.02}% defines arrow's distance from wires
+    \ctikzset{voltage/bump b/.initial=1}% defines arrow's curvature
+    \ctikzset{resistor = european}
+    \draw
+        (0,0) to [sinusoidal voltage source, l=$V_a$] (3,0)
+        (3,0) to [R, l=$Z_1$] (9,0)
+        to [short, i_=$I_{NL}$,] (11,0)
+        to [empty diode, l=$NL$] (11,-3)
+        (3,0) to [R] (6,-2) node [left=4em,above=1.6em,anchor=east] {$Z_2$}
+        to [R] (9,0) node [left=2.7em,above=-4.2em,anchor=east] {$Z_3$}
+        (6,-2) to [twoport, l=$P+jQ$] (6,-5)
+        (3,0) to [short] (2,-1)
+        to [C, l=$Z_p$] (2,-3)
+        (6,-2) to [short] (5,-3)
+        to [C, l_=$Z_p$] (5,-5)
+        (0,0) to [short] (0,-3);
+        \draw (0-0.25, -3) to [short] (0+0.25, -3)
+        (0-0.17, -3.1) -- (0+0.17, -3.1)
+        (0-0.07, -3.2) -- (0+0.07, -3.2);
+        \draw (2-0.25, -3) to [short] (2+0.25, -3)
+        (2-0.17, -3.1) -- (2+0.17, -3.1)
+        (2-0.07, -3.2) -- (2+0.07, -3.2);
+        \draw (11-0.25, -3) to [short] (11+0.25, -3)
+        (11-0.17, -3.1) -- (11+0.17, -3.1)
+        (11-0.07, -3.2) -- (11+0.07, -3.2);
+        \draw (5-0.25, -5) to [short] (5+0.25, -5)
+        (5-0.17, -5.1) -- (5+0.17, -5.1)
+        (5-0.07, -5.2) -- (5+0.07, -5.2);
+        \draw (6-0.25, -5) to [short] (6+0.25, -5)
+        (6-0.17, -5.1) -- (6+0.17, -5.1)
+        (6-0.07, -5.2) -- (6+0.07, -5.2);
+        \filldraw 
+        (9,0) circle (2pt) node[align=left, above] {$V_c$}
+        (6,-2) circle (2pt) node[align=left, above] {$V_b$}
+        ;
+    \end{circuitikz}
+    \caption{Circuit plantejat amb làmpada de descàrrega}
+    \label{fig:F1NL1}
+    \end{center}
+    \end{figure}
+Com s'observa, també hi ha una càrrega de la qual es coneix la seva potència activa i reactiva (equivaldria a un bus PQ) i un bus oscil·lant. En alguns busos s'hi troben impedàncies constants $Z_p$. Més endavant la seva admitància s'anomenarà $Y_p$. S'observa que es tracta d'un sistema mallat per les impedàncies $Z_1$, $Z_2$ i $Z_3$. Les seves admitàncies seran $Y_1$, $Y_2$ i $Y_3$. Els valors de les dades del sistema es plasmen a la Taula \ref{tab:NL1}, expressats en tant per unitat. 
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{ll}
+    \hline
+    Magnitud & Valor\\
+    \hline
+    \hline
+    $Z_1$ & 0,1 + 0,5j\\
+    $Z_2$ & 0,02 + 0,13j\\
+    $Z_3$ & 0,023 + 0,1j\\
+    $Z_p$ & -10j\\
+    $v_{A,N}$ & 0,5\\
+    $V_a$ & 1,1\\
+    $P+jQ$ & -1-0,1j\\
+    \hline 
+    \end{tabular}
+    \caption{Valors de les dades del model de la Figura \ref{fig:F1NL1}}
+    \label{tab:NL1}
+    \end{center}
+  \end{table}
+
+\subsection{Formulació}
+Per resoldre el sistema, el primer pas i el més laboriós consisteix a formular les equacions per les quals es regeix el sistema a freqüència fonamental. Es comença amb la intensitat de la càrrega no lineal:
+\begin{equation}
+    I_{NL}=I_{1,N}\cos\theta_1+jI_{1,N}\sin\theta_1\ ,
+    \label{eq:Fx1}
+\end{equation}
+on el mòdul $I_{1,N}$ es coneix però no la fase $\theta_1$ atès que l'angle $\theta_{V_c}$ és desconegut. L'Equació \ref{eq:NL2} es compacta:
+\begin{equation}
+    \theta_1=\theta_{V_c}+\theta_x\ ,
+    \label{eq:Fx2}
+\end{equation}
+on $\theta_x$ representa els elements de la dreta de la igualtat de l'Equació \ref{eq:NL2} que són independents de l'angle $\theta_{V_c}$. L'angle $\theta_{V_c}$ rigorosament és la fase final de la tensió $V_c$. Si es defineix com una sèrie per aplicar el mètode d'incrustació holomòrfica, obeeix:
+\begin{equation}
+    \tan\theta_{V_c}(s)=\frac{V_c^{(im)}[0]+sV_c^{(im)}[1]+s^2V_c^{(im)}[2]+...+s^nV_c^{(im)}[n]}{V_c^{(re)}[0]+sV_c^{(re)}[1]+s^2V_c^{(re)}[2]+...+s^nV_c^{(re)}[n]}\ ,
+    \label{eq:Fx3}
+\end{equation}
+on cada un dels termes de la tensió del bus on es connecta la càrrega no lineal s'ha separat en part real i imaginària. L'últim coeficient pren l'índex $n$. 
+
+Amb l'Equació \ref{eq:Fx2} s'expandeix l'Equació \ref{eq:Fx1}, que dóna peu a:
+\begin{equation}
+    I_{N,L}=I_{1,N}(\cos\theta_x\cos\theta_{V_c}(s)-\sin\theta_x\sin\theta_{V_c}(s))+jI_{1,N}(\sin\theta_x\cos\theta_{V_c}(s)+\cos\theta_x\sin\theta_{V_c}(s))\ .
+    \label{eq:Fx4}
+\end{equation}
+Llavors, amb la idea de no dependre a la vegada de $\cos\theta_{V_c}(s)$ i $\sin\theta_{V_c}(s)$, s'utilitzen les raons trigonomètriques:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sin\theta_{V_c}(s)=\pm \frac{\tan\theta_{V_c}(s)}{\sqrt{1+\tan^2\theta_{V_c}(s)}}\ ,
+    \\
+    \cos\theta_{V_c}(s)=\pm \frac{1}{\sqrt{1+\tan^2\theta_{V_c}(s)}}\ .
+    \end{split}
+\end{cases}
+    \label{eq:Fx5}
+\end{equation}
+És d'esperar que la fase de la tensió $V_c$ romangui propera a la de $V_a$, que és la tensió del bus oscil·lant. De fet, en tractar-se del bus oscil·lant, es fixa el seu angle a 0. Així, es preveu que l'angle $\theta_{V_c}$ final quedi al primer o al quart quadrant. Davant aquesta assumpció se selecciona el signe positiu de les expressions de l'Equació \ref{eq:Fx5}. Posteriorment s'ha de comprovar el compliment de tal suposició.
+
+És interessant realitzar uns quants canvis de variable per facilitar el desenvolupament dels termes:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+F(s)&=\tan\theta_{V_c}(s)\ ,
+\\
+M(s)&=\sin\theta_{V_c}(s)\ ,
+\\
+Y(s)&=\cos\theta_{V_c}(s)\ .
+\end{split}
+\end{cases}
+\label{eq:Fx6}
+\end{equation}
+També convé utilitzar l'Equació \ref{eq:Fx7} per reemplaçar el denominador present a l'Equació \ref{eq:Fx5} i desfer-se d'un operador no lineal com és l'arrel gràcies a la introducció de $F(s)$. Només cal calcular una arrel quadràtica pel primer terme de la sèrie $L(s)$.
+\begin{equation}
+L(s)L(s)=1+F(s)F(s)\ .
+\label{eq:Fx7}
+\end{equation}
+A més, es crea una sèrie auxiliar per evitar que el càlcul de $F(s)$ depengui d'una divisió:
+\begin{equation}
+X(s)=\frac{1}{V_c^{(re)}(s)}\ ,
+\label{eq:Fx8}
+\end{equation}
+on $V_c^{(re)}(s)$ és la sèrie de parts reals de tensió.
+
+De mode que l'Equació \ref{eq:Fx3} es converteix en:
+\begin{equation}
+F(s)=V_c^{(im)}(s)X(s)\ ,
+\label{eq:Fx9}
+\end{equation}
+on $V_c^{(im)}(s)$ simbolitza la sèrie de parts imaginàries de tensió que apareix al numerador de l'Equació \ref{eq:Fx3}.
+
+Amb tot això, l'equació de càlcul de la intensitat de la càrrega no lineal també s'expressa en funció de $s$:
+\begin{equation}
+I_{NL}(s)=I_{1,N}(\cos\theta_xY(s)-\sin\theta_xM(s))+jI_{1,N}(\sin\theta_xY(s)+\cos\theta_xM(s))\ .
+\label{eq:Fx10}
+\end{equation}
+Pel que fa a les equacions que defineixen el sistema, primer es considera el balanç de corrents amb les incrustacions pertanyents al bus en què es connecta la làmpada de descàrrega:
+\begin{equation}
+    V_aY_1+V_b(s)Y_3+V_c(s)(-Y_1-Y_3)=sI_{NL}(s)\ .
+    \label{eq:Gx1}
+\end{equation}
+Es nota que el producte de la variable $s$ per la sèrie $I_{NL}(s)$ implica que quan en un principi s'utilitza l'Equació \ref{eq:Gx1}, la intensitat de la càrrega no lineal no hi influeix. En altres paraules, es retarda el seu ús.
+
+Del sumatori d'intensitats al bus PQ es dedueix:
+\begin{equation}
+sV_b(s)Y_p+Y_2(V_b(s)-V_a)+sY_3(V_b(s)-V_c(s))=s(P-jQ)R(s)\ ,
+\label{eq:Gx2}
+\end{equation}
+on altre cop no hi ha només una manera d'incrustar-la. S'ha decidit que sigui així per tal que $V_b(s)$ s'obtingui de l'Equació \ref{eq:Gx2} sense massa complicació. La nova sèrie $R(s)$ segueix:
+\begin{equation}
+    R(s)=\frac{1}{V^*_b(s^*)}\ ,
+    \label{eq:Gx3}
+\end{equation}
+que ja s'ha fet servir a l'Equació \ref{eq:Gx2}. 
+
+Amb aquestes equacions plantejades es passa a mostrar explícitament el càlcul dels coeficients de les diverses sèries. Per als primers termes es comença amb l'Equació \ref{eq:Gx2}. Se soluciona per $V_b(s)$:
+\begin{equation}
+    V_b[0]=V_a\ .
+    \label{eq:Hx1}
+\end{equation}
+Per a la tensió $V_c(s)$ de l'Equació \ref{eq:Gx1} s'arriba a:
+\begin{equation}
+    V_c[0]=\frac{Y_1V_a+Y_3V_b[0]}{Y_1+Y_3}\ .
+    \label{eq:Hx2}
+\end{equation}
+La sèrie $R(s)$ només depèn de $V_b(s)$. Així, el seu primer terme esdevé:
+\begin{equation}
+    R[0]=\frac{1}{V^*_b[0]}\ .
+    \label{eq:Hx3}
+\end{equation}
+Es progressa amb el càlcul de sèries que influeixen en la fase de la càrrega no lineal:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+X[0]&=\frac{1}{V_c^{(re)}[0]}\ ,\\
+F[0]&=X[0]V_c^{(im)}[0]\ ,\\
+L[0]&=\sqrt{1+F[0]F[0]}\ .
+\end{split}
+\end{cases}
+\label{eq:Hx4}
+\end{equation}
+Així, la resta de factors de les sèries que manca inicialitzar són:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+Y[0]&=\frac{1}{L[0]}\ ,
+\\
+M[0]&=F[0]Y[0]\ ,
+\\
+I_{NL}[0]&=I_{1,N}(\cos\theta_xY[0]-\sin\theta_xM[0])+jI_{1,N}(\sin\theta_xY[0]+\cos\theta_xM[0])\ .
+\end{split}
+\end{cases}
+\label{eq:Hx5}
+\end{equation}
+A continuació es formula el càlcul dels factors amb índex $i\geq1$. L'ordre en què es calculen els termes és idèntic al seguit fins ara. Per calcular la sèrie $V_b(s)$ els successius coeficients només depenen d'aquells que ja s'han trobat:
+\begin{equation}
+    V_b[i]=\frac{(P-jQ)R[i-1]-Y_3(V_b[i-1]-V_c[i-1])-Y_pV_b[i-1]}{Y_2}\ .
+    \label{eq:Hx6}
+\end{equation}
+Per als termes de la sèrie $V_c(s)$ s'empra:
+\begin{equation}
+    V_c[i]=\frac{I_{NL}[i-1]-Y_3V_b[i]}{-Y_1-Y_3}\ .
+    \label{eq:Hx7}
+\end{equation}
+Si es vol prescindir de resoldre un sistema d'equacions, s'observa que es necessita que el càlcul de $V_b[i]$ precedeixi el de $V_c[i]$. 
+
+Pel càlcul dels termes $R[i]$ s'aplica la convolució discreta:
+\begin{equation}
+    R[i]=\frac{-\sum_{k=0}^{i-1}R[k]V^*_b[i-k]}{V^*_b[0]}\ .
+    \label{eq:Hx8}
+\end{equation}
+Per la resta de sèries relacionades amb $\theta_{V_c}(s)$ es fa servir:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    X[i]&=\frac{-\sum_{k=0}^{i-1}X[k]V_c^{(re)}[i-k]}{V_c^{(re)}[0]}\ ,\\
+    F[i]&=\sum_{k=0}^iV_c^{(im)}[k]X[i-k]\ ,\\
+    %B[i]&=\sum_{k=0}^iF[k]F[i-k],\\
+    L[i]&=\frac{\sum_{k=0}^iF[k]F[i-k]-\sum_{k=1}^{i-1}L[k]L[i-k]}{2L[0]}\ ,\\
+    Y[i]&=\frac{-\sum_{k=0}^{i-1}Y[k]L[i-k]}{L[0]}\ ,\\
+    M[i]&=\sum_{k=0}^iF[k]Y[i-k]\ .\\
+    \end{split}
+\end{cases}
+    \label{eq:Hx9}
+\end{equation}
+Finalment, els termes de la intensitat de la càrrega no lineal obeeixen:
+\begin{equation}
+    I_{NL}[i]=I_{1,N}(\cos\theta_xY[i]-\sin\theta_xM[i])+jI_{1,N}(\sin\theta_xY[i]+\cos\theta_xM[i])\ .
+    \label{eq:Hx10}
+\end{equation}
+Com s'ha pogut evidenciar, la major part de les sèries es dediquen a calcular l'angle de la tensió que rep la càrrega no lineal. Tanmateix, la complexitat d'adaptar el mètode d'incrustació holomòrfica queda justificada en el fet que, una vegada s'han inicialitzat els primers termes de les sèries, s'ha transformat un circuit regit per equacions no lineals en un conjunt d'equacions lineals. Això possibilita l'ús d'un esquema recurrent amb el qual es construeix la solució.
+
+També es vol apuntar que la potència que demana el bus PQ s'ha considerat que només és deguda a la component fonamental. Exactament no seria així, però es tracta d'una bona aproximació (Rashid, 2018).
+
+\subsection{Resultats}
+Mitjançant l'aplicació de les equacions formulades fins ara, per la component fonamental s'obtenen els resultats de la Taula \ref{tab:NL2}. 
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{ll}
+    \hline
+    Magnitud & Valor\\
+    \hline
+    \hline
+    $I_{NL}$ &  0,8382 \phase{-70,01^{\circ}}\\
+    $V_c$ & 0,9491 \phase{-6,53^{\circ}}\\
+    $V_b$ & 1,0031 \phase{-6,77^{\circ}}\\
+    \hline 
+    \end{tabular}
+    \caption{Resultats del circuit amb làmpada de descàrrega a la freqüència fonamental}
+    \label{tab:NL2}
+    \end{center}
+  \end{table}
+
+S'observa que en el pla complex la tensió $V_c$ fonamental queda al quart quadrant. Així, l'assumpció d'escollir el signe positiu a les expressions de l'Equació \ref{eq:Fx5} és correcta.
+
+Els harmònics que injecta la làmpada de descàrrega són imparells. A partir de l'Equació \ref{eq:NL3} es calcula la intensitat de cada harmònic en mòdul i fase. Llavors, les tensions surten d'una simple anàlisi nodal. S'ha tingut en compte que les reactàncies inductives són directament proporcionals a l'ordre de l'harmònic, mentre que les dels condensadors són inversament proporcionals. La Taula \ref{tab:NL2x} capta els resultats pels primers harmònics.
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{lllll}
+    \hline
+    Magnitud & $h=3$ & $h=5$ & $h=7$ & $h=9$\\
+    \hline
+    \hline
+    % $I_{NL}$ &  0,0500 \phase{22,25^{\circ}} & 0,0180\phase{22,16^{\circ}} & 0,0092\phase{22,14^{\circ}} & 0,0056\phase{22,13^{\circ}}\\
+    % $V_a$ &  0,0862 \phase{112,15^{\circ}} & 0,0199\phase{111,98^{\circ}} & 0,0081\phase{111,81^{\circ}} & 0,0047\phase{111,54^{\circ}}\\
+    % $V_b$ &  0,0806 \phase{112,36^{\circ}} & 0,0162\phase{112,39^{\circ}} & 0,0050\phase{112,67^{\circ}} & 0,0015\phase{113,94^{\circ}}\\
+    % $V_c$ &  0,0690 \phase{113,10^{\circ}} & 0,0930\phase{114,50^{\circ}} & 0,0003\phase{162,10^{\circ}} & 0,0021\phase{-71,49^{\circ}}\\
+    $I_{NL}$ &  0,0500 \phase{22,25^{\circ}} & 0,0180\phase{22,16^{\circ}} & 0,0092\phase{22,14^{\circ}} & 0,0056\phase{22,13^{\circ}}\\
+    $V_b$ &  0,0148 \phase{-71,09^{\circ}} & 0,0109\phase{-70,33^{\circ}} & 0,0120\phase{-70,62^{\circ}} & 0,0329\phase{-75,52^{\circ}}\\
+    $V_c$ &  0,0249 \phase{-71,52^{\circ}} & 0,0166\phase{-70,33^{\circ}} & 0,0154\phase{-70,27^{\circ}} & 0,0316\phase{-74,67^{\circ}}\\
+    \hline 
+    \end{tabular}
+    \caption{Resultats del circuit amb làmpada de descàrrega, components harmòniques}
+    \label{tab:NL2x}
+    \end{center}
+  \end{table}
+
+Es conclou que els harmònics tenen poc pes. L'aproximació que considera que la potència és causada només per la component fonamental esdevé acceptable. 
+
+Per altra banda, igual que s'ha fet amb el circuit de corrent continu, s'avalua l'evolució de l'error. En aquest cas es computa el màxim error d'intensitat als busos en què es planteja l'equació del balanç d'intensitat. S'ha calculat amb els aproximants de Padé. Se'l compara amb l'obtingut a través de la resolució del sistema amb el mètode iteratiu de Gauss-Seidel. Tot plegat es representa a la Figura \ref{fig:errlamp}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|\Delta I_{max}|$},xlabel={Ordre},domain=0:5, ymode = log, ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=1pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/lampadaMIH.csv};
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/lampadaGS.csv};
+        \legend{GS, ,MIH} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Error d'intensitat amb MIH i amb Gauss-Seidel segons l'ordre (profunditat i iteracions respectivament)}
+    \label{fig:errlamp}
+    \end{center}
+\end{figure}
+
+De la Figura \ref{fig:errlamp} se'n desprèn que tot i que els dos mètodes arriben a la solució, el mètode de Gauss-Seidel necessita pràcticament 50 iteracions per assolir el mateix error que s'obté amb una profunditat de 25 coeficients amb el MIH. Altre cop amb els aproximants de Padé s'aconsegueix un perfil en què l'error es redueix ràpidament i llavors s'estabilitza.
+
+La resolució del flux de potències amb harmònics tradicionalment s'ha abordat amb el mètode de Newton-Raphson. En aquest capítol no s'intenta justificar que el mètode d'incrustació holomòrfica és superior als iteratius. Simplement s'ha volgut oferir una explicació de com se'l pot adaptar per a sistemes amb altres càrregues. S'ha mostrat que també assoleix la solució i que en essència, el plantejament en forma de termes recorda al dels sistemes elèctrics de transport o distribució.

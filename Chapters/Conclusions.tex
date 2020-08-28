@@ -1,0 +1,40 @@
+El mètode d'incrustació holomòrfica s'ha presentat com una eina adient per solucionar el flux de potències de sistemes elèctrics ben condicionats i mal condicionats. Des d'un punt de vista purament resolutiu, és competitiu amb els mètodes iteratius tradicionals. 
+
+S'han treballat dues formulacions que en la seva essència es basen en el mateix però exhibeixen lleugeres variacions. Ambdues converteixen un problema definit a través d'equacions no lineals en successives equacions lineals. Les incògnites es tracten com sèries, i després de trobar suficients coeficients, el mètode és capaç d'assolir un resultat satisfactori. Totes dues han estat programades en Python, així com les diverses funcions que utilitzen.
+
+La formulació pròpia és una contribució d'aquest treball, i s'ha integrat en el programari GridCal. No força el compliment de l'estat de referència, de manera que els aproximants Sigma no són bons indicadors quan hi ha transformadors amb relació de transformació variable. Tanmateix, arriba a la solució independentment d'això. Per la seva banda, la formulació original se centra a assolir l'estat de referència. Amb aquesta formulació la validesa dels aproximants Sigma no depèn de quina mena de transformadors hi hagi en el sistema.
+
+S'ha raonat que els aproximants de Padé fonamenten el mètode d'incrustació holomòrfica gràcies al teorema de Stahl. A part d'aquest, hi ha altres camins per trobar el valor final de les incògnites: els mètodes recurrents. Per a xarxes ben condicionades el mètode Èpsilon de Wynn i Eta de Bauer ofereixen errors equiparables als dels aproximants de Padé. En general els altres mètodes són menys convenients. L'estudi del radi de convergència determina si només amb el sumatori dels coeficients de les sèries se'n fa prou. Quan el radi excedeix la unitat, habitualment és una bona idea. 
+
+Els aproximants de Thévenin resulten una eina potent a l'hora d'obtenir les corbes PV i QV. A diferència de tots els altres recursos per calcular el resultat final, generen no només la solució de la branca estable sinó també la de la branca inestable. El seu ús sobretot val la pena quan es computen les solucions a prop del punt de col·lapse de tensions. Encara que amb el mètode d'incrustació holomòrfica l'error sigui elevat, tracen les corbes amb exactitud.
+
+Els aproximants Sigma són l'eina de diagnòstic del mètode d'incrustació holomòrfica. Determinen si el resultat esdevé vàlid. També proporcionen informació de forma gràfica. Situen un punt per cada bus PQ i PV en un pla, on s'hi dibuixa una paràbola. Quan tots els punts queden dins la paràbola, la solució queda validada, i viceversa. A més a més, permeten intuir a què són deguts els desplaçaments dels punts (variacions de potència activa o de reactiva) i identifiquen els busos conflictius. Fins i tot quan els punts queden fora la paràbola dóna idea d'on està el problema.
+
+Quan les xarxes operen a prop del punt de col·lapse de tensions, els gràfics Sigma identifiquen aquest estat de treball. En tals condicions la combinació del mètode d'incrustació holomòrfica amb el Padé-Weierstrass resulta l'única manera d'obtenir un error acceptable. S'ha vist que és clau seleccionar correctament els punts d'avaluació de les solucions parcials perquè variar la profunditat té poca importància. El Padé-Weierstrass ha estat desenvolupat per a la formulació original, així que en sistemes molt carregats, s'ha d'evitar la formulació pròpia. 
+
+Dels sistemes seleccionats, ja des d'un inici el cas d'11 busos ha estat el més mal condicionat. La distribució de punts del gràfic Sigma ha esdevingut força anormal. Pel que fa als mètodes iteratius, només el Levenberg-Marquardt i el desacoblat ràpid han obtingut les solucions correctes. Els altres, o no convergien, o no proporcionaven el resultat operatiu adient, el que provoca certa ambigüitat. Per la seva banda, el mètode d'incrustació holomòrfica ha encertat el resultat. A més a més, el diagnòstic ha indicat la correcció de la solució.
+
+La resta de xarxes (IEEE14, IEEE30, Nord Pool, IEEE118 i PEGASE2869) s'han resolt correctament amb els mètodes iteratius. El nombre d'iteracions requerit pràcticament no ha variat amb les dimensions dels sistemes. No són xarxes mal condicionades des d'un principi. Els gràfics Sigma han donat una idea de quin era el desplaçament dels punts i s'ha justificat el motiu, mentre que les corbes PV i QV han caracteritzat les tensions al voltant del punt de col·lapse. 
+
+S'ha treballat un cas en corrent continu i un sistema amb una càrrega no lineal que s'han resolt per mitjà del mètode d'incrustació holomòrfica. El primer consta d'un díode i el segon d'una làmpada de descàrrega. Aquests dos exemples mostren que l'aplicació del mètode d'incrustació holomòrfica s'estén més enllà de les xarxes de transport i distribució.
+
+Al costat del mètode d'incrustació holomòrfica, normalment els mètodes iteratius tradicionals també són capaços d'obtenir la solució correcta. No obstant això, la principal riquesa del mètode d'incrustació holomòrfica es troba en el ventall d'eines que ofereix. Els aproximants Sigma diagnostiquen el sistema tant abans com després del col·lapse, els aproximants de Thévenin generen les corbes PV i QV, i quan la solució inicial és millorable, el Padé-Weierstrass possibilita afinar-la. Es conclou que el mètode d'incrustació holomòrfica permet conèixer més a fons els sistemes elèctrics de potència.
+
+\section{Treballs futurs}
+La formulació pròpia que s'ha desenvolupat és incompatible amb els aproximants Sigma quan hi ha transformadors de relació variable i amb el Padé-Weierstrass. En els dos casos el plantejament exigeix que els primers coeficients de tensió siguin unitaris. Tanmateix, es pensa que el Padé-Weierstrass es pot remodelar per a la formulació pròpia encara que això impliqui el retard del càlcul dels coeficients de potència reactiva. 
+
+Un aspecte que queda obert és la interpretació en més detall de les sèries dels aproximants Sigma, que al cap i a la fi, participen en la construcció d'un equivalent de dos busos entre el bus oscil·lant i qualsevol altre bus. Conèixer i entendre les sèries a fons pot permetre que davant canvis de càrrega d'aquell bus, mitjançant l'equivalent no faci falta tornar a solucionar el flux de potències de tot el sistema. S'estima que això donaria lloc a una aproximació del valor final de tensió de forma més ràpida. Per aquest motiu pot tenir importància a l'hora de solucionar contingències, on la solució final no ha de ser exacta però sí que ha de ser extreta amb poc temps.
+
+Pel que fa als circuits electrònics, falta veure com modelitzar altres elements (per exemple, transistors) i si cal ajustar les equacions en funció del seu punt d'operació. Seria interessant comparar la fiabilitat del mètode d'incrustació holomòrfica al costat del Newton-Raphson en simuladors de circuits integrats. 
+
+Altres qüestions pendents tenen a veure amb la integració de totes les funcionalitats del codi al GridCal. Actualment només hi consta la formulació pròpia, que va ser la que es va desenvolupar primer. No obstant això, per fer-ho més extensible caldria incorporar també la formulació original, de manera que els aproximants Sigma i el Padé-Weierstrass fossin totalment compatibles. Fa falta integrar-hi els aproximants de Thévenin perquè avui en dia el GridCal no genera les dues branques de les corbes PV i QV. El creador del GridCal n'és conscient i preveu incloure-ho a les pròximes versions.
+
+Manca analitzar els temps de càlcul que demana el mètode d'incrustació holomòrfica amb les dues formulacions al costat dels mètodes iteratius de programaris de simulació popularitzats per resoldre el flux de potències, com poden ser PowerWorld, MATPOWER o el mateix GridCal. És possible que el fet que la matriu del sistema no s'hagi d'invertir a cada pas faci competitiu el mètode d'incrustació holomòrfica. A més a més es beneficiaria d'un codi a l'encop orientat a objectes i vectoritzat al complet.
+
+\vspace*{\fill}
+\par Josep Fanals Batllori
+\vspace*{-16pt}
+\par Graduat en Enginyeria Elèctrica
+\vspace*{15pt}
+\par Girona, 30 de maig de 2020.
+\vspace*{4pt}

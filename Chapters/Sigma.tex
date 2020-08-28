@@ -1,0 +1,576 @@
+Els aproximants de Thévenin i els aproximants Sigma actuen com a complements en el mètode d'incrustació holomòrfica. No intervenen en la resolució de les diverses formulacions plantejades, sinó que depenen dels coeficients obtinguts. Tanmateix, proporcionen informació per comprendre millor el sistema. Tots dos tipus d'aproximants es fonamenten en reduir el sistema en un equivalent de dos busos: el bus que s'analitza i el bus oscil·lant.
+
+Els aproximants de Thévenin consisteixen en el que s'anomenen aproximants de major ordre (Trias, 2018). Són interessants per obtenir tensions més exactes que les resultants amb els aproximants de Padé a zones properes al col·lapse de tensions. També permeten trobar el voltatge quan el sistema treballa en condicions d'operació inestables.
+
+Per altra banda, els aproximants Sigma estan ideats per actuar com a eina de diagnòstic. Hi ha situacions de xarxes molt carregades en què el flux de potències no té solució. Els aproximants Sigma es perfilen com un recurs per conèixer si el sistema és resoluble. A més, gràficament donen nocions de l'estat de càrrega del sistema i identifiquen com els busos més problemàtics perjudiquen la resta de busos. 
+
+\section{Aproximants de Thévenin}
+Els aproximants de Thévenin són un cas particular dels aproximants d'Hermite-Padé. El cap i a la fi, tots ells busquen aproximar la solució, en aquest cas del flux de potències, amb la relació d'osculació. La Figura \ref{fig:oscu1} mostra que consisteix en el contacte íntim entre dues corbes. 
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+        \incfig{oscula3}{0.25}
+    \caption{Relació d'osculació entre dues corbes}
+    \label{fig:oscu1}
+    \end{center}
+\end{figure}
+
+Hi ha una sèrie genèrica $A(s)$ que es vol avaluar a un punt donat (per exemple, en el MIH això equivaldria a dir que es busca la tensió $V(s=1)$). Llavors, com que en funció del cas cal utilitzar algun mètode de continuació analítica per obtenir un error acceptable, s'opta per una sèrie $B(s)$. Es diu que manté una relació d'osculació amb $A(s)$ perquè estableixen contacte entorn del punt en què es vol avaluar $A(s)$. 
+
+Tot i no ser aproximants de major ordre, els aproximants de Padé es fonamenten en el mateix concepte. La sèrie $B(s)$ ve a ser el quocient $P(s)/Q(s)$ de l'Equació \ref{eq:pade1}.
+
+Els equivalents de Thévenin busquen expressar la tensió $V(s)$ com:
+\begin{equation}
+V(s)=F(s)+s\frac{G(s)}{V^*(s^*)}\ ,
+\label{th.T2}
+\end{equation}
+on $G(s)$ i $F(s)$ són sèries a obtenir a través dels aproximants de Thévenin. S'observa que l'Equació \ref{th.T2} recorda a l'equació resultant del balanç d'intensitats d'un bus que només es troba connectat al bus oscil·lant. 
+
+En concret, els equivalents de Thévenin segueixen la següent relació amb la sèrie de tensió $V(s)$: 
+\begin{equation}
+    T^{(0)}_N(s)+T^{(1)}_N(s)V(s)+T^{(2)}_N(s)\frac{s}{V^*(s^*)}=r_N(s)s^{N+1}\ ,
+    \label{th.T3}
+\end{equation}
+on:
+
+$T^{(0)}_N(s)$, $T^{(1)}_N(s)$ i $T^{(2)}_N(s)$: sèries a calcular.
+\vs
+$N=-1,0,1,...,\infty$: ordre de la relació d'osculació.
+\vs
+$r_N(s)$: residu a l'ordre $N$. És d'esperar que prengui valors molt petits.
+
+Així, es tracta de convertir l'Equació \ref{th.T3} en:
+\begin{equation}
+V(s)=-\frac{T^{(0)}_N(s)}{T^{(1)}_N(s)}-\frac{T^{(2)}_N(s)}{T^{(1)}_N(s)}\frac{s}{V^*(s^*)}+r_N(s)s^{N+1}\ ,
+\label{th.T4}
+\end{equation}
+on al final, per a grans $N$, $r_N(s)s^{N+1}$ serà menyspreat. 
+
+Per tant, les sèries $F(s)$ i $G(s)$ de l'Equació \ref{th.T2} s'extreuen de l'Equació \ref{th.T4}. D'aquí que s'anomenin aproximants de Thévenin. S'obté un equivalent no lineal que ve recollit per $F(s)$ i $G(s)$. Aquestes dues sèries engloben la informació del sistema vist des d'aquell bus. 
+
+\subsection{Càlcul}
+Segons Trias (2018), el càlcul dels aproximants implica imposar el grau dels polinomis:
+\begin{equation}
+    \text{grau}(T^{(a)}_N(s))=\left\lfloor\frac{N+1-a}{3}\right\rfloor\ ,
+    \label{th.T5}
+\end{equation}
+on $\lfloor m\rfloor$ arrodoneix a l'enter menor o igual a $m$, mentre que $a$ pren per valor el 0, l'1 i el 2, tal com es dedueix de l'Equació \ref{th.T4}. Quan el grau resulta negatiu, el polinomi és nul; quan val zero, el polinomi esdevé una constant.
+
+Els polinomis en què $a=0$ es normalitzen:
+\begin{equation}
+T^{(0)}_N(0)=-1\ ,
+\label{th.T6}
+\end{equation}
+encara que aquesta tria és arbitrària. En aquest desenvolupament s'ignora la dependència de les sèries amb $s$ quan aquesta és evident. De les Equacions \ref{th.T3} i \ref{th.T5} quan $a=1$ es dedueix:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+T^{(1)}_{-1}&=0\ ,\\
+T^{(1)}_{0}&=\frac{1}{V[0]}\ ,\\
+T^{(1)}_{1}&=\frac{1}{V[0]}\ .\\
+\end{split}
+\end{cases}
+\label{th.T7}
+\end{equation}
+És necessari considerar que $V[0]$ pot no ser exactament igual a 1 per aplicar els aproximants de Thévenin al MIH amb la formulació pròpia. Quan $a=2$:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    T^{(2)}_{-1}&=0\ ,\\
+    T^{(2)}_{0}&=0\ ,\\
+    T^{(2)}_{1}&=\frac{-V[1]V^*[0]}{V[0]}\ .\\
+    \end{split}
+\end{cases}
+    \label{th.T8}
+\end{equation}
+Els residus es troben a partir de l'Equació \ref{th.T3}. S'aïllen per $N=-1, 0, 1$ i en resulta que cada un dels seus coeficients segueix:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    r_{-1}[0]&=-1\ ,\\
+    r_0[k]&=\frac{V[k+1]}{V[0]}\ ,\\
+    r_1[k]&=\frac{V[k+2]}{V[0]}-\frac{V[1]V^*[0]X[k+1]}{V[0]}\ ,
+    \end{split}
+\end{cases}
+    \label{th.T9}
+\end{equation}
+on:
+
+$k=0,1,...,n-2$: índex que identifica un terme genèric dels residus. 
+\vs
+$n$: darrer índex de la sèrie $V(s)$. 
+\vs
+$X(s)$: sèrie inversa de la tensió $V^*(s^*)$. 
+
+Tal com s'aprecia, tots els termes de $r_{-1}(s)$ són nuls excepte el primer d'ells. A continuació cal obtenir els successius polinomis $T^{(a)}_N(s)$. Com que en principi a major $N$ millor s'aproxima la solució, s'inicia amb $N=1$ i se l'augmenta gradualment. S'expandeixen les relacions d'osculació per tres ordres consecutius:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+T^{(0)}_{N-2}+T^{(1)}_{N-2}V(s)+T^{(2)}_{N-2}\frac{s}{V^*(s^*)}&=r_{N-2}(s)s^{N-1}\ ,\\
+T^{(0)}_{N-1}+T^{(1)}_{N-1}V(s)+T^{(2)}_{N-1}\frac{s}{V^*(s^*)}&=r_{N-1}(s)s^{N}\ ,\\
+T^{(0)}_{N}+T^{(1)}_{N}V(s)+T^{(2)}_{N}\frac{s}{V^*(s^*)}&=r_{N}(s)s^{N+1}\ .
+\end{split}
+\end{cases}
+\label{th.T15}
+\end{equation}
+Es busca progressar, o sigui, trobar els polinomis d'ordre $N+1$. Es multiplica cada expressió de l'Equació \ref{th.T15} per les constants $a_{N+1}s$, $b_{N+1}$ i $c_{N+1}$ respectivament, que s'han de determinar. Això s'ha de llegir com aquelles constants que donen peu als polinomis  $T^{(a)}_{N+1}(s)$, d'aquí el seu subíndex. Queda:
+\begin{equation}
+\begin{split}
+a_{N+1}sT^{(0)}_{N-2}&+b_{N+1}T^{(0)}_{N-1}+c_{N+1}T^{(0)}_{N}
++(a_{N+1}sT^{(1)}_{N-2}+b_{N+1}T^{(1)}_{N-1}+c_{N+1}T^{(1)}_{N})V(s)\\
+&+(a_{N+1}sT^{(2)}_{N-2}+b_{N+1}T^{(2)}_{N-1}+c_{N+1}T^{(2)}_{N})sX(s)\\
+&=(a_{N+1}r_{N-2}(s)+b_{N+1}r_{N-1}(s)+c_{N+1}sr_{N}(s))s^N\ .
+\end{split}
+\label{th.T16}
+\end{equation}
+L'Equació \ref{th.T16} té la mateixa forma que la relació d'osculació. Precisament es tracta d'aconseguir que doni lloc a la relació d'osculació d'ordre $N+2$ a través d'escollir les constants coherentment. 
+
+Per progressar cap a la següent equació d'osculació, on a la banda dreta de la igualtat de l'expressió hi ha de figurar $s^{N+2}$, s'han d'eliminar aquells termes que acompanyin $s^{N}$ i $s^{N+1}$. Amb aquesta condició s'arriba a:
+\begin{equation}
+    \begin{cases}
+\begin{split}
+a_{N+1}r_{N-2}[0]+b_{N+1}r_{N-1}[0]=0\ ,\\
+a_{N+1}r_{N-2}[1]+b_{N+1}r_{N-1}[1]+c_{N+1}r_{N}[0]=0\ .
+\end{split}
+\end{cases}
+\label{th.T17}
+\end{equation}
+Per calcular les tres constants manca una equació. Es defineixen els nous polinomis d'ordre $N+1$:
+\begin{equation}
+T^{(a)}_{N+1}(s)=a_{N+1}sT^{(a)}_{N-2}+b_{N+1}T^{(a)}_{N-1}+c_{N+1}T^{(a)}_{N}\ .
+\label{th.T18}
+\end{equation}
+Mitjançant l'Equació \ref{th.T18}, en normalitzar el nou polinomi $T^{(0)}_{N+1}=-1$ igual que s'ha fet amb els altres, s'obté la tercera equació per determinar les constants:
+\begin{equation}
+b_{N+1}(-1)+c_{N+1}(-1)=-1\ .
+\label{th.T19}
+\end{equation}
+Llavors, es combinen les Equacions \ref{th.T17} i \ref{th.T19} per conèixer què val cada constant:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    a_{N+1}&=\frac{r_{N-1}[0]r_{N}[0]}{r_{N-2}[0]r_{N-1}[1]-r_{N-1}[0]r_{N-2}[1]-r_{N-2}[0]r_{N}[0]}\ ,\\
+    b_{N+1}&=-a_{N+1}\frac{r_{N-2}[0]}{r_{N-1}[0]}\ ,\\
+    c_{N+1}&=1-b_{N+1}\ .
+    \end{split}
+\end{cases}
+    \label{th.T20}
+\end{equation}
+Finalment només queda treure la nova sèrie $r_{N+1}(s)$, on cada un dels seus termes es dedueix a través de l'expressió a la dreta de l'igual de l'Equació \ref{th.T16}:
+\begin{equation}
+r_{N+1}[k]=a_{N+1}r_{N-2}[k+2]+b_{N+1}r_{N-1}[k+2]+c_{N+1}r_N[k+1]\ .
+\label{th.T21}
+\end{equation}
+En resum, el procediment de càlcul dels aproximants de Thévenin comença amb les sèries de tensió $V_i(s)$ per a cada bus $i$. És indispensables haver-les calculat, ja sigui amb una formulació del MIH o amb l'altra. S'inicialitzen els polinomis i seguidament es troben els residus amb l'Equació \ref{th.T9}. Amb això s'obtenen les constants de l'Equació \ref{th.T20}, la qual cosa permet conèixer els nous polinomis amb l'Equació \ref{th.T18}. Es repeteix aquest procés (la resta de vegades s'utilitza l'Equació \ref{th.T21} pels residus) fins a exhaurir els coeficients. En efecte, el nombre de termes dels residus es redueix a mesura que $N$ creix.
+
+Per al càlcul definitiu de les tensions s'utilitza $G(s)$ i $F(s)$, que tal com s'ha raonat, s'extreuen de l'Equació \ref{th.T4}. Es pren l'Equació \ref{th.T2} i en resulta:
+\begin{equation}
+    v(s)=1+s\frac{G(s)}{F(s)F^*(s^*)}\frac{1}{v^*(s^*)}\ ,
+    \label{th.T22}
+\end{equation}
+on $v(s)=\dfrac{V(s)}{F(s)}$. Per simplificar-ho més s'introdueix el canvi de variable $\sigma^{TH}=\dfrac{G(s)}{F(s)F^*(s^*)}$. Això permet calcular el valor final de $v$:
+\begin{equation}
+    v=\frac{1}{2}\pm \sqrt{\frac{1}{4}+\Re[\sigma^{TH}]-(\Im[\sigma^{TH}])^2}+j\Im[\sigma^{TH}]\ ,
+    \label{th.T23}
+\end{equation}
+de mode que juntament amb $F(s=1)$ s'aproxima $V(s=1)$.
+\subsection{Representació}
+Com s'observa, $v$ rep dos valors. Quan s'utilitza el signe positiu de l'arrel quadrada es representa la tensió superior, el que s'anomena la branca estable de la corba PV, mentre que amb el signe negatiu davant l'arrel, s'obté un punt de la branca inestable o negativa. Numèricament s'ha vist que els aproximants de Thévenin indiquen incorrectament l'angle de la tensió. Tanmateix, la seva característica més profitosa es manifesta a la Figura \ref{fig:A10TH}.
+
+% \tikzstyle{arrow} = [->,>=stealth]
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{29}|$},xlabel={$|P_{29}|$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/PV1.csv};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/PV2.csv};
+        \legend{Thévenin -, , Thévenin +} %tocar
+    \end{axis}
+    % \draw [arrow] (5,2.8) -- (6.7,3.2);
+    \draw [decoration={markings,mark=at position 1 with
+    {\arrow[scale=1.7,>=stealth]{>}}},postaction={decorate}] (5,2.8) -- (6.7,3.2);
+    \draw (5, 2.6) node[anchor=south east] {Punt de col·lapse};
+    \draw (5, 2.3) node[anchor=south east] {de tensions};
+    \draw[fill=gray!30,fill opacity=0.5] (6.8,0) rectangle ++(0.615,5.918);
+    \draw (8.5, 4) -- (7.1, 4);
+    \draw (8.5, 4) node[anchor=south west] {Sense};
+    \draw (8.5, 3.7) node[anchor=south west] {solució};
+
+    \end{tikzpicture}
+    \caption{Corba PV per al bus 29 de la xarxa IEEE30 amb la formulació original}
+    \label{fig:A10TH}
+    \end{center}
+  \end{figure} 
+  
+Les corbes PV consisteixen en una representació del mòdul de tensió a mesura que s'incrementa la demanda. A major consum, més s'empetiteix el voltatge, fins que s'arriba a l'anomenat punt de col·lapse de tensions, on la situació es reverteix. A la branca negativa o inestable una disminució de demanda implica una reducció de tensió. Matemàticament és una solució vàlida però anòmala (Barrero, 2004), que més aviat té un interès teòric. Amb els aproximants de Padé i els mètodes recurrents no s'obtenen els punts de treball de la branca negativa, ja que només troben la solució físicament possible.
+
+El punt de col·lapse de tensions marca la màxima demanda que pot tenir lloc en un bus. Si fos més gran, el flux de potències del sistema no tindria solució. La regió grisosa de la Figura \ref{fig:A10TH} precisament representa la zona on no hi ha solució possible. Per això, aquelles xarxes que contenen busos a prop del col·lapse de tensions es coneixen pel nom de mal condicionades. La resolució del flux de càrregues resulta més costosa que en casos ben condicionats. Els mètodes tradicionals iteren més vegades i en el MIH es necessiten més coeficients.
+
+La branca inestable obtinguda amb els aproximants de Thévenin, lluny del punt de col·lapse, pot no prendre els valors esperats. A la Figura \ref{fig:A10TH} es fa evident que per potències inferiors a 0,1 la trajectòria no segueix el típic perfil teòric. Segons Trias (2018), aquest comportament és típic dels aproximants de Thévenin. Sí que són convenients a l'hora de representar les tensions a prop del punt de col·lapse. Ho fan amb més exactitud que els aproximants de Padé. La Figura \ref{fig:A10TH2} il·lustra aquesta comparació, on s'utilitza la formulació pròpia i sèries de 30 coeficients.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, /pgf/number format/precision=3, use comma, 1000 sep={.}, ylabel={$|V_{29}|$},xlabel={$|P_{29}|$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=1pt,draw=black}, e={mark=+,mark size=1pt,draw=black}, f={mark=triangle,mark size=1pt,draw=black}}]]
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/PV29_th1.csv};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/PV29_th2.csv};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/PV29_pa.csv};
+        \legend{Thévenin -, Padé, Thévenin +} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Corba PV per al bus 29 de la xarxa IEEE30 a prop del col·lapse amb Padé i Thévenin}
+    \label{fig:A10TH2}
+    \end{center}
+  \end{figure} 
+
+Els aproximants de Padé es desvien de la trajectòria dels aproximants de Thévenin a punts propers al col·lapse de tensions. És més, els errors màxims de potència complexa calculats amb els aproximants de Padé esdevenen massa elevats, de l'ordre de $10^{-3}$. Es nota que les dues corbes dels aproximants de Thévenin s'uneixen al punt de col·lapse. 
+
+Els aproximants de Thévenin també permeten generar les corbes QV. A l'eix vertical es representa el mòdul de tensió mentre que a l'horitzontal hi apareix la potència reactiva injectada al bus. A la Figura \ref{fig:A11TH} s'exemplifica aquesta corba per al bus 29 de la xarxa IEEE 30.
+  
+  \begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{29}|$},xlabel={$Q_{29}$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=8cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/QV1.csv};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/QV2.csv};
+        \legend{Thévenin -, , Thévenin +} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Corba QV per al bus 29 de la xarxa IEEE30 amb aproximants de Thévenin}
+    \label{fig:A11TH}
+    \end{center}
+  \end{figure} 
+  
+Hi ha un punt de col·lapse ben definit, on ambdues branques s'uneixen. A major consum de reactiva, és a dir, com més negativa resulta, més s'apropa el punt de treball al col·lapse. 
+
+La potència reactiva més extrema a consumir val entorn de 0,622, el que representa una injecció de $-$0,622. Es mostra que els aproximants de Thévenin també són capaços de representar la branca inestable, tot i que fins a cert punt.
+
+\section{Aproximants Sigma}
+Els aproximants Sigma es presenten com un dels majors avantatges que ofereix el mètode d'incrustació holomòrfica respecte als mètodes de resolució tradicionals. En bona part, és una eina pensada per mostrar de forma gràfica cada bus PQ i PV com un punt. Si tots els punts se situen dins els límits d'una paràbola, la solució queda validada. Per contra, si algun d'ells surt dels límits, la solució del flux de potències no resulta correcta (Trias, 2014).
+
+\subsection{Formulació}
+De manera similar als aproximants de Thévenin, els aproximants Sigma també construeixen un model equivalent de dos busos. Es busca una expressió que ressembli l'Equació \ref{th.T2}. El desenvolupament comença amb el balanç de corrents a un bus donat:
+\begin{equation}
+    \frac{V(s)-V_{w}(s)}{Z(s)}=s\frac{S^*(s^*)}{V^*(s^*)}\ ,
+    \label{sig.A1}
+\end{equation}
+on:
+
+$V_{w}(s)$: voltatge del nus oscil·lant. D'entrada la seva sèrie és coneguda.
+\vs
+$V(s)$: voltatge del bus PV o PQ. Els seus coeficients ja han estat calculats.
+\vs
+$Z(s)$: sèrie que representa la impedància equivalent.
+\vs
+$S^*(s^*)$: sèrie que representa el complex conjugat de la potència del bus incògnita.
+
+Pel desenvolupament és indiferent considerar si es tracta amb un bus PV o amb un bus PQ, encara que les dades i les incògnites variïn. Pot ser que aquest bus no enllaci de manera directa amb el nus oscil·lant. Precisament la gràcia dels aproximants Sigma resideix en formar un model equivalent entre ambdós busos. 
+
+Es multiplica l'Equació \ref{sig.A1} a banda i banda per $\dfrac{Z(s)}{V_{w}(s)}$:
+\begin{equation}
+    \frac{V(s)}{V_{w}(s)}-1=s\frac{S^*(s^*)}{V^*(s^*)}\frac{Z(s)}{V_{w}(s)}\ .
+    \label{sig.A2}
+\end{equation}
+Aleshores s'aplica el canvi de variable $U(s)=\dfrac{V(s)}{V_{w}(s)}$. L'Equació \ref{sig.A2} es converteix en:
+\begin{equation}
+U(s)-1=s\frac{S^*(s^*)Z(s)}{V^*(s^*)}\frac{1}{V_{w}(s)\dfrac{V^*_{w}(s^*)}{V^*_{w}(s^*)}}\ .
+\label{sig.A3}
+\end{equation}
+Seguidament s'introdueix el canvi de variable que dóna nom als aproximants Sigma, que és: $\sigma(s)=\dfrac{S^*(s^*)Z(s)}{V_{w}(s)V^*_w(s^*)}$. Amb això s'arriba a:
+\begin{equation}
+U(s)=1+s\frac{\sigma(s)}{U^*(s^*)}\ ,
+\label{sig.A4}
+\end{equation}
+que recorda a l'Equació \ref{th.T2} i per tant, a un equivalent de dos busos.
+
+L'algoritme del MIH es basa a obtenir les sèries de tensió $V(s)$. Per la seva banda, la sèrie del bus oscil·lant es construeix independentment del flux de potències. Així doncs, trobar $\sigma(s)$ a partir de l'Equació \ref{sig.A4} és el següent pas. En aïllar-la de l'Equació \ref{sig.A4} s'arriba a: 
+\begin{equation}
+    \sigma(s)=\frac{(U(s)-1)/s}{\dfrac{1}{U^*(s^*)}}\ ,
+    \label{sig.A6}
+\end{equation}
+on convé introduir el canvi de variable $\dfrac{1}{U^*(s^*)}=X(s)$. 
+
+Així, $\sigma(s)$ esdevé calculable amb:
+\begin{equation}
+    \sigma(s)=\frac{\sum_{k=0}^{\infty}U[k+1]s^k}{\sum_{k=0}^{\infty}X[k]s^k}\ ,
+    \label{sig.A7}
+\end{equation}
+tot i que no es troba d'aquest mode. Es formula un enfocament més apropiat. 
+
+Interessa plantejar com calcular la ràtio de tensió entre el bus a estudiar i l'oscil·lant, que es denota per $U(s)$, a partir dels aproximants Sigma, per motius que es faran evidents a continuació. Es defineix $U=a+jb$ i $\sigma=\sigma_{re}+j\sigma_{im}$. En considerar $s=1$, l'Equació \ref{sig.A4} es converteix en:
+\begin{equation}
+a+jb=1+\frac{\sigma_{re}+j\sigma_{im}}{a-jb}\ ,
+\label{sig.A8}
+\end{equation}
+que en desenvolupar-la i separar-la explícitament entre part real i imaginària: 
+\begin{equation}
+(a^2-a+b^2)+j(b)=(\sigma_{re})+j(\sigma_{im})\ ,
+\label{sig.A9}
+\end{equation}
+de manera que directament $b=\sigma_{im}$. 
+
+Per la part real es treballa l'equació de segon grau. S'obté:
+\begin{equation}
+    a=\frac{1}{2}\pm\sqrt{\frac{1}{4}-\sigma^2_{im}+\sigma_{re}}\ .
+\label{sig.A10}
+\end{equation}
+Conseqüentment es dedueix una conclusió de vital importància a l'hora de tractar els aproximants Sigma com a eina de diagnòstic. Serveixen per indicar que no hi ha solució quan es compleix:
+\begin{equation}
+\frac{1}{4}-\sigma^2_{im}+\sigma_{re}<0\ .
+\label{sig.A11}
+\end{equation}
+Al cap i a la fi l'Equació \ref{sig.A11} dibuixa una paràbola. Quan la solució obtinguda de tensió quedi fora de l'interior que defineix la paràbola, serà considerada invàlida. De fet, només que passi per un bus, la solució del flux de potències resulta incorrecta. 
+
+Això compta amb una aplicabilitat destacable en un centre de control: d'un sistema amb multitud de busos, a simple cop d'ull s'identifica la situació d'operació en què es troba. 
+
+\subsection{Càlcul}
+Per trobar el valor que pren $\sigma(s)$ l'opció més adient tracta de plantejar un sistema matricial. Experimentalment s'ha vist que si s'aplica l'Equació \ref{sig.A7}, s'aconsegueix menys exactitud. El càlcul consisteix a obtenir els coeficients d'un parell de sèries noves. 
+
+Una d'elles és la que sorgeix de $U(s)$:
+\begin{equation}
+    (U(s)-1)/s=\sum_{N=0}^{\infty}U[N+1]s^N=\sum_{n=0}^{\infty}c_ns^n\ ,
+    \label{sig.A12}
+\end{equation}
+i l'altra de $X(s)$:
+\begin{equation}
+    X(s)=\frac{1}{U^*(s^*)}=\sum_{N=0}^{\infty}X[N]s^N=\sum_{n=0}^{\infty}d_ns^n\ .
+    \label{sig.A13}
+\end{equation}
+Llavors es planteja aproximar el quocient que formen les Equacions \ref{sig.A12} i \ref{sig.A13} a través de:
+\begin{equation}
+    \frac{\sum_{n=0}^{\infty}c_ns^n}{\sum_{n=0}^{\infty}d_ns^n}=\frac{\sum_{n=0}^{L}p_ns^n}{\sum_{n=0}^{M}q_ns^n}\ .
+    \label{sig.A14}
+    \end{equation}
+ A continuació es pren $L=M$. En desenvolupar l'Equació \ref{sig.A14} i igualar termes s'arriba a: 
+ \begin{equation}
+    -\begin{pmatrix}
+    0 & 0 & \dots & 0 & -d_0 & 0 & \dots & 0 \\
+    c_0 & 0 & \dots & 0 & -d_1 & -d_0 & \dots & 0\\
+    c_1 & c_0 & \dots & 0 & -d_2 & -d_1 & \dots & 0\\
+    \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots\\
+    c_{2M-2} & c_{2M-3} & \dots & c_{M-1} & -d_{2M-1} & -d_{2M-2} & \dots & -d_{M-1}\\
+    c_{2M-1} & c_{2M-2} & \dots & c_M & -d_{2M} & -d_{2M-1} & \dots & -d_{M}\\
+    \end{pmatrix}
+    \begin{pmatrix}
+    q_1\\
+    \vdots\\
+    q_M\\
+    p_0\\
+    \vdots\\
+    p_M\\
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+    c_0\\
+    c_1\\
+    c_2\\
+    \vdots\\
+    c_{2M-1}\\
+    c_{2M}
+    \end{pmatrix}\ .
+    \label{sig.A15}
+    \end{equation} 
+Cal invertir la matriu per tal de trobar els coeficients que es busquen i seguidament computar el quocient de l'Equació \ref{sig.A14}. No apareix $q_0$, ja que s'ha fixat que valgui 1 (igual que amb els aproximants de Padé, on aquest valor és arbitrari). En el fons, aquest plantejament matricial recorda al dels aproximants de Padé.
+
+Val la pena tenir present les implicacions de l'Equació \ref{sig.A4}. Se sap que d'acord amb la seva definició, $U(s)=\dfrac{V(s)}{V_w(s)}$. Per tant, el seu primer terme resulta:
+\begin{equation}
+    U[0]=\frac{V[0]}{V_w[0]}\ ,
+    \label{sig.A16}
+\end{equation}
+on $V_w[0]=1$ segons la incrustació que s'utilitza en aquest bus. L'Equació \ref{sig.A4} indica que forçosament $U[0]=1$, així que tot això porta a descobrir que, en efecte, $V[0]$ també ha de valdre 1. Pel que s'ha raonat, a la formulació pròpia amb presència de transformadors de relació variable això no és cert. El primer coeficient de la sèrie de tensió difereix de la unitat. En aquesta situació els aproximants Sigma fan un diagnòstic incorrecte.
+
+Per comparar gràfics s'escull la xarxa IEEE14, que conté tres transformadors de relació variable, i el bus 13 es carrega més que a l'inici. Amb la formulació pròpia s'obté la Figura \ref{fig:sigA12}.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=6.5cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sig_14_v22.csv};
+        %\legend{Padé, Èpsilon, Aitken, Rho, Theta, Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma de la IEEE14 amb $P_{13}=-$1,5 amb la formulació pròpia}
+    \label{fig:sigA12}
+    \end{center}
+  \end{figure} 
+  
+  Es fa evident que els busos s'acosten cap al límit inferior de la paràbola. A partir de la Figura \ref{fig:sigA12}, el punt que es correspon al bus 13 (o sigui, el darrer bus del sistema) arrossega la resta de busos cap a fora els límits. De bon principi es trobaven tots més a prop de l'origen. En canvi, si s'utilitza la formulació original, surt la Figura \ref{fig:sigA13}. Només es dibuixa el límit inferior perquè els punts se situen al voltant d'aquest.
+  
+  \begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=6.5cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    %\addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sig_14_v11.csv};
+        %\legend{Padé, Èpsilon, Aitken, Rho, Theta, Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma de la IEEE14 amb $P_{13}=-$1,5 amb la formulació original}
+    \label{fig:sigA13}
+    \end{center}
+  \end{figure} 
+  
+La distribució de punts s'assimila, encara que en el gràfic de la formulació pròpia hi ha punts que surten dels límits. Amb la formulació original, en canvi, tots queden dins els marges que defineix la paràbola. Es tracta d'un cas mal condicionat, on amb totes dues formulacions s'assoleix un error de l'ordre de $10^{-7}$. Resulta prou acceptable. Així, el gràfic Sigma de la formulació pròpia no és correcte. La part positiva es troba en el fet que avisa abans que arribi el col·lapse. En aquest aspecte, tira pel costat de la seguretat. 
+
+No obstant això, s'ha comprovat que per xarxes sense transformadors de relació variable, com la IEEE30, els gràfics Sigma de les dues formulacions resulten idèntics.
+
+\subsection{Diagnòstic} %parlar de relació amb P i Q, cercles de tensió i veure quan s'aproxima cap al límit com respon
+Els aproximants Sigma han estat pensats per actuar com a eina de diagnòstic. Analíticament indiquen si la resolució del flux de potències és correcta a partir de trobar $\sigma_{re}$ i $\sigma_{im}$. Amb això es determina si s'està dins els límits. A més a més, la seva representació gràfica resulta molt beneficiosa per diagnosticar l'estat del sistema. 
+
+Per un costat, mostra com evoluciona l'estat del sistema en funció de la seva càrrega. Per exemple, la Figura \ref{fig:sigA14} capta la distribució de punts del gràfic Sigma en la xarxa IEEE30 inicial.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sig_29_1.csv};
+        %\legend{Padé, Èpsilon, Aitken, Rho, Theta, Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma de la IEEE30 en la situació de càrrega inicial}
+    \label{fig:sigA14}
+    \end{center}
+  \end{figure} 
+
+  Com s'observa, tots ells se situen molt a prop de l'origen. Això correspon a un sistema ben condicionat. I és que per mitjà de l'Equació \ref{sig.A4} es dedueix que si $\sigma(s)\rightarrow 0$, $U(s)\rightarrow 1$, i per tant la tensió del bus s'aproxima a la del bus oscil·lant. En un cas així els corrents que circulen per les branques en sèrie tendeixen a ser nuls.
+  
+  Per contra, quan el bus 29 injecta una potència activa de $-$0,82, la xarxa esdevé molt més mal condicionada. A la Figura \ref{fig:A10TH2} s'observa que en aquestes condicions s'opera a prop del punt de col·lapse. La Figura \ref{fig:sigA15} mostra el gràfic Sigma en tal situació.
+
+  \begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sig_29_2.csv};
+        %\legend{Padé, Èpsilon, Aitken, Rho, Theta, Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma de la IEEE30 quan $P_{29}=-$0,82}
+    \label{fig:sigA15}
+    \end{center}
+  \end{figure} 
+
+Aquell núvol de punts tan concentrat vora el punt (0, 0) s'ha expandit cap avall. Ho han fet especialment els busos 26, 28 i 29. Justament s'ha carregat més el bus 29, i els busos 26 i 28 enllacen amb aquest. Així doncs, s'interpreta que un bus estira el sistema cap al col·lapse de tensions. 
+
+No és casualitat que els punts es desplacin de la forma que ho han fet. De fet, $\sigma$ s'ha definit com:
+\begin{equation}
+    \sigma(s)=\frac{S^*(s^*)Z(s)}{V_w(s)V^*_w(s^*)}\ .
+    \label{sig.A16x}
+\end{equation}
+S'elimina la dependència de les sèries amb $s$ i es considera que es tracta amb un bus on la potència complexa és coneguda. Amb això:
+\begin{equation}
+    \sigma=\frac{(P-jQ)(R+jX)}{|V_w|^2}\ ,
+    \label{sig.A17}
+\end{equation}
+on $R$ i $X$ representen la part real i imaginària de la impedància $Z$. En fragmentar també $\sigma$:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \sigma_{re}&=\frac{PR+QX}{|V_w|^2}\ ,\\
+        \sigma_{im}&=\frac{PX-QR}{|V_w|^2}\ .
+    \end{split}
+\end{cases}
+    \label{sig.A18}
+\end{equation}
+Separar $\sigma$ en part real i imaginària permet fer-se una idea de les variacions que patiran en funció de les potències. A més, en els sistemes de transport, la reactància de les línies és predominant al costat de la resistència, pel que X$\gg$R. En aquestes xarxes $\sigma_{re}$ depèn especialment de la potència reactiva, mentre que $\sigma_{im}$ ho fa amb la potència activa. 
+
+A tall d'exemple se suposa que hi ha un sistema de dos busos: un és l'oscil·lant, que roman fixat a una tensió d'1; l'altre, un bus PQ on les potències varien. La línia que els uneix només té una reactància inductiva de 0,05. La Figura \ref{fig:A14x} mostra l'evolució del punt en el gràfic Sigma.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.1,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=1.5pt,draw=black}, c={mark=o,mark size=1.5pt,draw=black}%
+      ,d={mark=*,mark size=1.5pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sigP.csv};
+    \addplot[scatter,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sigQ.csv};
+        \legend{, , , $\Delta P<0$, $\Delta Q<0$} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Evolució de Sigma amb canvis a la $P$ o a la $Q$ per a xarxa de dos busos amb $R=0$ i $X=$\ 0,05}
+    \label{fig:A14x}
+    \end{center}
+  \end{figure}
+
+Tal com s'observa a la Figura \ref{fig:A14x}, quan la injecció de potència reactiva disminueix (per tant, hi ha un major consum d'aquesta), $\sigma_{re}$ disminueix, el que provoca que s'acosti cap al nas de la paràbola. Encara que no s'hagi representat, si la potència reactiva injectada al bus s'incrementa, $\sigma_{re}$ creix. En aquesta situació el punt s'allunya del límit. El sistema passa a trobar-se més ben condicionat.
+
+Davant canvis a la potència activa, $\sigma_{re}$ es queda fixa i és $\sigma_{im}$ la que varia. Ho fa cap avall quan el consum s'incrementa, i cap amunt quan disminueix. Això lliga amb la Figura \ref{fig:sigA15}, on només s'augmentava la potència activa del bus 29. En global els punts s'apropaven al límit inferior. La xarxa IEEE30 és un bon exemple de sistema en el qual X$\gg$R, pel que les relacions justificades entre les diverses variables es compleixen. 
+
+El gràfic Sigma també té la capacitat d'indicar entre quins valors es mouen els mòduls de tensió. En expandir l'Equació \ref{sig.A9} es troba que en el gràfic Sigma tots els punts d'un mateix mòdul de tensió dibuixen una circumferència, del tipus:
+\begin{equation}
+    (\sigma_{re}-V^2_x)^2+(\sigma_{im}-0)^2=V^2_x\ ,
+    \label{eq:sigcirc}
+\end{equation}
+on $V_x$ és límit escollit. 
+
+De fet, $V_x$ no representa directament el voltatge dels busos, sinó la proporció entre la tensió d'aquests busos i la de l'oscil·lant, ja que és el límit que es fixa per a $U$. No obstant això, mostra si les tensions dels busos se separen extremadament de la del bus oscil·lant. 
+
+Per exemple, si es decideix que $V_x$ valgui 1,0 i 0,9, la Figura \ref{fig:sigA15} esdevé la Figura \ref{fig:sigA15x}.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$}, domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[no marks, densely dashed] {+(1^2-(\x - 1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashed] {-(1^2-(\x - 1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/sig_29_2.csv};
+        \legend{ , , {$V_x=$1,0}, ,{$V_x=$0,9}} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma de la IEEE30 quan $P_{29}=-$0,82 amb indicadors de tensió d'1,0 i 0,9}
+    \label{fig:sigA15x}
+    \end{center}
+  \end{figure} 
+
+Com que la tensió del bus oscil·lant és unitària, es dedueix que la majoria de busos compten amb un mòdul de tensió situat entre 1,0 i 0,9, mentre que els dos busos més propers als límits operen amb un voltatge, en valor absolut, inferior a 0,9.

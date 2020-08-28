@@ -1,0 +1,96 @@
+\selectlanguage *{catalan}
+\selectlanguage *{catalan}
+\vspace {5pt}
+\contentsline {chapter}{\numberline {1}INTRODUCCIÓ}{6}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Antecedents}{6}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Objecte}{6}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Especificacions i abast}{7}{section.1.3}%
+\contentsline {chapter}{\numberline {2}EL PROBLEMA DEL FLUX DE CÀRREGUES}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Tipus de busos}{9}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Modelització d'elements}{11}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Transformadors}{12}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Línies}{13}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}Mètodes tradicionals de resolució}{15}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Gauss-Seidel}{15}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Newton-Raphson}{17}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Desacoblat ràpid}{20}{subsection.2.3.3}%
+\contentsline {chapter}{\numberline {3}MÈTODE D'INCRUSTACIÓ HOLOMÒRFICA}{22}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Característiques}{22}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Formulació original}{26}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Algoritme}{30}{subsection.3.2.1}%
+\contentsline {section}{\numberline {3.3}Formulació pròpia}{35}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Algoritme}{36}{subsection.3.3.1}%
+\contentsline {chapter}{\numberline {4}AVALUACIÓ DE LES SÈRIES}{39}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Radi de convergència}{39}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Mètodes de recurrència}{43}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Delta d'Aitken}{43}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Transformació de Shanks}{44}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Rho de Wynn}{45}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Èpsilon de Wynn}{46}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Theta de Brezinski}{46}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.6}Eta de Bauer}{47}{subsection.4.2.6}%
+\contentsline {section}{\numberline {4.3}Aproximants de Padé}{48}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Càlcul}{49}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Anàlisi de pols i zeros}{51}{subsection.4.3.2}%
+\contentsline {chapter}{\numberline {5}APROXIMANTS DE THÉVENIN I APROXIMANTS SIGMA}{56}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Aproximants de Thévenin}{56}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Càlcul}{58}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Representació}{61}{subsection.5.1.2}%
+\contentsline {section}{\numberline {5.2}Aproximants Sigma}{63}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Formulació}{63}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Càlcul}{66}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Diagnòstic}{68}{subsection.5.2.3}%
+\contentsline {chapter}{\numberline {6}PADÉ-WEIERSTRASS}{72}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Primer graó}{73}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Busos PQ}{74}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Busos PV}{76}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.3}Compactació}{78}{subsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.1.4}Algoritme}{80}{subsection.6.1.4}%
+\contentsline {section}{\numberline {6.2}Generalització}{83}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Busos PQ}{84}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Compactació}{85}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}Busos PV}{86}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}Punt d'avaluació de les solucions parcials}{89}{subsection.6.2.4}%
+\contentsline {chapter}{\numberline {7}CIRCUIT DE CORRENT CONTINU I CÀRREGA NO LINEAL}{91}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Circuit de corrent continu}{91}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Formulació}{92}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Resultats}{94}{subsection.7.1.2}%
+\contentsline {section}{\numberline {7.2}Càrrega no lineal}{96}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Formulació}{98}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Resultats}{102}{subsection.7.2.2}%
+\contentsline {chapter}{\numberline {8}PROGRAMA}{105}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Inicialització}{105}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Càlcul de coeficients}{108}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Padé-Weierstrass}{111}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Incorporació al GridCal}{114}{section.8.4}%
+\contentsline {chapter}{\numberline {9}RESULTATS AMB XARXES DE TEST INICIALS}{115}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Diagnòstic}{116}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Comparació amb mètodes tradicionals}{120}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Influència de la profunditat}{123}{section.9.3}%
+\contentsline {chapter}{\numberline {10}RESULTATS AMB AUGMENT DE CÀRREGA DE XARXES DE TEST}{130}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Cas d'11 busos}{130}{section.10.1}%
+\contentsline {section}{\numberline {10.2}IEEE14}{133}{section.10.2}%
+\contentsline {section}{\numberline {10.3}IEEE30}{136}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Nord Pool}{139}{section.10.4}%
+\contentsline {section}{\numberline {10.5}IEEE118}{142}{section.10.5}%
+\contentsline {section}{\numberline {10.6}PEGASE2869}{145}{section.10.6}%
+\contentsline {chapter}{\numberline {11}RESUM DEL PRESSUPOST}{148}{chapter.11}%
+\contentsline {chapter}{\numberline {12}CONCLUSIONS}{149}{chapter.12}%
+\contentsline {section}{\numberline {12.1}Treballs futurs}{151}{section.12.1}%
+\contentsline {chapter}{\numberline {13}RELACIÓ DE DOCUMENTS}{153}{chapter.13}%
+\contentsline {chapter}{\numberline {14}BIBLIOGRAFIA}{154}{chapter.14}%
+\contentsline {chapter}{\numberline {15}GLOSSARI}{158}{chapter.15}%
+\contentsline {chapter}{\numberline {A}EXPRESSIONS DE CÀLCUL}{159}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Valors unitaris}{159}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Jacobià del NR}{160}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Matrius B' i B'' del FDLF}{160}{section.A.3}%
+\contentsline {chapter}{\numberline {B}CODI}{162}{appendix.B}%
+\contentsline {section}{\numberline {B.1}MIH formulació pròpia}{162}{section.B.1}%
+\contentsline {section}{\numberline {B.2}MIH formulació original}{171}{section.B.2}%
+\contentsline {section}{\numberline {B.3}Funcions: Padé, Thévenin, Sigma i mètodes recursius}{181}{section.B.3}%
+\contentsline {section}{\numberline {B.4}Padé-Weierstrass}{191}{section.B.4}%
+\contentsline {section}{\numberline {B.5}Matriu com a imatge, gràfic de Domb-Sykes i gràfic Sigma}{198}{section.B.5}%
+\contentsline {section}{\numberline {B.6}Circuit de corrent continu}{199}{section.B.6}%
+\contentsline {section}{\numberline {B.7}Càrrega no lineal amb MIH}{200}{section.B.7}%
+\contentsline {section}{\numberline {B.8}Càrrega no lineal amb GS}{203}{section.B.8}%
+\contentsfinish 

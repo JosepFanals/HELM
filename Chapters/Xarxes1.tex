@@ -1,0 +1,568 @@
+%treure resultats del GS i dir que no es farà servir perquè és lent, està estudiat i avui en dia es troba en desús. No posar-lo a cap taula.
+
+Per validar el mètode d'incrustació holomòrfica i esbrinar les seves diferències respecte als mètodes tradicionals, s'han seleccionat sis xarxes de test: un sistema d'11 busos mal condicionat, les xarxes IEEE14, IEEE30 i IEEE118, el sistema Nord Pool de 44 busos i la xarxa PEGASE2869 de 2.869 busos. En aquest capítol s'estudien sense canviar el percentatge de càrrega dels busos. En el següent, es modifica la càrrega per valorar les variacions.
+
+El sistema d'11 busos mal condicionat va ser primer plantejat per Tripathy et al. (1982). Les dades que els autors ofereixen de la topologia només contenen els elements de la matriu d'admitàncies. Bonini et al. (2015) mostren unes dades similars però més aclaridores, pel que s'utilitzen aquestes últimes. A l'hora de resoldre'l, en ser una xarxa amb relativament pocs busos, és sensat utilitzar el mètode de Gauss-Seidel. També se soluciona amb el Newton-Raphson i amb la formulació original del MIH, ja que compta amb transformadors de relació variable. Totes les potències s'han multiplicat per $\lambda=$\ 0,5 perquè de no ser així, el sistema ja des d'un principi no té solució.
+
+La formulació pròpia del MIH també funciona per a sistemes amb transformadors de relació variable. Tanmateix, els aproximants Sigma no són representatius. Per aquest motiu, quan hi ha transformadors de relació variable d'entrada es prefereix la formulació original.
+
+Les xarxes IEEE14, IEEE30 i IEEE 118 contenen 14, 30 i 118 busos respectivament. La primera d'elles representa una part del sistema de potència elèctric de l'Oest Mitjà dels Estats Units que data del febrer de 1962. Per la seva banda, la IEEE30 simbolitza una fracció del mateix sistema el desembre de 1961, mentre que la IEEE118 ho fa el desembre de 1962 (Christie, 2020). Els fitxers de dades s'han extret de Peñate (2020b).
+
+Com que el sistema IEEE14 es pot considerar de dimensions reduïdes, en un principi convé utilitzar el GS, el NR i la formulació original del MIH perquè hi ha transformadors de relació variable. Per a la IEEE30 s'usa el NR i les dues formulacions del MIH. La IEEE118 es resol amb el NR i preferiblement amb la formulació original del MIH.
+
+La xarxa Nord Pool de 44 busos es correspon a un model del sistema de transport que transcorre per Suècia, Noruega i Finlàndia. Se soluciona amb el NR i les dues formulacions del MIH. El fitxer de dades s'ha adaptat a partir dels de Peñate (2020b).
+
+En últim lloc, la xarxa PEGASE2869 de 2.869 busos és un sistema fictici que pretén representar amb exactitud la mida i la complexitat d'una part de la xarxa europea (Zimmerman et al. 2011). També s'ha partit de les dades de Peñate (2020b). Interessa extreure resultats amb la formulació original del MIH i amb el NR. En aquest cas, més que dur a terme un estudi detallat, es vol mostrar que el MIH és capaç de resoldre un sistema de tants busos.
+
+Cal afegir que en tots els sistemes en què s'utilitza el Newton-Raphson també s'obté la solució amb el desacoblat ràpid. S'empra el NR bàsic, però si no convergeix, s'opta pel multiplicador d'Iwamoto i pel mètode de Levenberg-Marquardt. Per aquests mètodes iteratius es fa servir el GridCal.
+
+\section{Diagnòstic} % sigma, algun domb-sykes pels radis i justificar si cal continuació
+En primer lloc es vol determinar l'estat de càrrega global de les xarxes sense introduir canvis en els consums. Els gràfics Sigma permeten donar una idea qualitativa del sistema on en conjunt s'aprecia si la demanda de potència activa i reactiva té molt pes. Si els punts es concentren al voltant del punt (0, 0) del gràfic, significa que la xarxa treballa lluny dels límits. A més, els aproximants Sigma quantifiquen si la solució és correcta, cosa que també es representa al gràfic. 
+
+A la Figura \ref{fig:RES1} es copsen els gràfics Sigma de les xarxes de menor dimensió. D'ara endavant s'hi dibuixen les línies que indiquen que la proporció de tensió amb la de l'oscil·lant és igual a 0,9 i 1,1, de mode que visualment s'entén entre quines franges es troben els busos. 
+
+  \begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+
+    \begin{groupplot}[group style={group size=2 by 1, horizontal sep=3cm}]
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={Sistema d'11 busos}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_cas11.csv};
+        \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={IEEE14}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+    \addplot[no marks] {(0.25+\x)^(1/2)};
+    \addplot[no marks] {-(0.25+\x)^(1/2)};
+    \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+    \addplot[scatter, only marks,scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_IEEE14.csv};
+        \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+    \end{groupplot}
+    \end{tikzpicture}
+    \caption{Gràfic Sigma del sistema d'11 busos i de la IEEE14}
+    \label{fig:RES1}
+    \end{center}
+  \end{figure}
+
+La xarxa IEEE14 presenta una distribució de punts típica d'un sistema ben condicionat. Tots els busos es troben entre les marques de 0,9 i 1,1. A més, no es distancien gaire del punt (0, 0). 
+
+Per la seva banda, el sistema d'11 busos és en essència un sistema mal condicionat. Compta amb un total de set línies de transmissió i set transformadors, tots ells de relació variable. Aquestes relacions de transformació estan ajustades per sota la unitat, el que comporta que les tensions de quatre busos siguin superiors a 1,1 vegades la del bus oscil·lant, tal com s'observa a la Figura \ref{fig:RES1}. El perfil de tensions del sistema és anormal perquè si bé alguns voltatges es troben al voltant de la unitat, el bus 10 es troba a una tensió d'1,759. 
+
+La Figura \ref{fig:RES2} mostra els gràfics Sigma per les altres xarxes: la IEEE30, la Nord Pool, la IEEE118 i la PEGASE2869. 
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=2 by 2, horizontal sep=3cm, vertical sep = 1.8cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={IEEE30}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_IEEE30.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={Nord Pool}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_Nord.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={IEEE118}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+      \addplot[no marks] {(0.25+\x)^(1/2)};
+      \addplot[no marks] {-(0.25+\x)^(1/2)};
+      \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[scatter, only marks,scatter src=explicit symbolic]%
+          table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_IEEE118.csv};
+          \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={PEGASE2869}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.75,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+      \addplot[no marks] {(0.25+\x)^(1/2)};
+      \addplot[no marks] {-(0.25+\x)^(1/2)};
+      \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[scatter, only marks,scatter src=explicit symbolic]%
+          table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig_Pegase2869.csv};
+          \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de les xarxes IEEE30, Nord Pool, IEEE118 i PEGASE2869}
+  \label{fig:RES2}
+  \end{center}
+\end{figure}
+
+La xarxa IEEE30 es troba molt poc carregada. Tots els busos presenten mòduls de tensió molt similars. Al cap i a la fi els punts queden concentrats a prop del (0, 0). Al sistema Nord Pool els punts queden a prop de la part superior de la paràbola. Això indica que els busos en què la potència és més extrema es corresponen a busos on hi ha molta generació en lloc de molta demanda. En aquest aspecte es tracta d'un sistema anormal perquè sovint la tendència és contrària. Igual que a la xarxa IEEE30, tots els busos estan entre les línies de 0,9 i 1,1. Els seus gràfics Sigma s'han generat amb la formulació original i amb la formulació pròpia. En els dos casos resulten idèntics.
+
+Al sistema IEEE118 altre cop tots els busos treballen entre 0,9 i 1,1 vegades el voltatge de l'oscil·lant, tot i que força més pròxims al límit de 0,9. En conjunt, s'observa que als busos PQ i PV la demanda de potència activa sobrepassa la generació, ja que els punts del gràfic tendeixen cap al límit inferior. A la xarxa PEGASE2869 el núvol de punts il·lustra que en bona part els busos també treballen dins uns marges de tensió acceptables. Tanmateix, hi ha una agrupació de punts que freguen el límit inferior. Són els més propers al col·lapse de tensions. 
+
+Per tal d'esbrinar si els mètodes de continuació analítica són necessaris, s'estudia el radi de convergència de les sèries. S'ha comprovat que les tensions d'un mateix sistema amb una mateixa formulació presenten radis de convergència semblants. La Taula \ref{tab:radis_sist} mostra per a cada xarxa seleccionada el major i el menor radi de les tensions amb les dues formulacions. S'han definit sèries amb un total de 60 coeficients.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lllll}
+  \hline
+   Formulació & \multicolumn{2}{c}{Original} & \multicolumn{2}{c}{Pròpia} \\
+   \hline
+  Sistema & $r_{max}$ & $r_{min}$ & $r_{max}$ & $r_{min}$\\
+  \hline
+  \hline
+  Cas d'11 busos & 0,882 & 0,880 & 2,838 & 2,838 \\
+  IEEE14 & 3,702 & 3,679 & 4,528 & 4,513\\
+  IEEE30 & 5,827 & 5,819 & 5,721 & 5,717\\
+  Nord Pool & 1,917 & 1,912 & 1,881 & 1,878\\
+  IEEE118 & 2,639 & 2,639 & 1,940 & 1,940\\
+  PEGASE2869 & 1,460 & 1,454 & 0,808 & 0,805\\
+  \hline 
+  \end{tabular}
+  \caption{Màxims i mínims radis de convergència de les tensions dels sistemes en l'estat inicial}
+  \label{tab:radis_sist}
+  \end{center}
+\end{table}
+
+Els radis de convergència de la formulació original guarden relació amb els gràfics Sigma. Per exemple, el sistema d'11 busos és on són menors. La Figura \ref{fig:RES1} ja indica una distribució de punts molt escampats. En canvi, a la IEEE30 els punts es concentren a prop del (0, 0). S'obtenen els majors radis de convergència de tots els sistemes. 
+
+En aquesta xarxa i en la Nord Pool els radis de convergència màxims i mínims són molt similars amb les dues formulacions. No succeeix el mateix en les altres xarxes, on pot haver-hi diferències notòries. Es dedueix que una formulació pot tenir més problemes que l'altra a l'hora de solucionar el mateix sistema. En part, que una xarxa es trobi mal condicionada és relatiu a la formulació escollida.
+
+Els resultats de la Taula \ref{tab:radis_sist} també posen de manifest que només cal emprar mètodes de continuació analítica en la xarxa PEGASE2869 amb la formulació pròpia i en el sistema d'11 busos amb l'original. En aquest sistema si se sumen els termes de tensió, el valor final no convergeix. Per exemple, la Figura \ref{fig:diagn1} mostra la tensió del bus 10 que s'aconsegueix amb els aproximants de Padé i amb la suma de coeficients depenent de la profunditat.
+
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{10}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=+,mark size=1.5pt,draw=black}, c={mark=o,mark size=1.5pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/bus10_pade2.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/bus10_suma2.csv};
+      \legend{ ,Suma, Padé} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució del mòdul de tensió del bus 10 del cas d'11 busos amb la formulació original}
+  \label{fig:diagn1}
+  \end{center}
+\end{figure}
+
+Encara que el valor a què s'arriba amb els aproximants de Padé és força diferent de la unitat, aconsegueixen convergir. Amb la suma de termes la solució divergeix. Com més s'incrementa la profunditat, més s'allunya la solució obtinguda amb la suma comparada amb la dels aproximants de Padé. La continuació analítica és necessària en aquesta situació.
+
+En canvi, a la xarxa IEEE30 s'obté el perfil de la Figura \ref{fig:diagn2} per al bus 29.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{29}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=+,mark size=1.5pt,draw=black}, c={mark=o,mark size=1.5pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/bus29_pade.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/bus29_suma.csv};
+      \legend{ ,Suma, Padé} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució del mòdul de tensió del bus 29 de la IEEE30 amb la formulació original}
+  \label{fig:diagn2}
+  \end{center}
+\end{figure}
+
+No només de les dues maneres el voltatge convergeix, sinó que en tractar-se d'un sistema ben condicionat, ho fa força a major velocitat en comparació amb el cas d'11 busos. Pràcticament a cada profunditat el mòdul resultant de tensió coincideix, pel que gairebé no s'aprecien les diferències entre l'evolució del voltatge amb la suma o amb els aproximants de Padé.
+
+\section{Comparació amb mètodes tradicionals}
+Una eina com els aproximants Sigma i el seu gràfic són útils per determinar a simple cop d'ull l'estat d'operació del sistema. No obstant això, són propis del mètode d'incrustació holomòrfica. Atès que els mètodes iteratius com el Gauss-Seidel, el Newton-Raphson i el desacoblat ràpid per definició no compten amb aquest recurs, es procedeix a solucionar els sistemes per primer comprovar que s'obté la solució, i en segon lloc, per tal de descobrir si d'algun mode s'intueix que les xarxes es troben mal condicionades.
+
+A la Taula \ref{tab:solucio_iteratius1} es captura l'error màxim així com el nombre d'iteracions necessari per a cada sistema amb els mètodes iteratius esmentats. S'ha fixat un error màxim de $10^{-10}$ amb els resultats del NR i del FDLF. Pel GS, que se soluciona amb el PowerWorld, s'assumeix que l'error màxim és de $10^{-6}$ perquè no indica més decimals. Per tant, no hi ha interès en l'error.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{llllll}
+  \hline
+   & \multicolumn{2}{c}{Errors} & \multicolumn{3}{c}{Iteracions} \\
+  \hline
+  Sistema & NR & FDLF & GS & NR & FDLF\\
+  \hline
+  \hline
+  Cas d'11 busos & 2,94.10$^{-12}$ & 8,28.10$^{-11}$ & 282 & 7 & 80\\
+  IEEE14 & 8,86.10$^{-16}$& 6,90.10$^{-11}$ & 180 & 3 & 22\\
+  IEEE30 & 4,48.10$^{-17}$ & 9,52.10$^{-11}$ & - & 3 & 22\\
+  Nord Pool & 9,93.10$^{-11}$ & 7,21.10$^{-11}$ & - & 3 & 20\\
+  IEEE118 & 3,93.10$^{-12}$ & 2,64.10$^{-11}$ & - & 3 & 14\\
+  PEGASE2869 & 3,25.10$^{-16}$ & 8,96.10$^{-11}$ & - & 6 & 70\\ 
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries en els sis sistemes seleccionats}
+  \label{tab:solucio_iteratius1}
+  \end{center}
+\end{table}
+
+A partir de la Taula \ref{tab:solucio_iteratius1} s'observa que encara que hi hagi pocs busos, el GS requereix moltes iteracions pel cas d'11 busos i per la IEEE14. Es tracta d'un mètode amb poca utilitat per resoldre fluxos de potència que segons Kothari i Nagrath (2011) resulta menys fiable que el NR. D'ara endavant no serà utilitzat.
+
+El mètode de NR bàsic és el que menys iteracions necessita. Per la majoria de sistemes només n'hi fan falta 3 gràcies a la seva convergència quadràtica. A la xarxa PEGASE2869 itera 6 vegades, segurament a causa de la seva dimensió. Per contra, el cas d'11 busos, tot i ser el de menors dimensions, demana més iteracions que la resta de sistemes. Això dóna a pensar que es tracta d'un sistema mal condicionat. Aparentment en cap cas cal recórrer al multiplicador d'Iwamoto o al mètode de Levenberg-Marquardt perquè el NR bàsic convergeix i aconsegueix l'error desitjat.
+
+Per altra banda, teòricament el FDLF necessita més iteracions que el NR però menys que el GS. Com s'aprecia a la Taula \ref{tab:solucio_iteratius1}, altre cop al cas d'11 busos és on es requereixen més iteracions. 
+
+El cas d'11 busos mereix especial atenció. Encara que s'hagi reduït la càrrega a la meitat, es troba que amb el NR la solució convergeix a unes tensions extremadament baixes que corresponen a solucions que formen part de la branca inestable de la corba PV. A la Taula \ref{tab:modulcas11} es plasmen els mòduls de tensió obtinguts amb el NR bàsic, el FDLF i les variacions del NR com el multiplicador d'Iwamoto i el mètode de Levenberg-Marquardt (L-M). També hi apareixen els voltatges obtinguts amb les dues formulacions del MIH. Se segueix la nomenclatura dels busos tal com apareixen als fitxers de dades del MIH.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lllllll}
+  \hline
+  Bus & NR & FDLF & NR Iwamoto & NR L-M & MIH propi & MIH original\\
+  \hline
+  \hline
+  0 & 1,024 & 1,024& 1,024 & 1,024 & 1,024 & 1,024\\
+  1 & 1,047 & 1,080 & 1,047 & 1,080 & 1,080 & 1,080\\
+  2 & 1,041 & 1,080& 1,041 & 1,080 & 1,080 & 1,080\\
+  3 & 1,014 & 1,073 & 1,014 & 1,073& 1,073 & 1,073\\
+  4 & 1,035 & 1,080& 1,035 & 1,080& 1,080 & 1,080\\
+  5 & 1,034 & 1,094 & 1,034 &1,094 & 1,094 & 1,094\\
+  6 & 0,536 & 1,088 & 0,536 &1,088 & 1,088 & 1,088\\
+  7 & 0,512 & 1,302 & 0,512 & 1,302& 1,302 & 1,302\\
+  8 & 0,665 & 1,709 & 0,665 &1,709 & 1,709 & 1,709\\
+  9 & 0,260 & 1,322 & 0,260 &1,322 & 1,322 & 1,322\\
+  10 & 0,290 & 1,759 &0,290 &1,759 & 1,759&1,759 \\
+  \hline 
+  \end{tabular}
+  \caption{Mòdul de tensions del cas d'11 busos amb mètodes iteratius i amb MIH}
+  \label{tab:modulcas11}
+  \end{center}
+\end{table}
+
+Per una banda, el FDLF, el NR amb Levenberg-Marquardt i les dues formulacions del MIH porten a la mateixa solució. S'observa que tot i haver-hi transformadors de relació variable, els dos plantejaments del mètode d'incrustació holomòrfica arriben a voltatges idèntics. Les tensions dels darrers busos prenen valors molt distants de la unitat, el que provoca que el perfil de tensions en conjunt sigui anormal. De fet, guarda relació amb les relacions de transformació variable. Totes elles estan ajustades a valors per sota la unitat. Així, intuïtivament s'entén que les tensions dels busos PQ superin la del bus oscil·lant de bastant. 
+
+Per altra banda, el NR bàsic i el NR amb el multiplicador d'Iwamoto arriben a una solució que encara que matemàticament és possible, correspon a la tensió de la branca negativa o inestable de les corbes PV. Per confirmar això, la Taula \ref{tab:modulcas11thx} recull els mòduls de voltatge calculats amb els aproximants de Thévenin per una profunditat de 60 i les solucions del NR bàsic. 
+
+\begin{table}[!htb]
+\begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Bus & NR & Thévenin\\
+  \hline
+  \hline
+  0 & 1,024 & -\\
+  1 & 1,047 & 1,042\\
+  2 & 1,041 & 1,043\\
+  3 & 1,014 & 1,009\\
+  4 & 1,035 & 1,042\\
+  5 & 1,034 & 1,036\\
+  6 & 0,536 & 0,539\\
+  7 & 0,512 & 0,510\\
+  8 & 0,665 & 0,670\\
+  9 & 0,260 & 0,259\\
+  10 & 0,290 & 0,291\\
+  \hline 
+  \end{tabular}
+  \caption{Mòdul de tensions del cas d'11 busos amb NR i amb aproximants de Thévenin}
+  \label{tab:modulcas11thx}
+  \end{center}
+\end{table}
+
+Els aproximants de Thévenin no s'utilitzen per al voltatge del bus oscil·lant, atès que es tracta d'una dada. Per la resta de busos hi ha alguna diferència de decimals, però en general les dues solucions s'assimilen molt. 
+
+Segons Tripathy et al. (1982), el cas d'11 busos correspon a un sistema mal condicionat, no necessàriament perquè la càrrega sigui excessiva. Sense canviar els percentatges de càrrega, el van trobar divergent tant pel NR com pel FDLF. Justifiquen que el jacobià presenta un nombre de condició elevat. En el problema del flux de potències, el nombre de condició representa com varien les incògnites si el vector que conté els errors de potència canvia lleugerament. Un gran nombre de condició complica l'obtenció de la solució.
+
+El cas d'11 busos il·lustra la problemàtica de fer servir el mètode de Newton-Raphson. En un sistema mal condicionat el mètode pot convergir cap a una solució inestable que durant condicions d'operació normals no es donarà. Per contra, algunes de les seves variacions (com el FDLF i el NR L-M) assoleixen la solució correcta des del punt de vista d'operació del sistema. Conèixer el sistema permet fer-se una idea aproximada de la correcció de la solució, però no hi ha eines per confirmar-ho.
+
+Contrari als mètodes iteratius, el MIH genera un gràfic Sigma que indica que tots els punts es troben dins la paràbola, i per tant, la solució és correcta. A més, els aproximants de Thévenin obtenen tant la solució corresponent a la branca estable de la corba PV com la de la inestable. Tal riquesa d'eines no està present en els mètodes iteratius. Com s'ha vist, el sistema no es pot conèixer tan a fons.
+
+\section{Influència de la profunditat}
+Igual que l'evolució de l'error en els mètodes iteratius depèn del nombre d'iteracions, en el MIH el nombre de coeficients que constitueixen les sèries també afecta el resultat final. S'espera que a més coeficients, millor es construirà la solució. 
+
+Primer es busca determinar si hi ha diferències notables entre l'error i la profunditat en les dues formulacions del MIH. Se selecciona el cas d'11 busos perquè a part d'estar mal condicionat, compta amb diversos transformadors de relació variable. Per definició la formulació pròpia del MIH no és encertada per calcular els aproximants Sigma. Tanmateix, a diferència de la formulació original, no fragmenta la matriu d'admitàncies total en simètrica amb totes les files que sumen 0 i en asimètrica on la suma de totes les files no resulta nul·la. L'evolució de l'error calculat amb Padé segons la profunditat es mostra a la Figura \ref{fig:err2formul}.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/prof11_propi.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/prof11_original.csv};
+      \legend{ ,Pròpia, Original} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució del logaritme de l'error màxim pel cas d'11 busos amb les dues formulacions}
+  \label{fig:err2formul}
+  \end{center}
+\end{figure}
+
+La formulació pròpia no força que els primers coeficients de les sèries de tensió siguin tots 1. Això per una banda impossibilita l'ús dels aproximants Sigma, però aconsegueix que aquests primers coeficients s'acostin molt més a la solució final. Amb qüestió de 20 coeficients s'arriba a un error de l'ordre de 10$^{-14}$. A partir d'aquest punt, incrementar la profunditat no millora significativament l'error. De fet, el radi de convergència de les sèries amb la formulació pròpia és de 2,838, molt superior al de la formulació original. Per això, amb aquesta calen força més coeficients per assolir un error satisfactori de l'ordre de 10$^{-10}$.
+
+En altres sistemes on les relacions de transformació variables s'ajusten més a la unitat i no són tan nombroses, les dues formulacions segueixen una progressió de l'error en funció la profunditat similar. La Figura \ref{fig:err2formul2} ho exemplifica per la IEEE118. També s'utilitzen els aproximants de Padé. Tal com s'observa, malgrat que els radis de convergència difereixin, les dues formulacions esdevenen competitives. Amb uns 20 coeficients l'error s'estabilitza.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/prof118_propi.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+  table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/prof118_original.csv};
+      \legend{ ,Pròpia, Original} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució del logaritme de l'error màxim per la IEEE118 amb les dues formulacions}
+  \label{fig:err2formul2}
+  \end{center}
+\end{figure}
+
+Com ja s'ha esmentat, no és que la formulació pròpia no pugui solucionar les xarxes en el seu estat inicial. N'és capaç, l'únic que quan hi ha transformadors de relació variable, el gràfic Sigma que proporciona esdevé enganyós. Tant per tant val la pena utilitzar la formulació original perquè no compta amb aquesta limitació.
+
+S'ha notat que a l'hora de resoldre el flux de potències per mitjà dels mètodes iteratius, el nombre d'iteracions requerides pel NR en general presenta poca variabilitat al costat del FDLF. Per això, també es valora la profunditat necessària de la formulació original del MIH per obtenir un error màxim de 10$^{-10}$. La Taula \ref{tab:coef_form_orig} mostra el nombre de coeficients requerits i l'error resultant pels sistemes seleccionats amb els aproximants de Padé.  
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Sistema & Errors & Profunditat\\
+  \hline
+  \hline
+  Cas d'11 busos &2,53.10$^{-11}$ & 69\\
+  IEEE14 & 3,29.10$^{-11}$& 12\\
+  IEEE30 & 5,52.10$^{-12}$ & 10\\
+  Nord Pool & 3,70.10$^{-11}$& 21\\
+  IEEE118 & 6,82.10$^{-11}$ & 16\\
+  PEGASE2869 &2,36.10$^{-11}$ & 28\\ 
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i profunditat necessària en els sis sistemes seleccionats amb el MIH original}
+  \label{tab:coef_form_orig}
+  \end{center}
+\end{table}
+
+A partir de la Taula \ref{tab:coef_form_orig} es dedueix que la profunditat requerida guarda certa relació amb els radis de convergència de la Taula \ref{tab:radis_sist}: a major radi de convergència cal menys profunditat. S'observa que en aquests exemples el nombre de busos no marca la tendència de quants coeficients fan falta. La xarxa PEGASE2869 és d'una dimensió molt superior al sistema d'11 busos, però així i tot, en aquest últim es necessita força més profunditat. De forma similar al mètode de NR, des d'un punt de vista de temps de càlcul, és interessant que el nombre de busos no tingui gaire influència en la profunditat.
+
+El càlcul de la solució final no sempre s'ha de dur a terme amb els aproximants de Padé. Els mètodes recurrents són una alternativa vàlida, com també ho és la suma de coeficients quan no fa falta continuació analítica. 
+
+Per tal de fer-se una idea de l'error existent en funció de la profunditat, primerament s'estudia el cas d'11 busos, ja que segons el raonat fins ara es tracta d'un sistema mal condicionat. A la Figura \ref{fig:11contin_met} apareixen els resultats amb els diversos mètodes de continuació (ja que no s'hi val a utilitzar la suma de coeficients), calculats amb la formulació original. 
+
+Els únics mètodes que han arribat a solucions satisfactòries són els aproximants de Padé, l'Èpsilon de Wynn i l'Eta de Bauer (en aquest últim cas les potències reactives han estat calculades amb Padé). Amb la resta de mètodes les solucions no convergeixen.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=12cm,height=9cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle*,mark size=2pt,draw=black},  g={mark=square,mark size=2pt,draw=black},  h={mark=pentagon,mark size=2pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_eps.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_eta.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_pade.csv};
+
+      \legend{, , , Èpsilon, , Eta, Padé} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error pel cas d'11 busos amb continuació analítica, formulació original}
+  \label{fig:11contin_met}
+  \end{center}
+\end{figure}
+
+Tal com s'observa, pràcticament tots tres mètodes assoleixen els mateixos errors al llarg de les diverses profunditats. De fet, a la IEEE14 amb $\lambda=2$ també es deduïa que aquests tres mètodes de continuació analítica eren els més encertats (Figura \ref{fig:err4}).
+
+Per contra, amb la formulació pròpia s'ha vist que es necessiten menys coeficients. A part dels aproximants de Padé, la Figura \ref{fig:11contin_met2} demostra que la resta de mètodes de continuació analítica també són útils.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=12cm,height=9cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle*,mark size=2pt,draw=black},  g={mark=square,mark size=2pt,draw=black},  h={mark=pentagon,mark size=2pt,draw=black}}]]
+     
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_delta2.csv};      
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_shanks2.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_rho2.csv};     
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_eps2.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_theta2.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_eta3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_pade3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/11_suma2.csv};
+
+      \legend{Delta, Shanks (x3), Rho, Èpsilon, Theta, Eta, Padé, Suma} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error pel cas d'11 busos, formulació pròpia}
+  \label{fig:11contin_met2}
+  \end{center}
+\end{figure}
+
+De tots els mètodes de continuació analítica, el Rho de Wynn són la pitjor opció. Convergeix més lentament que la resta. L'Eta de Bauer, l'Èpsilon de Wynn i els aproximants de Padé es tornen a perfilar com els mètodes que presenten menys error a la llarga. Un grup intermedi està constituït per les tres transformacions de Shanks, el mètode Theta de Brezinski i el Delta d'Aitken. Donat que el radi de convergència de les sèries és superior a 1 amb la formulació pròpia, la suma de termes també proporciona errors satisfactoris.
+
+Es torna a realitzar la mateixa comparació per un sistema més ben condicionat com és la IEEE30. En aquest cas s'utilitza la formulació original. Com que no hi ha transformadors de relació variable, les diferències entre ambdues formulacions són poc apreciables. La Figura \ref{fig:30contin_met3} mostra l'evolució de l'error màxim segons la profunditat. També es contempla la suma de coeficients, que tal com indica el seu radi de convergència, es tracta d'una opció viable.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=12cm,height=9cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black},  g={mark=square,mark size=2pt,draw=black},  h={mark=pentagon,mark size=2pt,draw=black}}]]
+     
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_delta3.csv};      
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_shanks3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_rho3.csv};     
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_eps3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_theta3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_pade3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/30_suma3.csv};
+
+      \legend{Delta, Shanks (x3), Rho, Èpsilon, Theta, , Padé, Suma} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error per la IEEE30, formulació original}
+  \label{fig:30contin_met3}
+  \end{center}
+\end{figure}
+
+Amb presència de busos PV, si es fa servir la formulació original, el primer terme de les incògnites de potències reactives és nul. Per això és preferible no trobar la solució amb Eta; altrament té lloc una divisió per 0. Si tot i això es vol utilitzar Eta, un recurs consisteix a fer un híbrid: les tensions es calculen amb Eta i les potències reactives amb Padé, tal com s'ha fet a la Figura \ref{fig:11contin_met}. Aquesta vegada els aproximants de Padé resulten la millor eina per computar la solució final. Sumar els coeficients també proporciona errors competitius, normalment millors que amb Èpsilon fins i tot. El mètode de Rho de Wynn torna a ser el més desafavorit.
+
+Per altra banda, els aproximants Sigma són sèries, i com a tal, depenen del nombre de coeficients triat. Les Figures \ref{fig:RES1} i \ref{fig:RES2} han sigut generades a partir de 60 coeficients. Si en lloc de 60 se n'escullen 10, que és una profunditat en què els errors encara tenen marge de millora, s'obté la Figura \ref{fig:RES3X}.
+
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=2 by 3, horizontal sep=3cm, vertical sep = 1.8cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={Sistema d'11 busos}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:3.0,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_cas11.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={IEEE14}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_IEEE14.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={IEEE30}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_IEEE30.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={Nord Pool}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_Nord.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={IEEE118}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+      \addplot[no marks] {(0.25+\x)^(1/2)};
+      \addplot[no marks] {-(0.25+\x)^(1/2)};
+      \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[scatter, only marks,scatter src=explicit symbolic]%
+          table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_IEEE118.csv};
+          \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+      \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={PEGASE2869}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.75,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+      \addplot[no marks] {(0.25+\x)^(1/2)};
+      \addplot[no marks] {-(0.25+\x)^(1/2)};
+      \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+      \addplot[scatter, only marks,scatter src=explicit symbolic]%
+          table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig2_Pegase2869.csv};
+          \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de tots els sistemes per una profunditat de 10 coeficients}
+  \label{fig:RES3X}
+  \end{center}
+\end{figure}
+
+La distribució de punts és gairebé idèntica a la de les Figures \ref{fig:RES1} i \ref{fig:RES2} en excepció del sistema d'11 busos, on hi ha un canvi destacable. És clar, el càlcul dels aproximants Sigma depèn dels coeficients de tensió. S'ha mostrat que l'error resultant per 10 coeficients és de l'ordre de $10^{-1}$, que esdevé inacceptable (Figura \ref{fig:11contin_met}). 
+
+El problema d'utilitzar pocs coeficients per diagnosticar el sistema es fa evident a la Figura \ref{fig:RES4X}, on aquest cop s'ha generat el gràfic amb només 8 termes. 
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=1 by 1, horizontal sep=3cm, vertical sep = 1.8cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:3.75,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_inici/sig3_cas11.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma del sistema d'11 busos per una profunditat de 8 coeficients}
+  \label{fig:RES4X}
+  \end{center}
+\end{figure}
+
+S'observa que hi ha un punt que queda fora els límits. Això indica que la solució és incorrecta, però no que el sistema no tingui solució. Com s'ha comprovat, el sistema té solució, l'únic que fa falta més profunditat per arribar-hi. A mesura que es treballa amb més i més coeficients, els gràfics Sigma s'assimilen més fins que resulten iguals a la vista. Cal fer èmfasi en el fet que els aproximants Sigma depenen dels coeficients de tensió. D'igual manera que a vegades fa falta una profunditat generosa per trobar una solució amb poc error, també calen suficients coeficients per diagnosticar correctament el sistema. 

@@ -1,0 +1,102 @@
+Per facilitar la realització i la interpretació dels càlculs es treballa amb valors unitaris. També s'ofereixen les expressions que intervenen en la resolució del flux de potències del NR i del FDLF. 
+
+\section{Valors unitaris}
+L'eina que s'utilitza a l'hora d'operar numèricament les equacions que regeixen els sistemes de potència és el que s'anomena valors unitaris o valors per unitat (pu). Aquests consisteixen a referir uns valors reals a una base determinada, és a dir, talment s'escalen els números. Segueixen:
+\begin{equation}
+    X_{pu} = \frac{X_{real}}{X_{base}}\ ,
+    \label{eq:annex1}
+\end{equation}
+on:
+
+$X_{pu}$: valor per unitat d'una magnitud determinada, adimensional.
+\vs
+$X_{real}$: valor real, amb les unitats que li corresponguin.
+\vs
+$X_{base}$: valor base o de referència, amb les unitats que li corresponguin.
+
+L'avantatge d'aquesta metodologia està en el fet que les magnituds s'expressen adimensionalment. Per això, en aquest treball la majoria de valors no van acompanyats d'unitats. Un altre punt positiu és que si les bases s'escullen apropiadament, es pot aconseguir operar sovint amb valors propers a 1. A més, en circuits trifàsics permet prescindir de distingir entre tensions entre fases i tensions entre fase i neutre. 
+
+En el cas de sistemes elèctrics de potència es defineix una potència aparent de base $S_b$ i una tensió de base $V_b$. A partir d'aquestes dues variables s'obté la intensitat de base $I_b$:
+\begin{equation}
+    I_{b} = \frac{S_b}{\sqrt{3}V_b}\ ,
+    \label{eq:annex2}
+\end{equation}
+i també la impedància de base $Z_b$:
+\begin{equation}
+    Z_{b} = \frac{V^2_b}{S_b}\ .
+    \label{eq:annex3}
+\end{equation}
+
+\section{Jacobià del NR}
+La resolució del flux de potències per mitjà del mètode de NR segueix l'estructura següent:
+\begin{equation}
+    \begin{pmatrix}
+        \Delta P\\
+        \Delta Q
+    \end{pmatrix}
+    = \begin{pmatrix}
+        J1 & J2\\
+        J3 & J4
+    \end{pmatrix}
+    \begin{pmatrix}
+        \Delta \delta\\
+        |\Delta V|/|V|
+    \end{pmatrix}\ .
+    \label{eq:annex4}
+\end{equation}
+Els elements del jacobià que es troben fora la diagonal dels diversos blocs matricials, tal com apunta Barrero (2004), obeeixen:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        J1_{ij}&=J4_{ij}=|V_i||V_j||Y_{ij}|\sin(\delta_{ij}-\gamma_{ij})\ ,\\
+        J2_{ij}&=-J3_{ij}=|V_i||V_j||Y_{ij}|\cos(\delta_{ij}-\gamma_{ij})\ ,
+    \end{split}
+\end{cases}
+    \label{eq:annex5}
+\end{equation}
+on $j\neq i$. Per la seva banda, els elements que constitueixen la diagonal són:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        J1_{ii}&=-Q_i-|V_i|^2|Y_{ii}|\sin\gamma_{ii}\ ,\\
+        J2_{ii}&=P_i+|V_i|^2|Y_{ii}|\cos\gamma_{ii}\ ,\\
+        J3_{ii}&=P_i-|V_i|^2|Y_{ii}|\cos\gamma_{ii}\ ,\\
+        J4_{ii}&=Q_i-|V_i|^2|Y_{ii}|\sin\gamma_{ii}\ .
+    \end{split}
+\end{cases}
+    \label{eq:annex6}
+\end{equation}
+El càlcul d'aquests elements s'ha de dur a terme a cada iteració. 
+
+\section{Matrius B' i B'' del FDLF}
+La resolució del flux de potències a través del FDLF es planteja com:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \Delta P/|V|&=B'\Delta \delta\ ,\\
+        \Delta Q/|V|&=B''|\Delta V|\ .
+    \end{split}
+\end{cases}
+    \label{eq:annex7}
+\end{equation}
+La matriu $B'$ té la mateixa dimensió que $J1$. Es calcula a partir de les reactàncies $X$ de les branques en sèrie de línies i transformadors. Pels elements fora la diagonal:
+\begin{equation}
+        B'_{ij}=\frac{-1}{X_{ij}}\ ,
+    \label{eq:annex8}
+\end{equation}
+mentre que pels de la diagonal:
+\begin{equation}
+    B'_{ii}=\sum_j 1/X_{ij}\ .
+\label{eq:annex8x}
+\end{equation}
+Per altre costat, la matriu $B''$ és idèntica a $J4$ pel que fa a les seves dimensions. Es forma amb la part imaginària de les diverses entrades la matriu d'admitàncies completa. Es denoten per $B$. Els elements que no formen part de la diagonal es defineixen com:
+\begin{equation}
+    B''_{ij}=-B_{ij}\ .
+\label{eq:annex9}
+\end{equation}
+Pels elements de la diagonal s'utilitza:
+\begin{equation}
+    B''_{ii}=-B_{ii}\ .
+\label{eq:annex10}
+\end{equation}
+Com que aquestes matrius només contenen dades de la topologia del circuit, romanen constants al llarg de totes les iteracions.

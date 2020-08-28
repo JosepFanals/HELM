@@ -1,0 +1,734 @@
+
+Els dos algoritmes que s'han presentat es basen en l'obtenció dels coeficients que conformen les sèries. En aquest capítol es detalla com trobar la solució final de les incògnites a través dels coeficients de les sèries. D'entrada, la solució final de les incògnites sorgiria de la suma d'infinitat de termes. Com que el nombre de coeficients obtinguts és finit, i de fet es recomana que es trobi entre 20 i 40 (Trias, 2018), la suma de termes no sempre és una opció a considerar.
+
+El recurs més utilitzat a l'hora de computar les incògnites amb el mètode d'incrustació holomòrfica són els aproximants de Padé, que constitueixen la teoria fonamental del MIH. Permeten estendre el radi de convergència de les sèries. D'acord amb la teoria, són la millor aproximació d'una funció a través d'una funció racional. Altres mètodes de continuació analítica són els anomenats processos recurrents. Es tracten els següents: Delta d'Aitken, transformacions de Shanks, Rho de Wynn, Èpsilon de Wynn, Theta de Brezinski i Eta de Bauer. Les obres de referència són Weniger (1989) i Shanks (1955).
+
+\section{Radi de convergència}
+Les sèries obtingudes amb el MIH, siguin de tensió o de potència reactiva, compten amb un radi de convergència. És a dir, que quan $s$ excedeix un determinat valor, les sumes parcials no tendeixen a estabilitzar-se. El radi de convergència es defineix com el radi del disc més gran amb centre a $c$ tal que la sèrie convergeix. Així, la condició de convergència és:
+\begin{equation}
+    |s-c| < r\ ,
+    \label{eq:converg1}
+\end{equation}
+on $r$ simbolitza el radi de convergència. La Figura \ref{fig:radigrafic} mostra gràficament aquest concepte. La regió ombrejada correspon a la zona on la sèrie convergeix. En el mètode d'incrustació holomòrfica el centre $c$ es fixa a (0, 0) i $s$ només pren valors reals; es desplaça per l'eix $s_{re}$.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+        \incfig{conv2}{0.35}
+    \caption{Representació del radi de convergència $r$ d'una sèrie centrada a $c$}
+    \label{fig:radigrafic}
+    \end{center}
+\end{figure}
+
+Segons Trias (2018), es necessita continuació analítica si aquest radi és inferior a 1. En aquest cas típicament s'utilitzen els aproximants de Padé. L'anàlisi del radi de convergència, a part de donar idea de si el sistema es troba mal condicionat, indica si obligatòriament cal utilitzar algoritmes de continuació analítica, o si per contra, es poden sumar els coeficients i obtenir una solució satisfactòria.
+
+De fet, els mètodes de continuació analítica, siguin els aproximants de Padé o els mètodes recurrents, sempre són un recurs que es pot utilitzar. Tanmateix, si es vol reduir el temps de càlcul, és interessant poder sumar els coeficients. La Figura \ref{fig:orgcont} esquematitza la decisió. S'evidencia que la Figura \ref{fig:orgcont} ve a ser un fragment detallat de la Figura \ref{fig:org1} (amb algunes etapes intermèdies ignorades), indispensable per trobar el resultat final.
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2.6cm, minimum height=1cm,text centered, text width = 2.5cm, draw=black,]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=2.6cm, minimum height=1cm, text centered, draw=black,]
+\tikzstyle{process} = [rectangle, minimum width=2.6cm, minimum height=1cm, text width=2.5cm, text centered, draw=black,]
+\tikzstyle{labeltext} = [rectangle, minimum width=1cm, minimum height=1cm, text centered, draw=black,]
+\tikzstyle{decision} = [diamond, minimum width=2.6cm, minimum height=1cm, text width=2.5cm, text centered, draw=black, aspect=2]
+\tikzstyle{arrow} = [->,>=stealth]
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+  \begin{tikzpicture}[node distance=2.0cm]
+    \node (b1) [startstop] {Càlcul de coeficients de $V(s)$ i $Q(s)$ amb MIH};
+    \node (b2) [process, below of = b1] {Gràfic de Domb-Sykes};
+    \node (b3) [decision, below of = b2] {$r>1$?};
+    \node (b4) [startstop, below of = b3, yshift=-0.2cm] {Continuació analítica};
+    \node (b5) [startstop, right of = b3, xshift=2cm] {Suma de termes o continuació analítica};
+
+    \draw[arrow] (b3) -- (b4) node[right, midway] {No};
+    \draw[arrow] (b3) -- (b5) node[above, midway] {Sí};
+    \draw[arrow] (b1) -- (b2) node[right, midway] {};
+    \draw[arrow] (b2) -- (b3) node[right, midway] {};
+    %\draw[arrow] (b3) -- (b4) node[right, midway] {};
+
+
+    % \node (b3) [process, below of = b2, xshift=-4cm] {Càlcul de $|V|$ amb Thévenin}; 
+    % \node (b4) [process, below of = b2, xshift=0cm] {Càlcul de $\sigma(s)$}; 
+    % \node (b5) [process, below of = b4, xshift=0cm] {Gràfic Sigma}; 
+    % \node (b6) [process, below of = b2, xshift=4cm] {Càlcul final de $V$ i $Q$}; 
+    % \node (b7) [decision, below of = b6, xshift=0cm] {Error petit?};
+    % \node (b8) [startstop, below of = b7, xshift=0cm] {Fi}; 
+    % \node (b9) [process, above of = b7, yshift=2cm, xshift=1cm] {P-W o incrementar profunditat};
+    % \node (bx) [right of = b7, xshift=2cm, text width=0cm] {};
+    % \node (by) [above of = bx, yshift=2cm] {};
+    % \draw[arrow] (b1) -- (b2) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b3) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b4) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b6) node[left, midway] {};
+    % \draw[arrow] (b4) -- (b5) node[left, midway] {};
+    % \draw[arrow] (b6) -- (b7) node[left, midway] {};
+    % \draw[arrow] (b7) -- (b8) node[right, midway] {Sí};
+    % \draw[] (b7) -- (bx) node[above, midway] {No};
+    % \draw[arrow] (b9) -- (b2) node[above, midway] {};
+    % \draw (7.75,-6) -- (8.05,-6);
+    % \draw (8.05,-6) -- (8.05,-2);
+    % \draw [arrow] (8.05, -2) -- (b9);
+    \end{tikzpicture} 
+  \caption{Etapes per a la decisió del càlcul de tensió i potència reactiva final}
+  \label{fig:orgcont}
+\end{center}
+\end{figure}
+
+Des d'un punt de vista teòric el càlcul del radi de convergència s'abordaria amb el criteri de l'arrel o criteri de Cauchy. Com que les sèries del MIH són finites, per calcular el radi de convergència s'han desenvolupat estimacions gràfiques. Són els anomenats gràfics de Domb-Sykes. Una primera versió parteix de:
+\begin{equation}
+    \f{1}{r}=\lim_{i\rightarrow \infty} \f{u_i}{u_{i-1}}\ ,
+    \label{eq:converg2}
+\end{equation}
+on $u_i$ representa un terme de la sèrie a estudiar i $u_{i-1}$ simbolitza el terme anterior. Pel MIH, les sèries són de tensió (busos PQ i PV) i de potència reactiva (només per als busos PV). L'Equació \ref{eq:converg2} indica que interessa buscar un valor de $i$ prou elevat tal que $1/i \rightarrow 0$. Això significa que $i$ s'aproxima a la profunditat màxima definida.
+
+Es representa $i$ a les abscisses i $|\f{u_i}{u_{i-1}}|$ a les ordenades. Llavors s'extrapola la tendència que defineixen els punts i es determina quin valor pren el quocient de l'eix vertical quan $1/i \rightarrow 0$. Precisament, el radi és la inversa d'aquest valor. Per caracteritzar-lo correctament pot convenir utilitzar més coeficients del compte. 
+
+La Figura \ref{fig:domb1} il·lustra un primer gràfic de Domb-Sykes per a la tensió del bus 5 de la xarxa Nord Pool amb les dades inicials.  
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|\f{u_i}{u_{i-1}}|$},xlabel={$i$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/domb1.csv};
+        %\legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic de Domb-Sykes per a la tensió del bus 5 de la Nord Pool amb la formulació pròpia}
+    \label{fig:domb1}
+    \end{center}
+\end{figure}
+
+En operar la inversa del quocient $|\f{u_i}{u_{i-1}}|$ per una $i$ prou gran, es nota que el radi de convergència és força superior a 1. Per tant, en aquest cas no cal cap mètode de continuació. Experimentalment s'ha trobat que totes les sèries de tensió i de potència reactiva d'un sistema tenen pràcticament el mateix radi de convergència.
+
+Mercer i Roberts (1990) proposen una variació respecte al gràfic de Domb-Sykes. Quan els signes dels coeficients no segueixen un patró clar, es calcula: 
+\begin{equation}
+    b^2_i=\f{u_{i+1}u_{i-1}-u^2_i}{u_iu_{i-2}-u^2_{i-1}}\ .
+    \label{eq:converg3}
+\end{equation}
+L'eix d'ordenades del gràfic conté l'arrel positiva de $|b^2_i|$ mentre que a l'eix horitzontal es representa $1/i$. Igual que abans, cal extrapolar per $1/i \rightarrow 0$. El valor de l'eix vertical indica altre cop la inversa del radi de convergència.
+
+A la Figura \ref{fig:domb2} es representa aquesta variació del gràfic de Domb-Sykes, també per la tensió del bus 5 de la xarxa Nord Pool en l'estat de càrrega inicial. 
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sqrt{|b^2_i|}$},xlabel={$1/i$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/domb2.csv};
+        %\legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Variació del gràfic de Domb-Sykes per a la tensió del bus 5 de la Nord Pool amb la formulació pròpia}
+    \label{fig:domb2}
+    \end{center}
+\end{figure}
+
+S'arriba a la mateixa conclusió que amb el gràfic de Domb-Sykes original, encara que amb la variació introduïda el perfil resulta més caòtic. 
+
+Davant l'estat de càrrega inicial de la xarxa Nord Pool, on el radi de convergència supera la unitat, es poden sumar els coeficients de les sèries perquè no fa falta continuació analítica. Tanmateix, això pot no ser així amb increments importants de càrrega. Quan totes les potències conegudes del sistema es dupliquen ($\lambda=2$), el gràfic de Domb-Sykes per a la tensió del bus 5 es plasma a la Figura \ref{fig:domb3}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|\f{u_i}{u_{i-1}}|$},xlabel={$i$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/domb3.csv};
+        %\legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Gràfic de Domb-Sykes per a la tensió del bus 5 de la xarxa Nord Pool amb la formulació pròpia i $\lambda=2$}
+    \label{fig:domb3}
+    \end{center}
+\end{figure}
+
+Tal com s'observa a la Figura \ref{fig:domb3}, per $\lambda=2$, la inversa del radi de convergència supera la unitat, així que fa falta utilitzar mètodes de continuació analítica. Si no, l'error màxim de potència complexa resulta inacceptable. Això indica que la solució del flux de potències no és prou bona. La Figura \ref{fig:err1} il·lustra els errors en les dues situacions de càrrega esmentades en funció del nombre de coeficients o profunditat.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log|\Delta S_{max}|$},xlabel={Profunditat},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=6cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=1.5pt,draw=black}, c={mark=o,mark size=1.5pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/err_cont1.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/err_cont2.csv};
+        \legend{, $\lambda=1$, $\lambda=2$} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Errors de la solució amb la suma de termes amb càrrega inicial i duplicada per la xarxa Nord Pool}
+    \label{fig:err1}
+    \end{center}
+\end{figure}
+
+La Figura \ref{fig:err1} posa de manifest que no cal continuació analítica per $\lambda=1$. El logaritme en base 10 de l'error màxim disminueix fins a ser extremadament petit. Quan $\lambda=2$ cal optar per la continuació analítica. Els errors són massa grans i no milloren amb la profunditat. De fet, la xarxa Nord Pool amb $\lambda=2$ té solució. S'obtenen errors de l'ordre de $10^{-12}$ amb els aproximants de Padé. 
+
+\section{Mètodes de recurrència}
+Aquells mètodes que aproximen el valor final de la sèrie mitjançant una relació de recurrència s'anomenen mètodes de recurrència o mètodes recursius. Com el seu nom indica, es combinen seqüencialment els diversos termes per formar la solució final. Són una alternativa als aproximants de Padé. 
+
+\subsection{Delta d'Aitken}
+El mètode Delta d'Aitken, $\Delta^2$ d'Aitken o simplement Delta és l'esquema recurrent més senzill. Considera les sumes parcials de la sèrie dels coeficients de tensió, per les quals s'adopta la nomenclatura de l'Equació \ref{R1}.
+\begin{equation}
+S_i = \sum_{k=0}^{i}U[k]\ .
+\label{R1}
+\end{equation}
+Seguidament es construeix una nova sèrie, anomenada $T(s)$. Es tracta de trobar el seu valor final, atès que en principi resulta la millor aproximació. Cada un dels seus coeficients es calcula per mitjà de:
+\begin{equation}
+T[i]=S_i-\frac{(S_{i+1}-S_i)^2}{(S_{i+2}-S_{i+1})-(S_{i+1}-S_i)}\ .
+\label{R2}
+\end{equation}
+Es tracta d'un mètode interessant per sèries que convergeixen ràpidament, mentre que per sistemes mal condicionats, on la convergència s'alenteix, no és la millor de les opcions. Tot i que no preserva les propietats que s'exploten amb els aproximants de Padé, amb sèries molt profundes s'aconsegueix major rapidesa de càlcul (Rao, 2017). 
+
+
+\subsection{Transformació de Shanks}
+La transformació de Shanks es basa a generar una o diverses noves seqüències que sovint convergeixen més de pressa que les sèries inicials. La transformació és idèntica a la de Delta d'Aitken, tot i que segueix la nomenclatura:
+\begin{equation}
+    H(S_i) = S_i-\frac{(S_{i+1}-S_i)^2}{(S_{i+2}-S_{i+1})-(S_{i+1}-S_i)}\ ,
+    \label{shanks1} 
+\end{equation}
+on $H(S_i)$ denota la nova seqüència. No desenvolupar el numerador i el denominador fa els mètodes més estables.
+
+Es poden calcular les successives transformacions ($H(H(S_i))$, $H(H(H(S_i))$, etc.) fins a exhaurir els termes que conformen $S_i$. Cada seqüència és més curta que l'anterior. El valor que en principi aproxima millor el resultat final de la incògnita a calcular és el darrer element no nul de l'última transformació. Comparat amb el mètode Delta d'Aitken, la transformació de Shanks espera una solució millor a causa de les successives transformacions. La Figura \ref{fig:err2} compara els errors segons la profunditat en un cas força ben condicionat de la IEEE30. 
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log|\Delta S_{max}|$},xlabel={Profunditat},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=6cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=1.5pt,draw=black}, c={mark=o,mark size=1.5pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/err_ait1.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/err_shanks1.csv};
+        \legend{, Delta, Shanks} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Errors segons Delta d'Aitken i 3 transformacions de Shanks a la xarxa IEEE30, $\lambda=2$}
+    \label{fig:err2}
+    \end{center}
+\end{figure}
+
+S'observa que a l'inici els dos mètodes parteixen d'errors molt similars. Tanmateix, les transformacions de Shanks aconsegueixen minimitzar l'error a un ritme més veloç que la Delta d'Aitken. Pel que s'ha comprovat, utilitzar més de 3 transformacions de Shanks no comporta una millora significativa.
+
+
+\subsection{Rho de Wynn}
+Aquest mètode de recurrència comença inicialitzant una matriu amb la primera columna (elements $\rho^i_{-1}$) plena de zeros mentre que la segona columna (elements $\rho^i_{0}$) conté les sumes parcials definides segons l'Equació \ref{R1}. 
+Per trobar els elements de les següents columnes s'empra:
+\begin{equation}
+\rho^i_{k+1} = \rho^{i+1}_{k-1}+\frac{k+1}{\rho^{i+1}_k-\rho^{i}_k}\ ,
+\label{R3}
+\end{equation}
+on el superíndex $i=0,1,..., n$ serveix per referir-se a la fila, en canvi, el subíndex $k=0,1,...,n-1$ s'utilitza per identificar la columna. El mètode construeix successives columnes, cada una amb un element menys que l'anterior, fins que s'exhaureixen els coeficients. Queda una estructura de la forma:    
+\begin{equation}
+M=
+\begin{bmatrix}
+0 & S_0 & \rho^0_{1} & \dots & \rho^0_{n-1} & \rho^0_{n}\\
+0 & S_1 & \rho^1_{1} & \dots & \rho^1_{n-1}& 0\\
+0 & S_2 & \rho^2_{1} & \dots & 0& 0\\
+\vdots &\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & S_{n-1} & \rho^{n-1}_1 & \dots & 0 & 0\\
+0 & S_n & 0 & \dots & 0 &0\\
+\end{bmatrix}\ .
+\label{R4}
+\end{equation}
+Amb les dues primeres columnes completades, s'empra l'Equació \ref{R3} per tal de calcular els elements de cada columna restant. 
+
+Per conèixer el valor final de les incògnites, quan el nombre de coeficients de la sèrie és parell, se selecciona l'element $\rho^0_{n-1}$, mentre que si és senar, s'utilitza l'element $\rho^0_n$. Des del punt de vista de càlcul, realitza poques operacions en comparació amb els altres mètodes. Tanmateix, tal com s'observarà, en el mètode d'incrustació holomòrfica no proporciona resultats gaire satisfactoris.
+
+\subsection{Èpsilon de Wynn}
+El mètode Èpsilon de Wynn presenta una estructura similar al Rho de Wynn. Es perfila com un sistema robust, utilitzat per Schmidt (2015) i per Rao (2017), amb uns resultats superiors a la majoria de sistemes recurrents. Es tracta d'organitzar els elements com en el mètode Rho de Wynn, és a dir, en la mateixa forma que la matriu de l'Equació \ref{R4}, on la primera columna està plena de zeros i la segona incorpora les sumes parcials. Per calcular els següents termes que conformen la taula, s'utilitza:
+\begin{equation}
+    \epsilon^i_{k+1} = \epsilon^{i+1}_{k-1}+\frac{1}{\epsilon^{i+1}_k-\epsilon^{i}_k}\ ,
+    \label{Reps}
+\end{equation}
+que comparat amb l'Equació \ref{R3} només canvia el numerador del segon terme. L'Èpsilon de Wynn és un mètode que si fa no fa també calcula els aproximants de Padé de mode recurrent, i no en forma de matriu.
+
+Com a solució final s'utilitza el mateix criteri que amb el mètode Rho de Wynn: amb un nombre parell de coeficients s'escull l'element $\epsilon^0_{n-1}$, i quan és senar, $\epsilon^0_n$. L'estructura de la taula és tal que successivament una columna pren valors extremadament grans mentre que l'altra accelera la sèrie. 
+
+\subsection{Theta de Brezinski}
+L'Èpsilon de Wynn accelera la convergència lineal però falla quan és logarítmica, mentre que el mètode Rho de Wynn és un dels millors per la convergència logarítmica però no per la lineal (Weniger, 1989). En aquest context interessa un esquema recurrent que aprofiti les millors característiques dels dos: el mètode Theta de Brezinski. 
+
+Inicia igual que Rho de Wynn, amb la primera columna formada per zeros i la segona amb les sumes parcials. 
+És a dir, $\Theta^i_{-1}=0$ mentre que $\Theta^i_{0}=S_i$  per tota $i$. 
+
+Aleshores, si l'índex de la columna és imparell, s'opta per:
+\begin{equation}
+\Theta^i_{2k+1}=\Theta^{i+1}_{2k-1}+\frac{1}{\Theta^{i+1}_{2k}-\Theta^{i}_{2k}}\ ,
+\label{R5}
+\end{equation}
+que ve a ser l'expressió de l'Èpsilon de Wynn.
+
+Quan l'índex de la columna resulta parell es recorre a:
+\begin{equation}
+\Theta^i_{2k+2}=\Theta^{i+1}_{2k}+\frac{(\Theta^{i+2}_{2k}-\Theta^{i+1}_{2k})(\Theta^{i+2}_{2k+1}-\Theta^{i+1}_{2k+1})}{(\Theta^{i+2}_{2k+1}-\Theta^{i+1}_{2k+1})-(\Theta^{i+1}_{2k+1}-\Theta^{i}_{2k+1})}\ .
+\label{R6}
+\end{equation}
+Igualment es calcula columna a columna fins que no hi ha més termes per progressar. Cal notar que l'Equació \ref{R5} segueix el mateix patró que l'Equació \ref{Reps}, mentre que per altra banda, l'Equació \ref{R6} recorda a la Delta d'Aitken. 
+
+Segons Weniger (1989), les columnes amb subíndexs parells convergeixen cap a la solució que se cerca. Les que comptin amb un índex imparell, divergeixen. L'esquema recurrent que es planteja en el mètode Theta de Brezinski és més complicat que la resta d'algoritmes. Es va crear de forma experimental. No obstant això, es va comprovar que proporcionava resultats satisfactoris, fins i tot amb sèries altament divergents. 
+
+
+\subsection{Eta de Bauer}
+L'algoritme Eta de Bauer presenta força similituds en comparació amb els anteriors: inicialitza les dues primeres columnes i la tria de les equacions depèn de si l'índex és parell o senar. 
+La primera columna està composta pels termes $\eta^i_{-1}=\infty$ i la segona pels termes $\eta^i_0=U[i]$. S'observa que no es basa en sumes parcials com abans. Si l'índex és senar, s'opta per:
+\begin{equation}
+\frac{1}{\eta^i_{2k+1}} = \frac{1}{\eta^{i+1}_{2k-1}}+\frac{1}{\eta^{i+1}_{2k}}+\frac{1}{\eta^{i}_{2k}}\ ,
+\label{R7}
+\end{equation}
+en cas que sigui parell s'usa:
+\begin{equation}
+\eta^i_{2k+2} = \eta^{i+1}_{2k}+\eta^{i+1}_{2k+1}-\eta^i_{2k+1}\ .
+\label{R8}
+\end{equation}
+El resultat final que aproxima la sèrie de tensió o de potència reactiva es correspon a la suma dels termes de la primera fila de totes les columnes, en excepció de la primera, que és infinit. 
+
+Rao (2017) esmenta que el mètode Eta de Bauer genera resultats similars als dels aproximants de Padé.     
+
+Es mostra la Figura \ref{fig:err3} per exemplificar el comportament dels algoritmes recurrents presentats, tots ells a la xarxa IEEE14 amb $\lambda=2$. S'ha utilitzat la formulació pròpia. 
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log|\Delta S_{max}|$},xlabel={Profunditat},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=8cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle*,mark size=2pt,draw=black}}]]
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Aitken.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Shanks.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Rho.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Epsilon.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Theta.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Eta.csv};
+        \legend{Delta, Shanks (x3), Rho, Èpsilon, Theta, Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Errors segons la profunditat amb els mètodes recurrents a la IEEE14, $\lambda=2$}
+    \label{fig:err3}
+    \end{center}
+\end{figure}
+
+Les transformacions de Shanks són altre cop superiors a la Delta d'Aitken. L'algoritme Rho de Wynn exhibeix una convergència lenta mentre que el perfil de Theta de Brezinski esdevé força erràtic. Els dos mètodes més encertats en aquesta situació són l'Eta de Bauer i l'Èpsilon de Wynn, que assoleixen errors de l'ordre de $10^{-12}$ amb menys d'una vintena de coeficients. S'ha comprovat que quan s'arriba a un error tan petit, gairebé no hi ha marge de millora. Com a molt s'assoleixen errors de l'ordre de $10^{-13}$ o $10^{-14}$. 
+
+Amb els mètodes recurrents no és recomanable excedir la vintena de coeficients, en primer lloc perquè habitualment l'error ja és prou petit, i en segon lloc, perquè en les simulacions comencen a aparèixer divisions per zero a causa de falta de precisió.
+
+\section{Aproximants de Padé}
+Els aproximants de Padé constitueixen una eina bàsica del mètode d'incrustació holomòrfica. Són uns aproximants racionals àmpliament utilitzats com a eina de continuació analítica gràcies a les seves propietats de convergència. Segons Trias (2018), el teorema de Stahl (Stahl (1989) i Stahl (1997)) anuncia que la seqüència d'aproximants diagonals de Padé, tal que els seus índexs tendeixen a infinit, convergeix en la seva màxima capacitat. 
+
+Pel que fa a l'aplicació en el MIH, Trias (2018) afirma que si els aproximants de Padé convergeixen a $s=1$, es garanteix que el resultat és fruit de la continuació analítica de la solució que parteix de $s=0$ (en altres paraules, l'estat de referència). Si els aproximants de Padé no convergeixen a $s=1$, no hi ha solució possible que parteixi de l'estat de referència. 
+
+La definició dels aproximants de Padé és la següent.
+\begin{equation}
+    C(s)=\frac{P(s)}{Q(s)}=\frac{p_0+sp_1+s^2p_2+...+s^Lp_L}{q_0+sq_1+s^2q_2+...+s^Mq_M}\ ,
+    \label{eq:pade1}
+\end{equation}
+on:
+
+$C(s)$: sèrie genèrica sobre la qual es vol aplicar la continuació analítica. Es coneixen els seus coeficients i correspon a una sèrie de tensió o de potència reactiva. 
+\vs
+$L$: ordre del numerador.
+\vs
+$M$: ordre del denominador. 
+
+L'Equació \ref{eq:pade1} dóna peu al conegut com a aproximant de Padé $[L/M]$. Per aprofitar el teorema de Stahl, interessa emprar els màxims valors possibles de $L$ i $M$. Així, se segueix una estructura en forma d'escala, del tipus: $[x/x]$, $[x+1/x]$, $[x+1/x+1]$... Tal com plantegen Dronamraju et al. (2020), també es pot escollir: $[x/x]$, $[x/x+1]$, $[x+1/x+1]$... Experimentalment s'ha trobat que la primera opció arriba a errors menors.
+
+\subsection{Càlcul}
+El càlcul dels aproximants de Padé es dedueix del desenvolupament de l'Equació \ref{eq:pade1}. En el cas que $L=M+1$:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        p_0 &= c_0q_0\ ,\\
+        p_1 &= c_1q_0 + c_0q_1\ ,\\
+        &\vdots\\
+        p_M&=c_Mq_0+c_{M-1}q_1+...+c_0q_M\ ,\\
+        p_{M+1}&=c_{M+1}q_0+c_Mq_1+...+c_1q_M\ ,\\
+        0&=c_{M+2}q_0+c_{M+1}q_1+...+c_2q_M\ ,\\
+        &\vdots\\
+        0&=c_{M+L}q_0+c_{M+L-1}q_1+...+c_Lq_M\ ,\\
+    \end{split}
+\end{cases}
+    \label{eq:desenvPade1}
+\end{equation}
+on $c_i$ representa el terme d'índex $i$ de la sèrie $C(s)$. En total $C(s)$ conté $L+M+1$ termes. 
+
+S'utilitza la condició de normalització en què el primer terme del denominador $Q(s)$ es fixa a la unitat. És una tria arbitrària. L'obtenció de la resta de termes de $Q(s)$ s'aconsegueix per mitjà de resoldre el sistema matricial:
+\begin{equation}
+   -\begin{pmatrix}
+        c_{2} & c_3 & \dots & c_M & c_{M+1}\\
+        c_{3} & c_{4} & \dots & c_{M+1} & c_{M+2}\\
+        \vdots & \vdots & \ddots & \vdots & \vdots\\
+        c_{M+1} & c_{M+2} & \dots & c_{M+L-2} & c_{M+L-1}
+    \end{pmatrix}
+    \begin{pmatrix}
+        q_M\\
+        q_{M-1}\\
+        \vdots\\
+        q_1
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        c_{M+2}\\
+        c_{M+3}\\
+        \vdots\\
+        c_{L+M}
+    \end{pmatrix}\ .
+    \label{eq:desenvPade2}
+\end{equation}
+La solució del sistema genera els elements que restaven per conèixer del denominador. Per trobar els coeficients del numerador, es resol de forma directa l'Equació \ref{eq:desenvPade1} amb els termes de $C(s)$ que proporciona el MIH i els de $Q(s)$ calculats anteriorment. Una vegada coneguts $P(s)$ i $Q(s)$, se substitueixen els valors a l'Equació \ref{eq:pade1}. Normalment s'avaluen a $s=1$. 
+
+Per tant, el càlcul dels aproximants de Padé implica la resolució d'un sistema matricial, on la matriu típicament s'inverteix. Si no es vol optar per aquest camí, es poden utilitzar els mètodes recurrents. Com a contrapartida, en principi no s'aprofita el teorema de Stahl. 
+
+Quan el nombre de termes que conté $C(s)$ és parell, s'utilitza l'Equació \ref{eq:desenvPade2} i el desenvolupament descrit fins ara. En canvi, quan el nombre de termes és imparell, es fixa $L=M$. Aleshores, l'expansió dels coeficients esdevé:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        p_0 &= c_0q_0\ ,\\
+        p_1 &= c_1q_0 + c_0q_1\ ,\\
+        &\vdots\\
+        p_L&=c_Lq_0+c_{L-1}q_1+...+c_0q_M\ ,\\
+        0&=c_{L+1}q_0+c_{L}q_1+...+c_1q_M\ ,\\
+        &\vdots\\
+        0&=c_{L+M}q_0+c_{L+M-1}q_1+...+c_Lq_M\ ,\\
+    \end{split}
+\end{cases}
+    \label{eq:desenvPade3}
+\end{equation}
+el que dóna lloc al sistema:
+\begin{equation}
+    -\begin{pmatrix}
+         c_{1} & c_2 & \dots & c_{L-1} & c_{L}\\
+         c_{2} & c_{3} & \dots & c_{L} & c_{L+1}\\
+         \vdots & \vdots & \ddots & \vdots & \vdots\\
+         c_{L} & c_{L+1} & \dots & c_{L+M-2} & c_{L+M-1}
+     \end{pmatrix}
+     \begin{pmatrix}
+         q_M\\
+         q_{M-1}\\
+         \vdots\\
+         q_1
+     \end{pmatrix}
+     =
+     \begin{pmatrix}
+         c_{L+1}\\
+         c_{L+2}\\
+         \vdots\\
+         c_{L+M}
+     \end{pmatrix}\ .
+     \label{eq:desenvPade4}
+ \end{equation}
+ El procés resolutiu és el mateix. Amb l'Equació \ref{eq:desenvPade4} s'obtenen els termes que formen el denominador per llavors utilitzar-los a l'Equació \ref{eq:desenvPade3}. Finalment se substitueixen a l'Equació \ref{eq:pade1}. 
+
+La Figura \ref{fig:err4} presenta els errors amb els mètodes recurrents que més bones prestacions oferien (Èpsilon i Eta) juntament amb els errors obtinguts amb els aproximants de Padé. L'anàlisi també s'ha dut a terme amb la formulació pròpia per a la xarxa IEEE14 amb $\lambda=2$. 
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log|\Delta S_{max}|$},xlabel={Profunditat},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=7cm,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Pade_prop.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Epsilon.csv};
+    \addplot[scatter, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Converg/Eta.csv};
+        \legend{, Padé, , Èpsilon, , Eta} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Errors segons la profunditat amb recurrents i Padé a la IEEE14, $\lambda=2$}
+    \label{fig:err4}
+    \end{center}
+\end{figure}
+
+S'observa que gairebé no hi ha diferència entre les trajectòries que segueixen els errors dels dos mètodes recurrents i els dels aproximants de Padé. Si bé és cert que amb la mínima profunditat els aproximants de Padé es perfilen com la millor opció, a la llarga tots tres proporcionen solucions amb pràcticament el mateix error. 
+
+\subsection{Anàlisi de pols i zeros} % comentar alguna figura i fragment de text, perquè hi ha moltes gràfiques i tot ve a dir el mateix. Treure per ara la part del P-W, posar-la després. Comentar-la o guardar-la a algun lloc, no ho tinc guardat enlloc més.
+
+Segons Dronamraju et al. (2020) interessa veure quina distribució prenen els pols i els zeros al pla complex per estudiar com convergeixen, per què ho fan d'aquella manera, i com depenen de la càrrega del sistema. Per això es pren la xarxa IEEE30 inicialment amb una demanda al bus 29 de $-$0,106, tal com ve per defecte. S'utilitza la formulació original. Es treballa amb els aproximants de Padé diagonals, és a dir, on $L=M$. Pel cas proposat es capturen a la Figura \ref{fig:pa1}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,axis equal,scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros11r.csv};
+        \legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Pols i zeros de l'aproximant de Padé de tensió del bus 29 de la IEEE30. $n_i=59$ i $P_{29}=-$0,106}
+    \label{fig:pa1}
+    \end{center}
+    \end{figure}
+
+Bona part dels pols i zeros es cancel·len: la seva posició al pla complex és idèntica. Això passa pels primers pols i zeros. Si només s'empressin aquests, el resultat de tensió final seria unitari. La resta de pols i zeros es concentren aproximadament entre el 0,2 i el 0 de l'eix real, sempre molt propers del 0 imaginari. Sota aquestes condicions la tensió $V_{29}$ val 0,9665$\phase{-3,0415^{\circ}}$. S'evidencia que la part imaginària de la tensió resultant té molt menys pes que la real.
+Si es carrega més el sistema, per exemple per $P_{29}=-$0,82, en resulta la gràfica de la Figura \ref{fig:pa2}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,axis equal, scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros2.csv};
+        \legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Pols i zeros de l'aproximant de Padé de tensió del bus 29 de la IEEE30 amb $n_i=59$ i $P_{29}=-$0,82}
+    \label{fig:pa2}
+    \end{center}
+\end{figure}
+
+Aquesta vegada el primer pol i el primer zero queden molt allunyats dels altres. La resta, es distribueixen de forma similar a la d'abans. Altre cop hi ha un conjunt de pols i zeros amb la part imaginària petita, que per tant, s'agrupen de forma horitzontal. 
+
+Respecte al cas anterior, ara els pols i els zeros estan molt més dispersos. Ocupen una regió més àmplia en el pla complex. En vistes d'aquests resultats, s'espera que un sistema ben condicionat tingui els pols i els zeros més agrupats. 
+
+A més a més, la distribució que segueixen té a veure amb el radi de convergència. A la situació de càrrega inicial de la IEEE30, el radi de convergència de les sèries val aproximadament 5,8, mentre que quan $P_{29}=-$0,82, esdevé 1,0. Si s'exceptua la parella del pol i el zero de la Figura \ref{fig:pa2} que queda tan allunyada, es nota que els radis de les circumferències que descriuen els pols i zeros cancel·lats de les Figures \ref{fig:pa1} i \ref{fig:pa2} vénen a ser inversament proporcionals als radis de convergència esmentats. A més, si fa no fa estan centrats al (0, 0). 
+
+Per tornar a valorar aquesta relació, s'introdueix el factor de càrrega $\lambda=$\ 0,1. Així es redueixen totes les dades de potència per un factor de 10. La Figura \ref{fig:pa3} mostra la nova distribució de pols i zeros. 
+
+\begin{figure}[!hb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm, axis equal, scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros3.csv};
+        \legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Pols i zeros de l'aproximant de Padé de tensió del bus 29 de la IEEE30. $n_i=59$ i $\lambda=$\ 0,1}
+    \label{fig:pa3}
+    \end{center}
+\end{figure}
+
+Efectivament els pols i zeros queden més concentrats que en els casos anteriors. Referent a la seva cancel·lació, pràcticament la posició de tots ells coincideix, encara que, en empetitir el rang de valors dels eixos, no es visualitza tan clarament com a les Figures \ref{fig:pa1} i \ref{fig:pa2}. Es dedueix que la cancel·lació no és total. En conjunt descriuen unes formes circulars, en diversos nivells. Ara el radi de convergència de les sèries és de 68,0 més o menys. La seva inversa s'assimila al radi de la circumferència que dibuixen els pols i zeros més exteriors.
+
+Per la seva banda, la potència reactiva és també una de les incògnites dels busos PV. S'escull el bus 26 com aquell on s'analitzen els pols i zeros de la sèrie de potència reactiva. Primer es representen els pols i zeros en la situació de càrrega inicial del sistema a la Figura \ref{fig:pa7}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm, axis equal, scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros811.csv};
+        \legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Pols i zeros de l'aproximant de Padé de reactiva del bus 26 de la IEEE30 amb $n_i=59$}
+    \label{fig:pa7}
+    \end{center}
+\end{figure}
+
+S'ha de destacar que la potència reactiva, per definició, és un nombre real. Això explica que els pols i zeros de la Figura \ref{fig:pa7} obeeixin una distribució simètrica respecte a l'eix horitzontal. En altres paraules, hi ha parelles de complexos conjugats. Altre cop uns quants pols i zeros es cancel·len. La gran majoria dels que no ho fan s'acumulen al llarg de l'eix $\Im=0$, mentre que els restants dibuixen una forma similar a la de la Figura \ref{fig:pa1}. Aquesta vegada, però, els zeros queden a dins els pols.
+
+En carregar més el sistema a partir de $P_{29}=-$0,82, s'obté la Figura \ref{fig:pa8}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=8cm,height=8cm,axis equal, scatter/classes={%
+      a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+      ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+    \addplot[scatter,only marks, scatter src=explicit symbolic]%
+        table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros8.csv};
+        \legend{Pols, ,Zeros} %tocar
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Pols i zeros de l'aproximant de Padé de reactiva del bus 26 de la IEEE30 amb $n_i=59$ i $P_{29}=-$0,82}
+    \label{fig:pa8}
+    \end{center}
+\end{figure}
+
+En lloc de tenir uns quants pols i zeros no cancel·lats que dibuixen una figura que ressembla una el·lipse, ara es distribueixen al llarg de l'eix real. Es preserva la simetria. Aquest fenomen no es compleix amb la tensió, on el més normal és que compti amb una petita part imaginària. Comparat amb la Figura \ref{fig:pa7} els pols i zeros s'han expandit, no estan tan concentrats.
+
+En aquest últim cas s'observa altra vegada que els pols i zeros cancel·lats tracen una mena de circumferència amb pràcticament el mateix radi que a la Figura \ref{fig:pa2}. Com s'ha observat, si fa no fa aquest radi és la inversa del radi de convergència trobat amb el gràfic de Domb-Sykes. Això il·lustra que tant la tensió com la potència reactiva de diferents busos del sistema mostren distribucions de pols i zeros similars.
+%----------------------
+
+% Fins ara s'han avaluat els gràfics de pols i zeros de l'algoritme en si, o sigui, el MIH base. Falta veure com s'organitzen en un cas mal condicionat en el qual es recorre a l'ús del P-W. Per això es tria la IEEE30 amb $P_{29}=-0,82$.
+
+% Amb el MIH base s'aconsegueix un error inicial de 8,55.$10^{-3}$, mentre que amb tres passos del P-W en què $s_0$=[0,6; 0,6; 0,6] l'error final resulta de 2,73.$10^{-10}$. S'evidencia el benefici que comporta el P-W, encara que no s'hagi ajustat del tot el vector $s_0$ i que es pugui optar per a més passos. Es tracta d'analitzar la distribució de pols i zeros per a les tensions del tipus $V'(s')$. S'escull la primera i l'última tensió (figura \ref{fig:pa4}).
+
+% \begin{figure}[!hb] \scriptsize
+%     \begin{center}
+% \begin{tikzpicture}
+%     \begin{axis}[
+%         name=plot1, /pgf/number format/.cd, use comma, 1000 sep={.}, title={Distribució de $V'(s')$}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=6.5cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%       \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%       table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros4.csv};
+%       %\legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \begin{axis}[
+%         name=plot2, title={Distribució de $V'''(s''')$}, at={($(plot1.east)+(2.5cm,0)$)},anchor=west, /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=6.5cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%       \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%       table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros5.csv};
+%       \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%   \end{tikzpicture}
+%   \caption{Pols i zeros de l'aproximant de Padé amb P-W del bus 29 de la IEEE30 amb $n_i=60$ }
+%   \label{fig:pa4}
+%   \end{center}
+% \end{figure}
+
+% Els pols i zeros de $V'''(s''')$ queden més compactats que els de $V'(s')$, i a més, la cancel·lació d'aquells que se situen prop d'$\Im=0$ es fa evident. En l'altra gràfic, els pols i zeros en aquesta franja es mantenen menys agrupats. Segueix el raonament d'abans: en els casos condicionats els pols i zeros queden força junts.
+
+% De moment s'han representat tots els pols i zeros del bus 29. Com queda la distribució si es dibuixa l'últim aproximant de Padé per a cada bus del sistema? Igualment s'estudiarà com queda en cas que $P_{29}=-0,106$ i quan $P_{29}=-0,82$, que tal com anteriorment s'ha esmentat, es tracta d'una situació més desfavorable des del punt de vista de resolució del flux de potències. 
+% A la figura \ref{fig:pa5} es mostren els darrers pols i zeros de cada bus per a la IEEE30 de partida.
+
+% \begin{figure}[!hb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros6.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros dels aproximants de Padé de tots els busos de la IEEE30 amb $n_i=60$ i $P_{29}=-0,106$}
+%     \label{fig:pa5}
+%     \end{center}
+% \end{figure}
+
+% Els pols i els zeros se situen a extrems oposats i de cap manera es cancel·len. Els valors dels eixos indiquen que, mirat en perspectiva, estan col·locats molt a prop del punt (0, 0). Així es dedueix que a la figura \ref{fig:pa2} els pols i zeros tendeixen cap a l'origen a mesura que se selecciona el major aproximant de Padé. 
+
+% Seguidament, la distribució quan $P_{29}=-0,82$ es representa a la figura \ref{fig:pa6}.
+
+% \begin{figure}[!hb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros7.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros dels aproximants de Padé de tots els busos de la IEEE30 amb $n_i=60$ i $P_{29}=-0,82$}
+%     \label{fig:pa6}
+%     \end{center}
+% \end{figure}
+
+% Aquest cop passa si fa no fa el mateix. No hi ha cancel·lació entre pols i zeros. S'ubiquen a zones oposades. El fet de ser un sistema força mal condicionat els pols i zeros s'escampen més en el pla, tal com s'ha deduït abans. Tot i així la distribució no canvia en excés. 
+
+% %PART D'AIXÒ D'AQUÍ SOTA JA HO HE POSAT!!!!!!!!!!
+% Per últim, falta avaluar els pols i zeros de la potència reactiva, una de les incògnites dels busos PV. Es comença representant tots els pols i zeros del bus 26 en la situació de càrrega inicial del sistema (figura \ref{fig:pa7}).
+
+% \begin{figure}[!htb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros811.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros dels aproximants de Padé de la reactiva del bus 26 de la IEEE30 amb $n_i=60$}
+%     \label{fig:pa7}
+%     \end{center}
+% \end{figure}
+
+% S'ha de destacar que la potència reactiva, per definició, és un número real. Això explica que els pols i zeros de la figura \ref{fig:pa7} obeeixin una distribució simètrica respecte l'eix horitzontal. Altre cop varis pols i zeros es cancel·len. Bona part dels que no ho fan s'acumulen al llarg d'$\Im=0$, mentre que els restants dibuixen una forma similar a la de la figura \ref{fig:pa1}. Aquesta vegada, però, els zeros queden per fora dels pols, i no al revés.
+
+% En carregar més el sistema a partir de $P_{29}=-0,82$, en resulta la figura \ref{fig:pa8}.
+
+% \begin{figure}[!htb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=6.5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros8.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros de la reactiva del bus 26 de la IEEE30 amb $n_i=60$ i $P_{29}=-0,82$}
+%     \label{fig:pa8}
+%     \end{center}
+% \end{figure}
+
+% En lloc de tenir uns quants pols i zeros que dibuixen una figura que ressembla una el·lipse, ara els pols i zeros no cancel·lats es distribueixen al llarg de l'eix d'abscisses. Es preserva la simetria. Aquest fenomen no es compleix amb la tensió. Comparat amb al figura \ref{fig:pa7} els pols i zeros s'han expandit, no estan tan concentrats.
+
+% Quant als darrers pols i zeros dels aproximants de Padé de la reactiva de cada un dels cinc busos PV, es plasma a la figura \ref{fig:pa9} el que ja es podia anticipar. 
+
+% \begin{figure}[!htb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=5cm, ymin=-0.1, ymax= 0.1, scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros9.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros de la reactiva de tots els busos de la IEEE30 amb $n_i=60$ i $P_{29}=-0,106$}
+%     \label{fig:pa9}
+%     \end{center}
+% \end{figure}
+
+% Tots els pols i zeros se situen exactament sobre l'eix d'abscisses. Curiosament els pols estan més a prop de l'origen que els zeros. Igual que abans els primers pols i zeros tendeixen a cancel·lar-se, mentre que els últims queden sobre l'eix horitzontal.
+
+% Quan el sistema es carrega més, és a dir, $P_{29}=-0,82$, la distribució canvia, tal com s'observa a la figura \ref{fig:pa10}.
+
+% \begin{figure}[!htb] \scriptsize
+%     \begin{center}
+%     \begin{tikzpicture}
+%     \begin{axis}[
+%         /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\Im$},xlabel={$\Re$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=10cm,height=5cm,scatter/classes={%
+%       a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black}%
+%       ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+%     \addplot[scatter,only marks, scatter src=explicit symbolic]%
+%         table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/polszeros10.csv};
+%         \legend{Pols, ,Zeros} %tocar
+%     \end{axis}
+%     \end{tikzpicture}
+%     \caption{Pols i zeros de la reactiva de tots els busos de la IEEE30 amb $n_i=60$ i $P_{29}=-0,82$}
+%     \label{fig:pa10}
+%     \end{center}
+% \end{figure}
+
+% Tot i que la majoria de pols i zeros sí que resten sobre l'eix d'abscisses, alguns no ho fan, i prenen un valor imaginari negatiu. Tanmateix, els valors de l'eix horitzontal indiquen que se situen a prop del 0. 
+
+% Això conclou l'anàlisi de la distribució dels pols i zeros dels aproximants de Padé. Penso que falta veure el perquè, així com entrar més en detall en la importància que tenen per a la fonamentació del mètode. 

@@ -1,0 +1,809 @@
+El mètode d'incrustació holomòrfica, originalment anomenat Holomorphic Embedding Load-Flow Method (HELM), és una tècnica relativament nova, presentada l'any 2012, per construir la solució de les equacions que regeixen el flux de potències en sistemes elèctrics. De fet, HELM es tracta d'una marca registrada per la companyia EleQuant Inc. En aquest treball el recurs desenvolupat rebrà per nom: mètode d'incrustació holomòrfica (MIH).
+
+Segons Trias (2018), els resultats del mètode són inequívocs. Si la solució és físicament possible, la construeix, i si no ho és, ho indica. Per contra, els esquemes iteratius com el Gauss-Seidel i el Newton-Raphson, poden patir sobretot dos tipus de problemes: que la solució no sempre convergeixi, i per altra banda, si convergeix, que no ho faci a la solució desitjada. 
+
+\section{Característiques}
+El mètode d'incrustació holomòrfica és trencador, en el sentit que es diferencia de la resta d'algoritmes resolutius en el fet que no és iteratiu. Construeix la solució. Converteix les incògnites en funcions analítiques al pla complex. Així, el problema es fragmenta en conjunts d'equacions algebraiques, la solució de les quals permet trobar el valor de les incògnites, encara que inicialment aquestes formin part d'un sistema d'equacions no lineals. 
+
+En la seva essència, es procura partir d'una situació de referència en la qual les tensions als busos són totes iguals. No hi ha ni demanda ni generació, i les intensitats que circulen per les línies són nul·les. La Figura \ref{fig:estat_referencia} mostra com queda un sistema en aquest estat.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+        \draw (0, 0) to [short] (0, 1)
+        to [sinusoidal voltage source] (0, 3)
+        to [short, -] (0, 3.5);
+        \draw (0-0.25, 0) -- (0+0.25, 0);
+        \draw (0-0.17, -0.1) -- (0+0.17, -0.1);
+        \draw (0-0.07, -0.2) -- (0+0.07, -0.2);
+        \draw [line width=2] (-0.5, 3.5) -- (0.5, 3.5);
+        \draw (0.25, 3.5) to [short] (0.25, 3.25)
+        to [short] (4.4, 2)
+        to [short] (4.4, 1.75);
+        \draw [line width=2] (4.15, 1.75) -- (5.15, 1.75);
+        \draw (4.65, 1.75) to [short] (4.65, 1.25)
+        (4.65, 0.75) to [short] (4.9, 1.25)
+        (4.65, 0.75) to [short] (4.65, 0.25)
+        to [european resistor] (4.65, -1)
+        to [short] (4.65, -1.5);
+        \draw (4.65-0.25, -1.5) -- (4.65+0.25, -1.5);
+        \draw (4.65-0.17, -1.6) -- (4.65+0.17, -1.6);
+        \draw (4.65-0.07, -1.7) -- (4.65+0.07, -1.7);
+        \draw (0.0, 3.5) to [short] (0.0, 3.75)
+        to [short] (7, 3.75);
+        \draw [line width=2] (7, 3.25) -- (7, 4.25);
+        \draw (7, 3.75) to [short] (7.5, 3.75)
+        to [short] (7.5, 3.25)
+        (7.5, 2.75) to [short] (7.75, 3.25)
+        (7.5, 2.75) to [short] (7.5, 2.25);
+        \draw (7.5, 2.25) [Telmech=G,n=generator] to (7.5, 1.25);
+        \draw (7.5, 1.25) to [short] (7.5, 0.75);
+        \draw (7.5-0.25, 0.75) -- (7.5+0.25, 0.75);
+        \draw (7.5-0.17, 0.65) -- (7.5+0.17, 0.65);
+        \draw (7.5-0.07, 0.55) -- (7.5+0.07, 0.55);
+        \draw (4.9, 1.75) to [short] (4.9, 2)
+        to [short] (6.75, 3.5)
+        to [short] (7, 3.5);
+        \draw (7, 3.75) node[anchor=south west] {Bus PV};
+        \draw (-1.17, 3.5) node[anchor=south east] {Bus};
+        \draw (-0.5, 3.25) node[anchor=south east] {oscil·lant};
+        \draw (-0.5, 1.8) node[anchor=south east] {$1\phase{0^{\circ}}$};
+        \draw (4.05, 2) node[anchor=north east] {Bus PQ};
+    \end{tikzpicture}
+    \caption{Sistema d'exemple en el seu estat de referència}
+    \label{fig:estat_referencia}
+    \end{center}
+\end{figure}
+
+Com es desprèn de la Figura \ref{fig:estat_referencia}, tots els elements connectats als busos que no siguin l'oscil·lant queden despenjats del sistema. Totes les tensions coincideixen, i per conveniència, es fixen a la unitat. Des de l'estat de referència el mètode soluciona cada una de les divisions en què s'ha fragmentat el problema. En efecte, de forma genèrica les incògnites segueixen funcions del tipus:
+\begin{equation}
+    C(s)=c_0+c_1(s-c)^1+c_2(s-c)^2+...=\sum_{k=0}^{\infty}c_k(s-c)^{k}\ ,
+    \label{eq:serie1}
+\end{equation}
+on:
+
+$C(s)$: funció analítica d'una incògnita del sistema.
+\vs
+$s$: variable complexa en què s'avalua la funció. 
+\vs
+$c_k$: terme $k$ que conforma la funció  $C(s)$.
+\vs
+$c$: centre de la funció.
+
+La funció $C(s)$ teòricament s'expressa com una sèrie infinita de potències. En el mètode d'incrustació holomòrfica se l'anomena sèrie de Maclaurin perquè es troba centrada al 0. Precisament l'avaluació de la funció a $s=0$ correspon a l'estat de referència de la Figura \ref{fig:estat_referencia}. Així, l'Equació \ref{eq:serie1} es converteix en: 
+\begin{equation}
+    C(s)=\sum_{k=0}^{\infty}c_ks^{k}\ .
+    \label{eq:serie2}
+\end{equation}
+En lloc de buscar obtenir infinitat de termes de la sèrie, es limita el nombre de coeficients a calcular:
+\begin{equation}
+    C'(s)=\sum_{k=0}^{n}c_ks^{k}\ ,
+    \label{eq:serie3}
+\end{equation}
+on $n$ simbolitza l'índex de l'últim terme a calcular. També rep el nom de profunditat.
+
+Es nota que $C(s)$ i $C'(s)$ difereixen, ja que la darrera no conté tots els termes. Per compensar l'error que s'introdueix al només obtenir els primers coeficients de la sèrie, habitualment cal recórrer a eines de continuació analítica. La continuació analítica estén el domini de les funcions analítiques. Amb aquestes, el valor de $C(s)$ i $C'(s)$ avaluades a una mateixa $s$ tendirà a coincidir. Amb el MIH se selecciona $s=1$ a l'hora de calcular el valor final de les incògnites.
+
+En el problema del flux de potències les incògnites que es defineixen com a sèries són les tensions de tots els busos PQ i PV, així com la potència reactiva dels busos PV. 
+
+En aquest capítol s'aborda el càlcul dels coeficients de les incògnites. Aquest és un dels primers passos per assolir la solució final. De fet, es tracta d'una etapa imprescindible, no només per trobar les incògnites, sinó també per poder emprar els recursos complementaris del mètode d'incrustació holomòrfica. La Figura \ref{fig:org1} mostra un esquema a alt nivell del mètode tal com el va concebre Trias (2018), on apareixen els seus recursos principals.
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2.6cm, minimum height=1cm,text centered, text width = 2.5cm, draw=black,]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=2.6cm, minimum height=1cm, text centered, draw=black,]
+\tikzstyle{process} = [rectangle, minimum width=2.6cm, minimum height=1cm, text width=3cm, text centered, draw=black,]
+\tikzstyle{labeltext} = [rectangle, minimum width=1cm, minimum height=1cm, text centered, draw=black,]
+\tikzstyle{decision} = [diamond, minimum width=2.6cm, minimum height=1cm, text width=2.5cm, text centered, draw=black, aspect=2]
+\tikzstyle{arrow} = [->,>=stealth]
+
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+  \begin{tikzpicture}[node distance=2.0cm]
+    \node (b1) [startstop] {Inicialitzar objectes};
+    \node (b2) [process, below of = b1] {Càlcul de coeficients de $V(s)$ i $Q(s)$ amb MIH};
+    \node (b3) [process, below of = b2, xshift=0cm] {Càlcul de $|V|$ amb Thévenin}; 
+    \node (b4) [process, below of = b3, xshift=0cm] {Càlcul de $\sigma(s)$ i gràfic Sigma}; 
+    \node (b5) [decision, below of = b4, xshift=0cm] {Solució vàlida?};
+    \node (b9) [process, left of = b5, xshift=-3cm] {Augmentar profunditat};
+    \node (b6) [process, below of = b5, xshift=0cm] {Càlcul final de $V$ i $Q$}; 
+    \node (b7) [decision, below of = b6, xshift=0cm] {Error petit?};
+    \node (b10) [process, right of = b7, xshift=3cm] {P-W o augmentar profunditat};
+    \node (b8) [startstop, below of = b7, xshift=0cm] {Fi};
+
+    \draw[arrow] (b1) -- (b2) node[left, midway] {};
+    \draw[arrow] (b2) -- (b3) node[left, midway] {};
+    \draw[arrow] (b3) -- (b4) node[left, midway] {};
+    \draw[arrow] (b4) -- (b5) node[left, midway] {};
+    \draw[arrow] (b5) -- (b6) node[right, midway] {Sí};
+    \draw[arrow] (b6) -- (b7) node[left, midway] {};
+    \draw[arrow] (b7) -- (b8) node[right, midway] {Sí};
+
+    \draw[arrow] (b5) -- (b9) node[above, midway] {No};
+    \draw[arrow] (b7) -- (b10) node[above, midway] {No};
+
+    \draw(b9) -- (-5,-2) node[above, midway] {};
+    \draw[arrow] (-5,-2) -- (b2) node[above, midway] {};
+
+    \draw(b10) -- (5,-10) node[above, midway] {};
+    \draw[arrow] (5,-10) -- (b6) node[above, midway] {};
+
+
+    % \node (b8) [startstop, below of = b7, xshift=0cm] {Fi}; 
+    % \node (b9) [process, above of = b7, yshift=2cm, xshift=1cm] {P-W o incrementar profunditat};
+    % \node (bx) [right of = b7, xshift=2cm, text width=0cm] {};
+    % \node (by) [above of = bx, yshift=2cm] {};
+    % \draw[arrow] (b1) -- (b2) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b3) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b4) node[left, midway] {};
+    % \draw[arrow] (b2) -- (b6) node[left, midway] {};
+    % \draw[arrow] (b4) -- (b5) node[left, midway] {};
+    % \draw[arrow] (b6) -- (b7) node[left, midway] {};
+    % \draw[arrow] (b7) -- (b8) node[right, midway] {Sí};
+    % \draw[] (b7) -- (bx) node[above, midway] {No};
+    % \draw[arrow] (b9) -- (b2) node[above, midway] {};
+    % \draw (7.75,-6) -- (8.05,-6);
+    % \draw (8.05,-6) -- (8.05,-2);
+    % \draw [arrow] (8.05, -2) -- (b9);
+    \end{tikzpicture} 
+  \caption{Diagrama de flux general de les etapes del mètode d'incrustació holomòrfica}
+  \label{fig:org1}
+\end{center}
+\end{figure}
+
+La inicialització dels objectes consisteix en la definició de les matrius i la incorporació de les dades que intervenen al programa. El càlcul dels coeficients es detalla en aquest capítol i s'ataca per mitjà de dues formulacions. Una vegada es coneixen les sèries de tensió i de potència reactiva, es calcula el seu valor final, sigui sumant termes o amb mètodes de continuació analítica. Això es tracta al capítol d'avaluació de les sèries. Si l'error del balanç de potència resulta excessiu, es defineixen sèries amb més coeficients per llavors repetir els càlculs. A vegades també es pot recórrer al mètode de Padé-Weierstrass (P-W) per millorar la solució.
+
+El mètode d'incrustació holomòrfica ofereix dues eines més. Una d'elles es fonamenta en calcular les tensions amb els aproximants de Thévenin (el que serveix per generar corbes que relacionen tensió i potència activa o reactiva). L'altra es basa en els aproximants Sigma, que s'utilitzen com a eina de diagnòstic. Són recomanables però no indispensables. Es pot passar a calcular la tensió i la potència reactiva directament.
+
+Per conèixer els coeficients s'han desenvolupat dues formulacions diferents: una és la plantejada en el volum de la bibliografia bàsica (Trias, 2018), que se l'anomena formulació original; l'altra, la formulació pròpia, ha estat ideada per l'autor del projecte. 
+
+Per un costat, la formulació original és compatible amb tots els recursos que es mostren a la Figura \ref{fig:org1}. Justament aquestes eines s'han desenvolupat per poder funcionar amb aquesta formulació. Tanmateix, el seu plantejament i la seva programació presenten certa complexitat. Per l'altre costat, amb la formulació pròpia no es pot utilitzar el Padé-Weierstrass, i algunes vegades els aproximants Sigma no són representatius. Malgrat això, el seu desenvolupament és més simple. 
+
+% La Taula \ref{tab:2tipusform} presenta quines eines de la Figura \ref{fig:org1} es poden utilitzar en cada cas.
+
+% \begin{table}[!htb]
+%     \begin{center}
+%     \begin{tabular}{lccc}
+%     \hline
+%     Formulació & Thévenin & Sigma & Padé-Weierstrass\\
+%     \hline
+%     \hline
+%     Pròpia & Sí & A vegades & No\\
+%     Original & Sí & Sí & Sí\\
+%     \hline 
+%     \end{tabular}
+%     \caption{Eines disponibles en cada formulació}
+%     \label{tab:2tipusform}
+%     \end{center}
+%   \end{table}
+
+% Sigma es pot utilitzar amb la formulació pròpia si no hi ha transformadors de relació variable. En cas contrari, no proporciona resultats fidedignes.
+
+Les equacions de les dues formulacions segueixen la nomenclatura indicada a la Figura \ref{fig:nomenclatura}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+        \draw (0, 0) to (0, 1)
+        (0, 1.4) circle (0.4)
+        (0, 1.8) to (0, 2.8);
+        \draw [line width=2] (-0.5, 2.8) -- (0.5, 2.8);
+        \draw (0.25, 2.8) to (0.25, 3.05)
+        to (1, 3.8)
+        to (1-0.0707107, 3.8+0.0707107)
+        to (1-0.0707107+1.060660172, 3.8+0.0707107+1.060660172)
+        to (1+0.0707107+1.060660172, 3.8-0.0707107+1.060660172)
+        to (1+0.0707107, 3.8-0.0707107)
+        to (1, 3.8)
+        (1+1.060660172, 3.8+1.060660172) to (1.75+1.060660172, 4.55+1.060660172)
+        to (1.75+1.060660172+0.25,  4.55+1.060660172);
+        \draw [line width=2] (2+1.060660172, 4.55+1.060660172-0.5) -- (2+1.060660172, 4.55+1.060660172+0.5);
+
+
+        \draw (-0.0, 2.8) to (-0.0, 3.05)
+        to (0, 3.8)
+        to (-0.1, 3.8) to (-0.1, 5.3)
+        to (0.1, 5.3)
+        to (0.1, 3.8)
+        to (0, 3.8)
+        (0, 5.3) to (0, 6.05);
+        \draw [line width=2] (-0.5, 6.05) -- (0.5, 6.05);
+
+        \draw (-0.25, 2.8) to (-0.25, 3.05)
+        to (-1, 3.8)
+        to (-1-0.0707107, 3.8-0.0707107)
+        to (-1-0.0707107-1.060660172, 3.8-0.0707107+1.060660172)
+        to (-1+0.0707107-1.060660172, 3.8+0.0707107+1.060660172)
+        to (-1+0.0707107, 3.8+0.0707107)
+        to (-1, 3.8)
+        (-1-1.060660172, 3.8+1.060660172) to (-1.75-1.060660172, 3.8+1.060660172+0.75)
+        to (-2-1.060660172, 3.8+1.060660172+0.75)
+        ;
+
+        \draw [line width=2] (-2-1.060660172, 3.8+1.060660172+0.25) -- (-2-1.060660172, 3.8+1.060660172+1.25);
+
+        \draw (0.25, 2.8) to (0.25, 2.55)
+        to (1.75, 2.55)
+        to (1.75, 2.65)
+        to (3.25, 2.65)
+        to (3.25, 2.45)
+        to (1.75, 2.45)
+        to (1.75, 2.55)
+        (3.25, 2.55) to (4.5, 2.55)
+
+        (-0.25, 2.8) to (-0.25, 2.55)
+        to (-1, 2.55)
+        to (-1, 2.2)
+        to (-1.1, 2.2)
+        to (-1.1, 0.7)
+        to (-0.9, 0.7)
+        to (-0.9, 2.2)
+        to (-1, 2.2)
+        (-1, 0.7) to (-1, 0)
+        ;
+        \draw [line width=2] (4.5, 2.05) -- (4.5, 3.05);
+        \draw (4.5, 2.55) to (5.0, 2.55)
+        to [sinusoidal voltage source] (5.0, 0.2)
+        to (5.0, 0);
+        
+        \draw (0.4, 2.8) node[anchor=south west] {Bus $i$};
+        \draw (0.4, 1.35) node[anchor=south west] {$P_i, Q_i$};
+        \draw (0.4, 0.9) node[anchor=south west] {$P_i, |V_i|$};
+        \draw (4.5, 2.8) node[anchor=south west] {Bus $w$};
+        \draw (5.5, 1.2) node[anchor=south west] {$V_w$};
+        \draw (2.2, 2.6) node[anchor=south west] {$Y_{iw}$};
+        \draw (-1.1, 1.2) node[anchor=south east] {$Y_{sh,i}$};
+        \draw (1.5, 4.25) node[anchor=north west] {$Y_{ij}$};
+        \draw (+2+1.060660172, 3.8+1.060660172+0.65) node[anchor=south west] {Bus $j$};
+
+        \draw (0-0.25, 0) -- (0+0.25, 0);
+        \draw (0-0.17, -0.1) -- (0+0.17, -0.1);
+        \draw (0-0.07, -0.2) -- (0+0.07, -0.2);
+
+        \draw (-1-0.25, 0) -- (-1+0.25, 0);
+        \draw (-1-0.17, -0.1) -- (-1+0.17, -0.1);
+        \draw (-1-0.07, -0.2) -- (-1+0.07, -0.2);
+
+        \draw (5-0.25, 0) -- (5+0.25, 0);
+        \draw (5-0.17, -0.1) -- (5+0.17, -0.1);
+        \draw (5-0.07, -0.2) -- (5+0.07, -0.2);
+
+    \end{tikzpicture}
+    \caption{Nomenclatura d'un fragment de sistema genèric}
+    \label{fig:nomenclatura}
+    \end{center}
+\end{figure}
+
+A l'hora de plantejar les equacions se selecciona un bus PQ o PV, amb índex $i$. Si es tracta d'un bus PQ, es coneix $P_i$ i $Q_i$; si és PV, les dades són $P_i$ i $|V_i|$. Al bus $i$ hi ha connectada l'admitància en derivació $Y_{sh,i}$ que recull les capacitats dels models de les línies amb què enllaça el bus $i$, com també la càrrega d'impedància constant que penja d'aquest bus.
+
+El bus $i$ connecta amb el bus oscil·lant, que s'anomena $w$. En l'acoblament de diverses xarxes de distribució pot haver-hi més d'un bus oscil·lant. Això es contempla a la formulació pròpia. L'admitància entre el bus $i$ i el bus oscil·lant ve donada $Y_{iw}$. El bus $i$ també connecta amb la resta de busos PQ i PV, que s'identifiquen amb l'índex $j$ progressivament. Cada un d'ells comparteix amb el bus $i$ les admitàncies $Y_{ij}$. Cal afegir que es considera que les admitàncies del tipus $Y_{ij}$ i $Y_{iw}$ donen lloc a la matriu d'admitàncies. Per tant, aquesta només conté els elements en sèrie de les branques. Les admitàncies en paral·lel van per separat amb $Y_{sh,i}$. 
+
+Les formulacions es deriven de les expressions:
+\begin{equation} % en Sergio deia de posar al sumatori j \neq i, però realment Ysh,i només agafa les capacitats, no és l'element Yii de la matriu d'admitàncies
+\begin{cases}
+    \begin{split}
+        \sum_{j} Y_{ij}V_j+Y_{iw}V_w+Y_{sh,i}V_i&=\frac{S^*_i}{V^*_i}\ , \hspace{30pt} i\in \text{PQ, PV}\ ,\\
+        V_iV^*_i&=|V_i|^2\ , \hspace{27.0pt} i\in \text{PV}\ .
+    \end{split}
+\end{cases}
+\label{eq:2eq}
+\end{equation}
+% En aquest capítol s'aborda el càlcul dels coeficients de les incògnites. Aquest és un dels primers passos per assolir la solució final. De fet, es tracta d'una etapa imprescindible, no només per trobar les incògnites, sinó també per poder emprar els recursos complementaris del mètode d'incrustació holomòrfica. La Figura \ref{fig:org1} mostra un esquema a alt nivell del mètode, on apareixen els seus recursos principals.
+% \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=2.6cm, minimum height=1cm,text centered, text width = 2.5cm, draw=black,]
+% \tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=2.6cm, minimum height=1cm, text centered, draw=black,]
+% \tikzstyle{process} = [rectangle, minimum width=2.6cm, minimum height=1cm, text width=2.5cm, text centered, draw=black,]
+% \tikzstyle{labeltext} = [rectangle, minimum width=1cm, minimum height=1cm, text centered, draw=black,]
+% \tikzstyle{decision} = [diamond, minimum width=2.6cm, minimum height=1cm, text width=2.5cm, text centered, draw=black, aspect=2]
+% \tikzstyle{arrow} = [->,>=stealth]
+% \begin{figure}[!htb] \footnotesize
+%     \begin{center}
+%   \begin{tikzpicture}[node distance=2.0cm]
+%     \node (b1) [startstop] {Inicialitzar objectes};
+%     \node (b2) [process, below of = b1] {Càlcul de coeficients de $V(s)$ i $Q(s)$ amb MIH};
+%     \node (b3) [process, below of = b2, xshift=-4cm] {Càlcul de $|V|$ amb Thévenin}; 
+%     \node (b4) [process, below of = b2, xshift=0cm] {Càlcul de $\sigma(s)$}; 
+%     \node (b5) [process, below of = b4, xshift=0cm] {Gràfic Sigma}; 
+%     \node (b6) [process, below of = b2, xshift=4cm] {Càlcul final de $V$ i $Q$}; 
+%     \node (b7) [decision, below of = b6, xshift=0cm] {Error petit?};
+%     \node (b8) [startstop, below of = b7, xshift=0cm] {Fi}; 
+%     \node (b9) [process, above of = b7, yshift=2cm, xshift=1cm] {P-W o incrementar profunditat};
+%     \node (bx) [right of = b7, xshift=2cm, text width=0cm] {};
+%     \node (by) [above of = bx, yshift=2cm] {};
+%     \draw[arrow] (b1) -- (b2) node[left, midway] {};
+%     \draw[arrow] (b2) -- (b3) node[left, midway] {};
+%     \draw[arrow] (b2) -- (b4) node[left, midway] {};
+%     \draw[arrow] (b2) -- (b6) node[left, midway] {};
+%     \draw[arrow] (b4) -- (b5) node[left, midway] {};
+%     \draw[arrow] (b6) -- (b7) node[left, midway] {};
+%     \draw[arrow] (b7) -- (b8) node[right, midway] {Sí};
+%     \draw[] (b7) -- (bx) node[above, midway] {No};
+%     \draw[arrow] (b9) -- (b2) node[above, midway] {};
+%     \draw (7.75,-6) -- (8.05,-6);
+%     \draw (8.05,-6) -- (8.05,-2);
+%     \draw [arrow] (8.05, -2) -- (b9);
+%     \end{tikzpicture} 
+%   \caption{Organigrama de les funcionalitats i de les etapes d'ús del mètode d'incrustació holomòrfica}
+%   \label{fig:org1}
+% \end{center}
+% \end{figure}
+% La inicialització dels objectes consisteix en la definició de les matrius i la incorporació de les dades que intervenen al programa. El càlcul dels coeficients es detalla en aquest capítol i s'ataca per mitjà de dues formulacions. Una vegada es coneixen les sèries de tensió i de potència reactiva, es calcula el seu valor final ja sigui sumant termes o amb mètodes de continuació analítica. Això es tracta al capítol d'avaluació de les sèries. Si l'error del balanç de potència resulta excessiu, es defineixen sèries amb més coeficients per llavors repetir els càlculs. Quan s'utilitza la formulació original també es pot recórrer al mètode de Padé-Weierstrass (P-W) per millorar la solució.
+% El mètode d'incrustació holomòrfica ofereix dues eines més. Una consisteix en calcular les tensions amb els aproximants de Thévenin (el que serveix per generar corbes que relacionen tensió i potència activa o reactiva). L'altra es basa en els aproximants Sigma, que s'utilitzen com a eina de diagnòstic.
+\section{Formulació original}
+El desenvolupament de la formulació original busca iniciar els primers coeficients de les sèries tals que compleixin amb l'estat de referència de la Figura \ref{fig:estat_referencia}. Per al seu desenvolupament es comença amb el sumatori d'intensitats per als busos PQ. De fet, és l'única equació a emprar per a aquest tipus de bus.
+\begin{equation}
+\sum_{j}Y_{ij}V_j = -Y_{iw}V_w-Y_{sh,i}V_i+\f{S^*_i}{V^*_i}\ .
+    \label{eq:F1}
+\end{equation}
+En aquest punt fa falta incrustar l'equació. Incrustar es refereix a afegir la variable complexa $s$ a les expressions. Hi ha llibertat per decidir com fer-ho, el que dóna lloc a multitud de formulacions possibles. L'elecció d'una incrustació diferent ha originat la formulació pròpia, que si bé desemboca a un desenvolupament relativament més simple, presenta alguna mancança a l'hora d'utilitzar els recursos addicionals.
+
+La formulació original converteix l'Equació \ref{eq:F1} en:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -Y_{iw}V_w(s)-sY_{sh,i}V_i(s)+s\f{S^*_i}{V^*_i(s^*)}\ .
+        \label{eq:F2}
+\end{equation}
+Les tensions $V_j$ i $V_i$, al ser incògnites, es defineixen com les sèries $V_j(s)$ i $V_i(s)$, que segueixen l'Equació \ref{eq:serie3}. La tensió del bus oscil·lant, tot i ser una dada, es tracta com una sèrie amb només dos termes. És imprescindible per complir amb l'estat de referència, on totes les tensions inicials valen 1. Tret que s'indiqui el contrari, en tot el treball s'opera amb valors unitaris, que com a tal, no tenen unitats.
+
+El darrer terme de l'Equació \ref{eq:F2} es multiplica per $s$. De no ser així, el coeficient d'un cert ordre de $V_i(s)$ i $V_j(s)$ dependria directament del terme de mateix ordre de $V^*_i(s^*)$, el qual apareix al denominador. En aquesta situació l'equació seria no lineal. Precisament, s'opera amb sèries per descompondre el problema en un conjunt d'equacions lineals. Multiplicar per $s$ retarda l'ús d'aquell objecte. El penúltim terme de l'Equació \ref{eq:F2} també es retarda en el càlcul per tal de complir amb l'estat de referència, on es desconnecta tot allò que connecta als busos PQ i PV que no siguin les branques en sèrie de les línies.
+
+La formulació original només planteja la presència d'un únic bus oscil·lant, que obeeix:
+\begin{equation}
+    V_w(s)=1+s(V_w-1)\ ,
+        \label{eq:F3}
+\end{equation}
+on $V_w$ fa referència a la dada de tensió del bus oscil·lant. 
+
+S'observa que el primer terme de la sèrie $V_w(s)$ és idèntic a 1, necessari per assolir l'estat de referència. El segon i últim terme de la sèrie serveix per compensar la diferència entre la tensió coneguda i la unitat. Com que les sèries s'avaluen per $s=1$, la tensió $V_w(s=1)$ resulta igual a $V_w$. 
+
+
+
+Amb l'Equació \ref{eq:F3} i tots els termes incrustats tal com apareixen a l'Equació \ref{eq:F2}, s'arriba a:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -Y_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+s\f{S^*_i}{V^*_i(s^*)}\ .
+        \label{eq:F4}
+\end{equation}
+Tots els termes de la dreta de l'igual depenen de $s$, menys la intensitat que aporta el bus oscil·lant en l'estat de referència. De fet, matemàticament l'estat de referència equival a $s=0$. Això implica que al primer pas queda:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j[0] = -Y_{iw}\ ,
+        \label{eq:F5}
+\end{equation}
+on $V_j[0]$ denota el primer terme de la sèrie $V_j(s)$. Amb aquesta notació les sèries són de la forma:
+\begin{equation}
+    V_j(s)=V_j[0]+sV_j[1]+s^2V_j[2]+...+s^nV_j[n]\ .
+        \label{eq:F6}
+\end{equation}
+De l'Equació \ref{eq:F5} es dedueix que si es vol que tot $V_j[0]=1$, fa falta que $\sum_{j}Y_{ij}=-Y_{iw}$. La matriu d'admitàncies total es defineix com la que no diferencia entre busos oscil·lants i no oscil·lants. És a dir, que recull totes les admitàncies en sèrie a les quals es connecta un bus, independentment de la categoria dels busos. Totes les seves files sumen 0, cosa que permet fixar que $V_j[0]=1$. Només en el cas que hi hagi transformadors de relació variable això no serà estrictament cert. La solució a aquest cas es presenta més endavant.
+
+Per altra banda, a l'Equació \ref{eq:F4} s'observa que $V^*_i$ s'ha incrustat com $V^*_i(s^*)=(V_i(s^*))^*$ i no com $V^*_i(s)=(V_i(s))^*$. Tal com il·lustra el nom del mètode, les funcions han de ser holomòrfiques. Una funció holomòrfica és aquella que definida en un subconjunt obert del pla complex, resulta complexament diferenciable en qualsevol dels seus punts. També se l'anomena funció analítica. Ha de complir amb les condicions de Cauchy-Riemann. Com assenyala Peñate (2020a), $s$ només pren valors reals.
+
+Primer es comprova si $\partial (V_i(s))^* / \partial s^* = 0$:
+\begin{equation}
+    \frac{\partial (V_i(s))^*}{\partial s^*}=\frac{\partial (\sum_{k=0}^n (s^k)^*V^*_i[k])}{\partial s^*}=\sum_{k=0}^n k(s^{k-1})^*V^*_i[k]\ .
+    \label{eq:CR1}
+\end{equation}
+S'evidencia que la incrustació $V^*_i(s)$ no és adient. 
+
+Amb la incrustació $V^*_i(s^*)$:
+\begin{equation}
+    \frac{\partial (V_i(s^*))^*}{\partial s^*}=\frac{\partial (\sum_{k=0}^n s^kV^*_i[k])}{\partial s^*}=0\ ,
+    \label{eq:CR2}
+\end{equation}
+que sí que compleix amb la condició establerta $\partial (V_i(s^*))^* / \partial s^* = 0$. Això valida la incrustació de les sèries conjugades. Cal tenir present que això s'aplica tant per a la formulació original com per a la formulació pròpia. 
+
+Convé introduir un canvi de variable per no treballar amb la sèrie $V^*_i(s^*)$ al denominador. D'entrada només es volen sèries al numerador:
+\begin{equation}
+    X_i(s)=\frac{1}{V^*_i(s^*)}\ .
+    \label{eq:F7}
+\end{equation}
+D'aquesta manera l'Equació \ref{eq:F4} esdevé:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -Y_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+sS^*_iX_i(s)\ .
+        \label{eq:F8}
+\end{equation}
+Pel que fa als busos PV, aquests requereixen l'ús de dues equacions. La primera d'elles, el sumatori d'intensitats, segueix el mateix estil que l'Equació \ref{eq:F8}. Tanmateix, no tota la potència es multiplica per $s$. Només aquella que forma part de les dades, és a dir, la potència activa. La reactiva actua com una incògnita. S'obté:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -Y_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+s\f{P_i}{V^*_i(s^*)}-j\f{Q_i(s)}{V^*_i(s^*)}\ .
+        \label{eq:F6x}
+\end{equation}
+A l'hora de calcular els termes, en el primer pas s'arriba a:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j[0] = -Y_{iw}-j\f{Q_i[0]}{V^*_i[0]}\ .
+        \label{eq:F7x}
+\end{equation}
+Aquest cop per complir amb l'estat de referència fa falta que $Q_i[0]=0$. Llavors l'Equació \ref{eq:F7x} és idèntica a l'Equació \ref{eq:F5}, així que sense transformadors de relació variable totes les $V_j[0]=1$. 
+
+Igualment s'aplica el canvi de variable de l'Equació \ref{eq:F7} a l'Equació \ref{eq:F6x}:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -Y_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+sP_iX_i(s)-jQ_i(s)X_i(s)\ .
+        \label{eq:F11x}
+\end{equation}
+Per altra banda, els mòduls de tensió dels busos PV segueixen:
+\begin{equation}
+    V_i(s)V^*_i(s^*)=1+s(W_i-1)\ ,
+    \label{eq:F9x}
+\end{equation}
+on $W_i=|V_i|^2$. Es nota que l'Equació \ref{eq:F9x} és consistent amb l'estat de referència. 
+
+Cal adreçar la presència de transformadors de relació variable. Es caracteritzen per provocar que les files de la matriu d'admitàncies total (amb la influència del bus oscil·lant) no sumin 0, així com afegir asimetries. Per això es decideix tractar-los per separat. La matriu inicial esdevé la suma de les dues matrius següents:
+\begin{equation}
+    Y = Y^{(b)} + Y^{(a)}\ ,
+        \label{eq:F8x}
+\end{equation}
+on:
+
+\vs
+$Y^{(b)}$: matriu d'admitàncies simètrica total amb totes les files que sumen 0.
+\vs
+$Y^{(a)}$: matriu d'admitàncies asimètrica total amb files que no sumen 0.
+
+Aquest plantejament no es descriu a la formulació original de Trias (2018), però és un mode coherent d'afrontar el problema. Es proposa que la matriu $Y^{(b)}$ reculli, a part de les admitàncies de les línies i transformadors sense relació variable, les dels transformadors de relació variable amb l'assumpció que la relació $t=1$. Per exemple, en un model de dos busos com el de la Figura \ref{fig:trafo3}:
+\begin{equation}
+    Y=
+    \begin{pmatrix}
+        Y_{cc} & -Y_{cc} \\
+        -Y_{cc} & Y_{cc} 
+    \end{pmatrix}
+    +
+    \begin{pmatrix}
+        Y_{cc}/|t|^2-Y_{cc} & -Y_{cc}/t^*+Y_{cc} \\
+        -Y_{cc}/t+Y_{cc} & 0
+    \end{pmatrix}\ .
+    \label{eq:quadri2MIH}
+\end{equation}
+Així la suma de les dues matrius equival a la matriu d'admitàncies de l'Equació \ref{eq:quadri2}. 
+
+Per complir amb l'estat de referència es retarda l'ús de la matriu $Y^{(a)}$ per mitjà de:
+\begin{equation}
+    Y = Y^{(b)} + sY^{(a)}\ .
+        \label{eq:F10x}
+\end{equation}
+En cas d'haver-hi algun de transformador de relació variable entre el bus oscil·lant i la resta de busos, els termes del tipus $Y_{iw}$ també es divideixen en $Y^{(b)}_{iw}$ i $Y^{(a)}_{iw}$. 
+
+Amb la fragmentació esmentada, l'Equació \ref{eq:F8} per als busos PQ esdevé:
+\begin{equation}
+    \begin{split}
+    \sum_{j}Y^{(b)}_{ij}V_j(s) = &-s\sum_{j}Y^{(a)}_{ij}V_j(s) -Y^{(b)}_{iw}(1+s(V_w-1))\\
+    &-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sS^*_iX_i(s)\ .
+    \end{split}
+        \label{eq:F9}
+\end{equation}
+I l'Equació \ref{eq:F11x} per als busos PV passa a ser:
+\begin{equation}
+    \begin{split}
+    \sum_{j}Y^{(b)}_{ij}V_j(s) = &-s\sum_{j}Y^{(a)}_{ij}V_j(s) -Y^{(b)}_{iw}(1+s(V_w-1))\\
+    &-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sP_iX_i(s)-jQ_i(s)X_i(s)\ .   
+    \end{split}
+        \label{eq:F9xx}
+\end{equation}
+\subsection{Algoritme}
+L'algoritme de la formulació original inicialitza tots els primers termes de tensió a 1, i tots els primers termes de potència reactiva a 0. Per als següents ordres fa falta separar les equacions del sumatori d'intensitat en part real i part imaginària. Schmidt (2015) ho evita i conseqüentment simplifica les equacions. Encara que la implementació resulti més simple, s'ha comprovat que amb presència de busos PV les propietats de convergència de les sèries es degraden considerablement. Vet aquí la necessitat de dividir en part real i imaginària.
+
+Així, l'Equació \ref{eq:F9} es converteix en:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}&V^{(re)}_j(s)-B^{(b)}_{ij}V^{(im)}_j(s)) = \Re\biggl[-s\sum_{j}Y^{(a)}_{ij}V_j(s) \\
+    &-Y^{(b)}_{iw}(1+s(V_w-1))-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sS^*_iX_i(s)\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}&V^{(re)}_j(s)+G^{(b)}_{ij}V^{(im)}_j(s)) = \Im\biggl[-s\sum_{j}Y^{(a)}_{ij}V_j(s)\\
+    &-Y^{(b)}_{iw}(1+s(V_w-1))-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sS^*_iX_i(s)\biggr]\ ,
+    \end{split}
+\end{cases}
+        \label{eq:F9PQ1}
+\end{equation}
+on:
+
+$G^{(b)}_{ij}$: part real de l'element $Y^{(b)}_{ij}$.
+\vs
+$B^{(b)}_{ij}$: part imaginària de l'element $Y^{(b)}_{ij}$.
+\vs
+$V^{(re)}_j(s)$: part real de la tensió $V_j(s)$.
+\vs
+$V^{(im)}_j(s)$: part imaginària de la tensió $V_j(s)$.
+\vs
+$\Re$[ ]: funció que extreu la part real.
+
+Per als busos PV l'Equació \ref{eq:F9xx} resulta:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}&V^{(re)}_j(s)-B^{(b)}_{ij}V^{(im)}_j(s))-\Im[Q_i(s)X_i(s)] = \Re\biggl[-s\sum_{j}Y^{(a)}_{ij}V_j(s)\\
+    &-Y^{(b)}_{iw}(1+s(V_w-1))-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sP_iX_i(s)\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}&V^{(re)}_j(s)+G^{(b)}_{ij}V^{(im)}_j(s))+\Re[Q_i(s)X_i(s)] = \Im\biggl[-s\sum_{j}Y^{(a)}_{ij}V_j(s)\\
+     &-Y^{(b)}_{iw}(1+s(V_w-1))-sY^{(a)}_{iw}(1+s(V_w-1))-sY_{sh,i}V_i(s)+sP_iX_i(s)\biggr]\ .
+    \end{split}
+\end{cases}
+        \label{eq:F9PV1}
+\end{equation}
+Tots els elements que apareixen a la dreta de la igualtat o pertanyen a dades del problema, o bé són incògnites en què el coeficient necessari ja ha estat calculat. En lloc de buscar les incògnites complexes $V_j(s)$, el problema tracta de trobar la seva part real i imaginària per llavors unir-les i conèixer finalment la tensió complexa.
+
+Les sèries es descomponen en termes. L'anàlisi dels primers termes, és a dir, els d'ordre 0, ja s'ha dut a terme. Pels d'ordre 1, les expressions de l'Equació \ref{eq:F9PQ1} són:
+% \begin{equation}
+%     \begin{split}
+%     \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[1]&-B^{(b)}_{ij}V^{(im)}_j[1]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]\\
+%     &-Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ ,\\
+%     \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[1]&+G^{(b)}_{ij}V^{(im)}_j[1]) = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]\\
+%     &-Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ ,
+%     \end{split}
+%         \label{eq:F9PQ2}
+% \end{equation}
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[1]-B^{(b)}_{ij}V^{(im)}_j[1]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]
+    -Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[1]+G^{(b)}_{ij}V^{(im)}_j[1]) = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]
+    -Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ ,
+    \end{split}
+\end{cases}
+        \label{eq:F9PQ2}
+\end{equation}
+on $X_i[0]=1$ tal com es dedueix de l'Equació \ref{eq:F7}. No obstant això, per un ordre genèric $c$ en el qual $c > 0$:
+\begin{equation}
+    X_i[c]=-\sum_{k=0}^{c-1}X_i[k]V^*_i[c-k]\ .
+    \label{eq:Xcalcul}
+\end{equation}
+Això es pot entendre com una convolució discreta.
+
+Les expressions a utilitzar per als termes d'ordre 1 en els busos PV esdevenen:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}&V^{(re)}_j[1]-B^{(b)}_{ij}V^{(im)}_j[1]) =\\
+    &\Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]
+    -Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}&V^{(re)}_j[1]+G^{(b)}_{ij}V^{(im)}_j[1])+Q_i[1] =\\
+    &\Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[0]
+     -Y^{(b)}_{iw}(V_w-1)-Y^{(a)}_{iw}-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ .
+    \end{split}
+\end{cases}
+        \label{eq:F9PV2}
+\end{equation}
+Per als termes d'ordre 1 de les tensions dels busos PV, mitjançant l'Equació \ref{eq:F9x} es troba que:
+\begin{equation}
+    2V^{(re)}_i[1]=W_i-1\ .
+        \label{eq:F13x}
+\end{equation}
+En aquest punt la resolució de les expressions que es presenten a les Equacions \ref{eq:F9PQ2}, \ref{eq:F9PV2} i \ref{eq:F13x} proporciona els termes d'ordre 1 de les tensions dels busos PQ i PV i de la potència reactiva desconeguda als busos PV. 
+
+Es nota que conformen un sistema lineal d'equacions. Una vegada solucionat, es calculen els termes $X_i[1]$ per mitjà de l'Equació \ref{eq:Xcalcul}. Llavors es passa a obtenir els coeficients del següent ordre. En excepció dels primers coeficients, per tota la resta s'ha de repetir un procediment d'aquesta mena.  
+
+Pels termes d'ordre 2 les equacions dels busos PQ donen peu a:
+% \begin{equation}
+%     \begin{split}
+%     \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[2]&-B^{(b)}_{ij}V^{(im)}_j[2]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]\\
+%     &-Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+S^*_iX_i[1]\biggr]\ ,\\
+%     \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[2]&+G^{(b)}_{ij}V^{(im)}_j[2]) = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]\\
+%     &-Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+S^*_iX_i[1]\biggr]\ ,
+%     \end{split}
+%         \label{eq:F9PQ3}
+% \end{equation}
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[2]-B^{(b)}_{ij}V^{(im)}_j[2]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]
+    -Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+S^*_iX_i[1]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[2]+G^{(b)}_{ij}V^{(im)}_j[2]) = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]
+    -Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+S^*_iX_i[1]\biggr]\ ,
+    \end{split}
+\end{cases}
+        \label{eq:F9PQ3}
+\end{equation}
+mentre que per als busos PV esdevenen:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}&V^{(re)}_j[2]-B^{(b)}_{ij}V^{(im)}_j[2]) =\\
+    &\Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]
+    -Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+P_iX_i[1]-jQ_i[1]X_i[1]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}&V^{(re)}_j[2]+G^{(b)}_{ij}V^{(im)}_j[2])+Q_i[2] =\\
+    &\Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[1]
+     -Y^{(a)}_{iw}(V_w-1)-Y_{sh,i}V_i[1]+P_iX_i[1]-jQ_i[1]X_i[1]\biggr]\ .
+    \end{split}
+\end{cases}
+        \label{eq:F9PV3}
+\end{equation}
+Pels mòduls dels busos PV es recorre a:
+\begin{equation}
+    2V^{(re)}_i[2]=-V_i[1]V^*_i[1]\ .
+        \label{eq:F14x}
+\end{equation}
+Altre cop es planteja un sistema d'equacions lineals, que té la mateixa estructura abans.
+
+Finalment, cal generalitzar l'algoritme per a majors ordres, tal que $c=3, 4, ... , n_i$, on $n_i$ representa la profunditat, és a dir, el màxim nombre de coeficients a calcular per les sèries. Per als busos PQ s'utilitza:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[c]&-B^{(b)}_{ij}V^{(im)}_j[c]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1]-Y_{sh,i}V_i[c-1]+S^*_iX_i[c-1]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[c]&+G^{(b)}_{ij}V^{(im)}_j[c]) = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1] -Y_{sh,i}V_i[c-1]+S^*_iX_i[c-1]\biggr]\ .
+    \end{split}
+\end{cases}
+        \label{eq:F9PQ4}
+\end{equation}
+Els mòduls de tensió dels busos PV segueixen:
+\begin{equation}
+    2V^{(re)}_i[c]=-\sum_{k=1}^{c-1}V_i[k]V^*_i[c-k]\ .
+        \label{eq:F14xx}
+\end{equation}
+De fet, l'Equació \ref{eq:F14x} sorgeix d'aquí.
+
+Per als busos PV les equacions generalitzades dels sumatoris d'intensitat són:
+% \begin{equation}
+%     \begin{split}
+%     \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[c]&-B^{(b)}_{ij}V^{(im)}_j[c]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1]-Y_{sh,i}V_i[c-1]+P_iX_i[c-1]\\
+%     &-j\sum_{k=1}^{c-1}Q_i[k]X_i[c-k]\biggr]\ ,\\
+%     \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[c]&+G^{(b)}_{ij}V^{(im)}_j[c])+Q_i[c] = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1]-Y_{sh,i}V_i[c-1]\\
+%     &+P_iX_i[c-1]-j\sum_{k=1}^{c-1}Q_i[k]X_i[c-k]\biggr]\ .
+%     \end{split}
+%         \label{eq:F9PV4}
+% \end{equation}
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+    \sum_{j}(G^{(b)}_{ij}V^{(re)}_j[c]&-B^{(b)}_{ij}V^{(im)}_j[c]) = \Re\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1]\\
+    &-Y_{sh,i}V_i[c-1]+P_iX_i[c-1]-j\sum_{k=1}^{c-1}Q_i[k]X_i[c-k]\biggr]\ ,\\
+    \sum_{j}(B^{(b)}_{ij}V^{(re)}_j[c]&+G^{(b)}_{ij}V^{(im)}_j[c])+Q_i[c] = \Im\biggl[-\sum_{j}Y^{(a)}_{ij}V_j[c-1]\\
+    &-Y_{sh,i}V_i[c-1]+P_iX_i[c-1]-j\sum_{k=1}^{c-1}Q_i[k]X_i[c-k]\biggr]\ .
+    \end{split}
+\end{cases}
+        \label{eq:F9PV4}
+\end{equation}
+L'algoritme finalitza una vegada s'han calculat tots els termes de les sèries de tensió dels busos PQ i PV i de potència reactiva dels busos PV. 
+
+Des del punt de vista de computació, el MIH parteix de l'avantatge que la matriu del sistema es conserva per tots els ordres. Pels primers termes, del tipus [0], no s'utilitza. Però per la resta de profunditats, se la defineix al principi de l'algoritme i s'inverteix o es factoritza una única vegada, cosa que no passa amb el mètode de Newton-Raphson.
+
+En forma de blocs el sistema d'equacions és:
+\begin{equation}
+    R = 
+    \begin{pmatrix}
+        G & -B & 0 \\
+        B & G &  1 \\
+        \Upsilon & 0 & 0 
+    \end{pmatrix}L\ ,
+    \label{eq:quadri2MIH2}
+\end{equation}
+on:
+
+$L$: vector d'incògnites format per $[V^{(re)}, V^{(im)}, Q]$. S'ordenen en funció de l'índex dels busos. 
+\vs
+$R$: vector de la dreta de la igualtat de les equacions anteriors, calculat en funció de l'ordre. És una dada i segueix la mateixa ordenació que $L$. 
+\vs
+$\Upsilon$: matriu amb tantes columnes com busos no oscil·lants i tantes files com busos PV. A cada fila totes les seves entrades són nul·les, excepte aquella que multiplica per $V^{(re)}_i$, on $i$ simbolitza l'índex d'un dels busos PV. Així, tots els seus elements no nuls valen 2. 
+
+La Figura \ref{fig:dispersa_MATx} posa de manifest que, tot i que per a la xarxa Nord Pool la matriu és de dimensions superiors que el jacobià de la Figura \ref{fig:dispersa_nord}, és també del tipus dispersa. La majoria dels seus elements són nuls. A l'hora de programar l'algoritme això s'ha tingut en compte. Es treballa amb la biblioteca SciPy per tractar-la com a dispersa i així estalviar temps de càlcul. S'observa que la majoria d'entrades no nul·les dibuixen diagonals, que precisament coincideixen amb les de les matrius de blocs de l'Equació \ref{eq:quadri2MIH2}.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+        \incfig{dispersa_MATx_nord2}{0.48}
+    \caption{Matriu del sistema Nord Pool de la formulació original en imatge. Elements nuls en blanc}
+    \label{fig:dispersa_MATx}
+    \end{center}
+\end{figure}
+
+\section{Formulació pròpia}
+La formulació pròpia es distingeix de la formulació original en la seva incrustació. No adapta la matriu d'admitàncies en funció de si hi ha transformadors de relació variable. Les equacions resultants són sovint més compactes. Tanmateix, amb transformadors de relació variable no compleix amb l'estat de referència en un inici. Això desencadena algunes limitacions a l'hora de fer servir recursos ideats per ser aplicats en la formulació original, com són els aproximants Sigma o el Padé-Weierstrass.
+
+Per als busos PQ es parteix de:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -\sum_wY_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+sS^*_iX_i(s)\ ,
+        \label{eq:MPQ1}
+\end{equation} 
+on no es divideix la matriu d'admitàncies en dos. A diferència de la formulació original, es considera que pot haver-hi més d'un bus oscil·lant. 
+
+En el cas dels busos PV, l'equació corresponent al balanç d'intensitats és:
+\begin{equation}
+    \sum_{j}Y_{ij}V_j(s) = -\sum_wY_{iw}(1+s(V_w-1)) -sY_{sh,i}V_i(s)+s(P_iX_i(s)-jQ_i(s)X_i(s))\ ,
+        \label{eq:MPV1}
+\end{equation}
+que a diferència de l'Equació \ref{eq:F11x}, també s'ha multiplicat la potència reactiva per $s$. Per tant, el seu càlcul queda retardat. Els termes $V_i[c]$ i $Q_i[c-1]$ es calculen simultàniament. Aquesta incrustació facilita l'obtenció dels termes inicials de tensió. 
+
+Pels mòduls de tensió dels busos PV es fa servir:
+\begin{equation}
+    V_i(s)V^*_i(s)=|V_i[0]|^2+s(W_i-|V_i[0]|^2)\ .
+        \label{eq:MPV2}
+\end{equation}
+Es nota que comparat amb l'Equació \ref{eq:F9x} no s'assumeix que els primers coeficients de tensió són unitaris. De fet, igual que en la formulació original, l'equació dels mòduls de tensió no intervé en el càlcul dels primers termes. 
+
+\subsection{Algoritme}
+L'algoritme de la formulació pròpia comença amb les Equacions \ref{eq:MPQ1} i \ref{eq:MPV1}. En un inici porten al mateix:
+\begin{equation}
+    \sum_jY_{ij}V_j[0]=-\sum_wY_{iw}\ .
+        \label{eq:Mordre1}
+\end{equation}
+Quan no hi ha transformadors de relació variable, el sistema d'equacions que en resulta té per solució les tensions unitàries, ja que la matriu d'admitàncies total manté la simetria i les seves files sumen 0. Quan n'hi ha, pot passar que $\sum_jY_{ij}$ per una fila donada no sigui igual a -$\sum_wY_{iw}$. En aquestes condicions els primers coeficients de tensió varien lleugerament respecte a la unitat. Com més extremes són les relacions $t$ dels transformadors, més distants d'1 esdevenen.
+
+Les equacions referents al balanç d'intensitats dels busos PQ pels termes del següent ordre són:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \sum_j(G_{ij}V^{(re)}_j[1]&-B_{ij}V^{(im)}_j[1]) = \Re\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ ,\\
+        \sum_j(B_{ij}V^{(re)}_j[1]&+G_{ij}V^{(im)}_j[1]) = \Im\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+S^*_iX_i[0]\biggr]\ .\\
+    \end{split}
+\end{cases}
+    \label{eq:MPQ2}
+\end{equation}
+Com que no es pot afirmar que els primers termes de tensió són sempre unitaris, per al càlcul del primer terme de $X_i(s)$ s'empra:
+\begin{equation}
+    X_i[0]=\frac{1}{V^*_i[0]}\ .
+    \label{eq:Xcalcul2}
+\end{equation}
+A la resta d'ordres s'utilitza:
+\begin{equation}
+    X_i[c]=\frac{-\sum_{k=0}^{c-1}X_i[k]V^*_i[c-k]}{V^*_i[0]}\ ,
+    \label{eq:Xcalcul3}
+\end{equation}
+on també es realitza la convolució entre sèries. Aquest cop, però, es té present que el primer terme de tensió pot no ser unitari. 
+
+En els busos PV, pels segons termes ja apareix la seva potència reactiva, que actua com incògnita:
+% \begin{equation}
+%     \begin{split}
+%         \sum_j(G_{ij}V^{(re)}_j[1]&-B_{ij}V^{(im)}_j[1])-X^{(im)}_i[0]Q_i[0] = \\
+%         &\Re\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ ,\\
+%         \sum_j(B_{ij}V^{(re)}_j[1]&+G_{ij}V^{(im)}_j[1])+X^{(re)}_i[0]Q_i[0] = \\
+%         &\Im\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ ,
+%     \end{split}
+%     \label{eq:MPV3}
+% \end{equation}
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \sum_j(G_{ij}V^{(re)}_j[1]-B_{ij}V^{(im)}_j[1])-X^{(im)}_i[0]Q_i[0] = 
+        \Re\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ ,\\
+        \sum_j(B_{ij}V^{(re)}_j[1]+G_{ij}V^{(im)}_j[1])+X^{(re)}_i[0]Q_i[0] = 
+        \Im\biggl[\sum_w Y_{iw}(V_w-1)-Y_{sh,i}V_i[0]+P_iX_i[0]\biggr]\ ,
+    \end{split}
+\end{cases}
+    \label{eq:MPV3}
+\end{equation}
+on $X^{(re)}_i$ i $X^{(im)}_i$ denoten respectivament la part real i imaginària de $X_i$.
+
+El desenvolupament de l'Equació \ref{eq:MPV2} pels termes d'ordre 1 porta a:
+\begin{equation}
+    2V^{(re)}_i[0]V^{(re)}_i[1]+2V^{(im)}_i[0]V^{(im)}_i[1]=W_i-|V_i[0]|^2\ .
+        \label{eq:MPV4}
+\end{equation}
+La resolució del sistema format per les Equacions \ref{eq:MPQ2}, \ref{eq:MPV3} i \ref{eq:MPV4} proporciona la solució de les tensions $V_i[1]$ i de les potències reactives $Q_i[0]$. 
+
+A partir d'aquí l'algoritme es generalitza per a $c=2, 3, ..., n_i$ amb la idea de trobar els següents termes de tensió i potència reactiva. Aquests últims sempre van retardats un pas respecte als de tensió.
+
+En el cas dels busos PQ s'empra:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \sum_j(G_{ij}V^{(re)}_j[c]&-B_{ij}V^{(im)}_j[c]) = \Re\biggl[-Y_{sh,i}V_i[c-1]+S^*_iX_i[c-1]\biggr]\ ,\\
+        \sum_j(B_{ij}V^{(re)}_j[c]&+G_{ij}V^{(im)}_j[c]) = \Im\biggl[-Y_{sh,i}V_i[c-1]+S^*_iX_i[c-1]\biggr]\ ,\\
+    \end{split}
+\end{cases}
+    \label{eq:MPQ3}
+\end{equation}
+que guarda relació amb l'Equació \ref{eq:MPQ2} amb la diferència que no conté la contribució dels busos oscil·lants. Justament els termes de l'esquerra de la igualtat estan acompanyats pels mateixos factors. 
+
+Per als busos PV l'equació del balanç de corrents esdevé:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \sum_j(G_{ij}V^{(re)}_j[c]&-B_{ij}V^{(im)}_j[c])-X^{(im)}_i[0]Q_i[c-1] = \\
+        &\Re\biggl[-j\sum_{k=1}^{c-1}X_i[k]Q_i[c-1-k]-Y_{sh,i}V_i[c-1]+P_iX_i[c-1]\biggr]\ ,\\
+        \sum_j(B_{ij}V^{(re)}_j[c]&+G_{ij}V^{(im)}_j[c])+X^{(re)}_i[0]Q_i[c-1] = \\
+        &\Im\biggl[-j\sum_{k=1}^{c-1}X_i[k]Q_i[c-1-k]-Y_{sh,i}V_i[c-1]+P_iX_i[c-1]\biggr]\ .
+    \end{split}
+\end{cases}
+    \label{eq:MPV5}
+\end{equation}
+Igualment desapareix l'efecte dels busos oscil·lants. 
+
+Per als mòduls de voltatge dels busos PV es recorre a:
+\begin{equation}
+    2V^{(re)}_i[0]V^{(re)}_i[c]+2V^{(im)}_i[0]V^{(im)}_i[c]=-\sum_{k=1}^{c-1}V_i[k]V^*_i[c-k]\ .
+        \label{eq:MPV6}
+\end{equation}
+Els termes que multipliquen les incògnites es mantenen constants des de l'ordre número 1, pel que la matriu del sistema, igual que en la formulació original, es conserva. Només ha de ser factoritzada o invertida una única vegada. En forma de blocs resulta ser:
+\begin{equation}
+    R = 
+    \begin{pmatrix}
+        G & -B & -X^{(im)}[0] \\
+        B & G &  X^{(re)}[0] \\
+        2V^{(re)}[0] & 2V^{(im)}[0] & 0 
+    \end{pmatrix}L\ ,
+    \label{eq:MATx}
+\end{equation}
+on $R$ i $L$ són vectors que segueixen la mateixa ordenació que en la formulació original (Equació \ref{eq:quadri2MIH2}). Les matrius $2V^{(re)}[0]$ i $2V^{(im)}[0]$ són tals que contenen els primers termes de tensió real i imaginària respectivament, multiplicats per 2, per així de complir amb l'equació dels mòduls de tensió. Les matrius $-X^{(im)}[0]$ i $X^{(re)}[0]$ també estan formades pels primers termes, en aquest cas de les sèries $X_i(s)$, que surten de les equacions dels balanços d'intensitat als busos PV. 
+
+Es nota que sense transformadors de relació variable, situació en què les entrades no nul·les de $V^{(re)}[0]$ i $X^{(re)}[0]$ estan constituïdes només per uns, i en què $V^{(im)}[0]$ i $X^{(im)}[0]$ només contenen zeros, la matriu de l'Equació \ref{eq:MATx} és idèntica a la de l'Equació \ref{eq:quadri2MIH2}. Amb transformadors de relació variable la matriu de la formulació pròpia és lleugerament menys dispersa que la de la formulació original. L'avantatge de la formulació pròpia es troba sobretot en la simplicitat de l'algoritme. 

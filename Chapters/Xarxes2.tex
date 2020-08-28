@@ -1,0 +1,657 @@
+En el capítol anterior s'ha valorat l'estat d'operació de les sis xarxes seleccionades en el seu punt d'operació inicial. S'ha observat que bona part d'elles resultaven ben condicionades. En aquest capítol s'apropen aquests mateixos sistemes al punt de col·lapse de tensions a partir de variar la seva càrrega. Això fa que es trobin més mal condicionats, i que per tant, els mètodes resolutius del flux de potències siguin més susceptibles de fallar. 
+
+Es realitza un estudi individual per a cada xarxa. En algunes d'elles s'augmenta la càrrega de tot el sistema pel mateix factor, mentre que en d'altres s'incrementa la demanda en únic bus. Tot això amb la idea de buscar fins a quin punt el mètode d'incrustació holomòrfica resulta capaç d'arribar a la solució. Amb les xarxes en el punt de treball inicial, l'ús del Padé-Weierstrass i dels aproximants de Thévenin per traçar les corbes PV o PQ no quedava justificat. En aquest cas també s'analitza la utilitat d'aquests recursos. 
+
+La Taula \ref{tab:canvis_sistemes} recull els canvis que pateix cada sistema per acostar-se al punt de col·lapse de tensions. El paràmetre $\lambda$ denota el factor pel qual es multipliquen les potències de tota la xarxa. S'ha assumit que a la xarxa d'11 busos $\lambda$ val 0,5 en un inici. 
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{ll}
+    \hline
+    Sistema & Canvi\\
+    \hline
+    \hline
+    Cas d'11 busos & $P_{10}=-$0,18\\
+    IEEE14 & $\lambda=$\ 4,0\\
+    IEEE30 & $P_{29}=-$0,82\\
+    Nord Pool & $\lambda=$\ 2,3\\
+    IEEE118 & $P_{117}=-$8,50\\
+    PEGASE2869 & $Q_{2.866}=-$11,0\\ 
+    \hline 
+    \end{tabular}
+    \caption{Canvis de càrrega escollits als sistemes a estudiar}
+    \label{tab:canvis_sistemes}
+    \end{center}
+  \end{table}
+
+\section{Cas d'11 busos}
+Essencialment el cas d'11 busos es troba mal condicionat. La presència de transformadors de relació variable fa que, tot i reduir la seva càrrega a la meitat, el NR bàsic i el NR amb el multiplicador d'Iwamoto no siguin capaços d'obtenir una solució correcta des del punt de vista d'operació. Tanmateix, el desacoblat ràpid, el NR amb la variació de Levenberg-Marquardt i el MIH sí que arriben a una solució vàlida. Per això, ara s'incrementa la potència del bus 10. Passa de comptar amb una demanda de potència activa de 0,079 a 0,18.
+
+En aquestes condicions s'obtenen els gràfics Sigma de la Figura \ref{fig:CAR1}. Per validar la solució s'han traçat les dues representacions amb profunditats diferents. Així, si tots els seus punts convergeixen a l'interior de la paràbola cap a la mateixa posició, la solució és físicament correcta.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=2 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={30 coeficients}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sig30_cas11.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={60 coeficients}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sig60_cas11.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma del sistema d'11 busos amb $P_{10}=-$0,18 i profunditats de 30 i 60}
+  \label{fig:CAR1}
+  \end{center}
+\end{figure}
+
+En els dos gràfics el punt més a prop del límit correspon al del bus 10, precisament, el que s'ha decidit carregar. Tant en un cas com en l'altre la distribució de punts resulta molt similar. Si s'incrementa encara més la profunditat, s'arriba a un gràfic gairebé igual a aquests dos on tots els punts queden dins els límits. 
+
+No passa el mateix quan per exemple $P_{10}=-$0,20. En tal situació s'obtenen els gràfics de la Figura \ref{fig:CAR2}. Com s'aprecia, hi ha diferències notables en funció de la profunditat. 
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=2 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.},  title={30 coeficients}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sig30_cas11_2.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={60 coeficients}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sig60_cas11_2.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma del sistema d'11 busos amb $P_{10}=-$0,20 i profunditats de 30 i 60}
+  \label{fig:CAR2}
+  \end{center}
+\end{figure}
+
+A la Figura \ref{fig:CAR2} les distribucions de punts no convergeixen cap a dins la paràbola. Així, es diagnostica que el sistema no té solució. Si s'incrementa la profunditat a més de 60 coeficients, els punts tampoc queden a l'interior de la paràbola. La informació afegida dels gràfics Sigma és que mostren els busos problemàtics. En aquest cas el bus 10 és el que queda més allunyat dels límits de la paràbola amb 60 coeficients. Això es podia anticipar a partir de la Figura \ref{fig:CAR1}, on gairebé roman sobre el límit.
+
+Donat que quan $P_{10}=-$0,18 el sistema té solució, es continua amb aquesta condició de càrrega. La resolució del sistema amb els mètodes iteratius dóna lloc a la Taula \ref{tab:CAR3}, on es presenten les iteracions requerides per aconseguir un error inferior a $10^{-10}$ i l'error resultant. Només es treballa amb el Levenberg-Marquardt i el desacoblat ràpid perquè en aquesta ocasió són els únics que convergeixen.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR L-M & 3,10.10$^{-12}$ & 19\\ 
+  FDLF & 9,70.10$^{-11}$ & 57\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries en el cas d'11 busos amb mètodes tradicionals. $P_{10}=-$0,18}
+  \label{tab:CAR3}
+  \end{center}
+\end{table}
+
+Tant el desacoblat ràpid com el Levenberg-Marquardt no només han estat capaços de convergir sinó també d'arribar a la solució correcta. El desacoblat ràpid ha necessitat menys iteracions en comparació amb les requerides quan $P_{10}=-$0,079 (Taula \ref{tab:solucio_iteratius1}). En canvi, si per exemple $P_{10}=-$0,20, cap d'ells convergeix. 
+
+El mètode d'incrustació holomòrfica en un inici proporciona errors de l'ordre de $10^{-2}$. Encara que la profunditat creixi, no milloren significativament. S'ignora la possibilitat d'utilitzar la formulació pròpia, ja que no diagnostica el sistema, i en segon lloc, també obté errors insatisfactoris. Per tant, en punts tan propers al col·lapse no es perfila com una bona eina per determinar si la solució és correcta. Cal emprar el mètode de Padé-Weierstrass amb la formulació original per tal d'aconseguir errors acceptables.
+
+L'obtenció del vector que conté les $s_0$ en què s'avaluen les sèries es porta a terme per mitjà d'un procediment d'assaig-i-error amb la bisecció. S'ha trobat que $s_0=$[0,50; 0,40; 0,50; 0,55] i amb una profunditat de 30 tant pel MIH bàsic com pel P-W, l'error final és inferior a $10^{-10}$. La Figura \ref{fig:CAR4} captura l'evolució de l'error al llarg de les iteracions en els diversos graons del P-W, i també, del MIH bàsic.  
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=11cm,height=9cm,scatter/classes={a={mark=triangle,mark size=2pt,draw=black}, b={mark=x,mark size=2pt,draw=black}, c={mark=*,mark size=2pt,draw=black}, d={mark=o,mark size=2pt,draw=black},e={mark=diamond,mark size=2pt,draw=black}, f={mark=+,mark size=1pt,draw=black},  g={mark=square,mark size=1pt,draw=black},  h={mark=pentagon,mark size=1pt,draw=black}}]]
+
+
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/11_MIHbasic.csv};         
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/11_grao1.csv};     
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/11_grao2.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/11_grao3.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/11_grao4.csv};
+
+      \legend{MIH bàsic, Graó 1, Graó 2, Graó 3, Graó 4} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error al cas d'11 busos segons l'etapa resolutiva}
+  \label{fig:CAR4}
+  \end{center}
+\end{figure}
+
+Tal com s'observa, els primers dos graons no superen el MIH bàsic, en el sentit que els seus errors romanen similars. Amb el tercer graó la solució comença a millorar, tot i que ho fa lentament. No és fins al quart graó que el perfil d'evolució de l'error en funció de la profunditat pren la trajectòria desitjada. Per una profunditat de 10 ja comença amb un error de l'ordre de 10$^{-4}$ i llavors, amb 20 coeficients més assoleix un error de 6,93.10$^{-11}$. 
+
+Així doncs, s'ha comprovat la utilitat del P-W. A partir d'una solució aparentment incorrecta, després de repetir diverses vegades la resolució del flux de potències amb solucions anteriors, arriba a un resultat satisfactori. 
+
+En comparació amb els mètodes tradicionals, del tipus iteratiu, s'ha vist que la combinació del MIH amb el P-W permet assolir errors del mateix ordre. En aquest cas, la riquesa del MIH està sobretot en el fet que diagnostica l'estat del sistema. Primer perquè permet identificar quins busos estan més a prop del límit de la paràbola del gràfic Sigma (que corresponen als busos més crítics), i llavors, perquè quan el resultat és erroni es fa evident quins busos en són els causants. Pel que fa als mètodes tradicionals, quan aquests no encerten la solució, no hi ha cap recurs per conèixer directament el motiu.
+
+\section{IEEE14}
+La xarxa IEEE14 també conté transformadors de relació variable. Per aquesta raó només es recorre a la formulació original. El fet que es tractés d'un sistema real en el seu moment fa que no presenti un perfil de tensions inusual com el del cas d'11 busos. Per tal d'acostar-lo al col·lapse de tensions, s'augmenten totes les seves potències d'acord amb un factor $\lambda=$\ 4,0. El gràfic Sigma amb 30 coeficients es mostra a la Figura \ref{fig:CAR5}. Per a profunditats superiors la distribució de punts es manté dins els límits, pràcticament amb els punts en la mateixa posició.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=1 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:1.25,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sig30_14.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de la IEEE14 amb $\lambda=$\ 4,0 i sèries de 30 coeficients}
+  \label{fig:CAR5}
+  \end{center}
+\end{figure}
+
+El conjunt de punts partia proper del (0, 0) però s'expandeix fins a aproximar-se al límit inferior de la paràbola. Això té sentit perquè s'han escalat totes les potències, tant activa com reactiva. Com que el consum d'activa és superior al de reactiva i a les línies la reactància predomina per sobre la resistència, els punts tendeixen a desplaçar-se cap a la zona inferior del gràfic. A més, la injecció addicional de reactiva dels busos PV fa que també es moguin cap a la dreta.
+
+Tots els mètodes numèrics iteratius han solucionat el sistema correctament. Tanmateix, la Taula \ref{tab:CAR6} posa de manifest que fan falta força més iteracions de les habituals per assolir una solució amb un error inferior a 10$^{-10}$. 
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR & 1,29.10$^{-14}$ & 6\\ 
+  NR Iwamoto & 6,68.10$^{-14}$ & 7\\
+  NR L-M & 6,17.10$^{-12}$ & 10\\ 
+  FDLF & 9,89.10$^{-11}$ & 110\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries a la IEEE14 amb mètodes tradicionals. $\lambda=$\ 4,0}
+  \label{tab:CAR6}
+  \end{center}
+\end{table}
+
+Per ser competitiu amb aquests mètodes tradicionals, el MIH també ha de ser capaç de trobar la solució amb un error acceptable. En un inici, per una profunditat de 30 coeficients, s'aconsegueix que valgui prop de 10$^{-3}$. Altre cop el P-W permet reduir aquest error fins a una tolerància arbitrària. Per exemple, amb el vector $s_0=$[0,50; 0,40; 0,50; 0,55] (el mateix que pel cas d'11 busos), s'arriba a un error de 6,11.10$^{-11}$. 
+
+Més que veure la solució a cada graó, es vol estudiar la influència dels vectors $s_0$ sobre l'error final. S'han fixat set toleràncies diferents. La Taula \ref{tab:CAR7} presenta els vectors $s_0$ ajustats tal que la diferència entre aproximants de Padé d'ordres $L/M$ i $(L-1)/(M-1)$ sigui inferior a la tolerància.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{ll}
+  \hline
+  Tolerància & $s_0$\\
+  \hline
+  \hline
+  $10^{-7}$ & [0,85]\\
+  $10^{-8}$ & [0,83; 0,97]\\
+  $10^{-9}$ & [0,78; 0,92]\\
+  $10^{-10}$ & [0,74; 0,88]\\
+  $10^{-11}$ & [0,70; 0,82]\\
+  $10^{-12}$ & [0,66; 0,76; 0,87]\\
+  $10^{-13}$ & [0,61; 0,63; 0,61; 0,72]\\
+  \hline 
+  \end{tabular}
+  \caption{Vectors $s_0$ en funció de la tolerància permesa}
+  \label{tab:CAR7}
+  \end{center}
+\end{table}
+
+Quan es busquen toleràncies petites cal utilitzar més graons. S'observa que per un costat hi ha dependència amb la llargada del vector $s_0$ però també amb valors que el conformen. Per exemple, el primer element de tots els vectors decreix a mesura que s'especifica una tolerància menys generosa. És necessari que sigui així, ja que els termes del vector $s_0$ s'han d'acostar progressivament cap a 1. L'última sèrie s'avalua a 1 i per això cal un valor ben condicionat. 
+
+Començar $s_0$ amb valors petits implica que es necessitin més graons, però per contra, possibilita arribar a un error menor. Quan el primer valor de $s_0$ resulta excessivament gran, no importa el nombre de graons perquè l'error amb prou feines disminueix. La Taula \ref{tab:CAR8} mostra els logaritmes dels errors a cada un dels graons amb els vectors de la Taula \ref{tab:CAR7}.
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lllll}
+  \hline
+  Tolerància & 1r graó & 2n graó & 3r graó & 4t graó\\
+  \hline
+  \hline
+  10$^{-7}$     & -6,58 &       &       &  \\
+  10$^{-8}$     & -6,86 & -7,53 &       &  \\
+  10$^{-9}$      & -5,33 & -7,81 &       &  \\
+  10$^{-10}$    & -5,66 & -7,78 &       &  \\
+  10$^{-11}$     & -4,97 & -10,38 &       &  \\
+  10$^{-12}$     & -4,59 & -9,63 & -10,60 &  \\
+  10$^{-13}$    & -5,06 & -7,80 & -10,75 & -11,70 \\
+  \hline 
+  \end{tabular}
+  \caption{Logaritmes dels errors segons la tolerància i el respectiu vector $s_0$, amb 30 coeficients}
+  \label{tab:CAR8}
+  \end{center}
+\end{table}
+
+Sovint les toleràncies més petites comencen amb errors considerables, però a mesura que s'implementen els següents graons, s'empetiteixen. Aquest és el preu a pagar per arribar a un error acceptable.
+
+Si en lloc d'estudiar el sistema per una càrrega concreta es valora com evoluciona la tensió dels busos a mesura que s'incrementa el factor de càrrega, s'arriba a la conclusió que les tensions evolucionen de forma similar a com ho fan en una gràfica PV. La gràfica de la Figura \ref{fig:CAR9} il·lustra l'evolució de la tensió del bus 3 amb els aproximants de Thévenin i amb el P-W per comparar les solucions obtingudes amb les dues eines.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+  \begin{axis}[
+      /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{3}|$},xlabel={$\lambda$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+    c={mark=x,mark size=1.5pt,draw=black}, b={mark=o,mark size=1.5pt,draw=black}, a={mark=|,mark size=2pt,draw=black}%
+    ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+  \addplot[scatter,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/14_PWload2.csv};
+  \addplot[scatter,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/14_TH1load2.csv};
+      \addplot[scatter,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/14_TH2load2.csv};
+      \legend{Thévenin -, Thévenin +, P-W} %tocar
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Mòdul de tensió del bus 3 de la xarxa IEEE14 en funció de $\lambda$ amb aproximants de Thévenin i amb P-W}
+  \label{fig:CAR9}
+  \end{center}
+\end{figure} 
+
+La corba superior ha estat representada tant amb els resultats extrets a partir del P-W com amb la solució positiva dels aproximants de Thévenin. S'encavalquen. Tot i que els aproximants de Thévenin parteixen dels coeficients de les sèries inicials, l'osculació fa possible obtenir mòduls de tensió extremadament similars als generats amb el P-W. En aquest darrer cas els errors s'han mantingut per sota l'ordre de $10^{-10}$. Així, els aproximants de Thévenin són una molt bona opció a l'hora de representar aquesta mena de corbes. De fet, és l'única eina que genera la branca inestable.
+
+\section{IEEE30}
+A jutjar pel gràfic Sigma, la IEEE30 és la xarxa més ben condicionada en l'estat inicial. Els punts queden molt propers al (0, 0). Per carregar el sistema es modifica la potència activa al bus 29, que passa de $-$0,106 a $-$0,82. Al capítol en què es detallen els aproximants Sigma ja s'ha presentat el gràfic Sigma en aquesta situació (Figura \ref{fig:sigA15}). Els busos 26, 28 i 29 són els que més s'acosten al límit. Això lliga amb la modificació de potència del bus 29. Aquest bus estira els altres cap al límit. 
+
+Tal com s'ha apreciat a la Figura \ref{fig:A10TH2}, una potència $P_{29}=-$0,82 implica que el sistema es trobi molt a prop del col·lapse de tensions. Es tracta d'una situació en què l'estat d'operació de la xarxa es cataloga de mal condicionat. No obstant això, tots els mètodes iteratius resolen el flux de potències correctament. A la Taula \ref{tab:CAR13x} es capturen els errors i les iteracions per aconseguir un error inferior a 10$^{-10}$. Generalment varien poc respecte als de la IEEE14 (Taula \ref{tab:CAR6}).
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR & 4,70.10$^{-12}$ & 6\\ 
+  NR Iwamoto & 1,44.10$^{-14}$ & 8\\
+  NR L-M & 2,71.10$^{-11}$ & 11\\ 
+  FDLF & 9,13.10$^{-11}$ & 142\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries a la IEEE30 amb mètodes tradicionals. $P_{29}=-$0,82}
+  \label{tab:CAR13x}
+  \end{center}
+\end{table}
+
+Per altra banda, la Figura \ref{fig:CAR10} mostra el radi de convergència de la tensió del bus 29 en funció de la potència. S'ha treballat amb la formulació original.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$r$},xlabel={$|P_{29}|$},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=8cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=1pt,draw=black},  g={mark=square,mark size=1pt,draw=black},  h={mark=pentagon,mark size=1pt,draw=black}}]]
+           
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/30_radi.csv};
+
+      %\legend{MIH propi, MIH original, P-W} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Radi de convergència de $V_{29}$ en funció de la demanda de potència activa $P_{29}$}
+  \label{fig:CAR10}
+  \end{center}
+\end{figure}
+
+La Figura \ref{fig:CAR10} reflecteix que no faria falta aplicar mètodes de continuació analítica. Amb la suma de coeficients s'arriba també a una solució acceptable en comparació amb els aproximants de Padé, per exemple. Aquest cas és oposat al sistema d'11 busos, on encara que el sistema es trobés lluny del col·lapse (amb $\lambda=$\ 0,5 i la formulació original), els radis de convergència eren inferiors a 1. Per tant, no es pot traçar un lligam fort entre la proximitat al punt de col·lapse i la necessitat de mètodes de continuació analítica.
+
+Com que no compta amb transformadors de relació variable, la IEEE30 és un sistema candidat a ser solucionat per mitjà de les dues formulacions del MIH. En un cas en el qual la xarxa opera lluny del col·lapse de tensions això resulta cert, però quan treballa a prop d'aquest col·lapse, els errors amb el MIH bàsic són inacceptables. Només la combinació de la formulació original amb el P-W possibilita minimitzar els errors. 
+
+La Figura \ref{fig:CAR10x} posa de manifest que sense el P-W la solució gairebé no millora al llarg de les iteracions.
+
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=11cm,height=8cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=2pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=1pt,draw=black},  g={mark=square,mark size=1pt,draw=black},  h={mark=pentagon,mark size=1pt,draw=black}}]]
+           
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/30_MIHpropi.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/30_MIHoriginal.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/30_PW.csv};
+
+      \legend{MIH propi, MIH original, P-W} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error a la IEEE30 amb $P_{29}=-$0,82, amb formulació pròpia, original i P-W}
+  \label{fig:CAR10x}
+  \end{center}
+\end{figure}
+
+Alguns errors dels MIH coincideixen al principi. Però en general les dues formulacions sense el P-W ofereixen resultats similars. Amb cap d'ells s'obtenen errors satisfactoris. S'ha comprovat que cap dels mètodes recurrents per calcular la solució final millora respecte als aproximants de Padé. Per aquesta raó, la formulació original es combina amb el P-W. L'error disminueix ràpidament i s'estabilitza entorn de $10^{-12}$. S'ha fixat una tolerància de 10$^{-13}$. El vector $s_0$ ha resultat ser [0,65; 0,55; 0,56; 0,59; 0,61; 0,76]. 
+
+Com s'ha raonat per a la IEEE14, el vector $s_0$ depèn de l'objectiu a l'hora d'utilitzar el P-W. Si per exemple es busca una tolerància petita com 10$^{-13}$, es necessiten força graons i la progressió dels components de $s_0$ esdevé lenta. La Figura \ref{fig:CAR11} il·lustra la dependència de $s_0$ amb l'error. Només s'ha emprat el P-W amb un únic graó en aquest cas.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={$s_0$},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=11cm,height=8cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=1pt,draw=black},  g={mark=square,mark size=1pt,draw=black},  h={mark=pentagon,mark size=1pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/30_s0.csv};
+
+      %\legend{MIH propi, MIH original, P-W} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error amb un graó del P-W en funció de $s_0$}
+  \label{fig:CAR11}
+  \end{center}
+\end{figure}
+
+S'evidencia que l'error mínim es produeix al voltant de $s_0=$\ 0,9, i que a partir d'aquell punt, creix. De fet, quan s'empra el P-W amb diversos graons, el primer valor del vector $s_0$ resulta més petit que aquest mínim. Això s'evidencia en el vector amb el qual es generen els resultats de la Figura \ref{fig:CAR10x}, que compta amb un valor inicial de 0,65. A la Figura \ref{fig:CAR11} queda clar que no correspon a la millor solució en un principi. Malgrat això, és indispensable per complir amb una tolerància de 10$^{-13}$ en els aproximants de Padé. 
+
+Numèricament s'observa que amb el vector $s_0$=[0,65; 0,55; 0,56; 0,59; 0,61; 0,76] l'error final val 6,06.10$^{-12}$. En canvi, si $s_0$=[0,90; 0,55; 0,56; 0,59; 0,61; 0,76] (i per tant només canvia el primer valor), l'error resulta de 5,84.10$^{-8}$. Una bona solució inicial amb el primer graó no garanteix que aquell primer valor sigui el millor per progressar amb altres graons.
+
+\section{Nord Pool}
+El sistema Nord Pool de 44 busos es caracteritza per comptar amb busos on la generació de potència activa és més extrema que la demanda. Això comporta que al gràfic Sigma els punts tendeixin a apropar-se al límit superior. La Figura \ref{fig:CAR12} representa aquest gràfic pel factor de càrrega $\lambda=$\ 2,3.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=1 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sigNord.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de la Nord Pool amb $\lambda=$\ 2,3 i sèries de 30 coeficients}
+  \label{fig:CAR12}
+  \end{center}
+\end{figure}
+
+Els dos punts que queden tan desplaçats cap a la dreta de l'eix real corresponen als busos 16 i 33. Això es deu al fet que són busos PV, on la potència reactiva no està fixada. Davant increments de potència, per mantenir el mòdul de tensió s'ha d'injectar potència reactiva. 
+
+A la xarxa Nord Pool les línies presenten un caràcter especialment inductiu, és a dir, que la reactància inductiva de les branques en sèrie predomina per sobre la resistència. Això comporta que juntament amb els augments de potència reactiva, els punts es desplacin tant cap a la dreta. Per altra banda, els busos 18 i 19 són els més propers als límits. Es tracten de busos PQ d'interconnexió, és a dir, on $P=0$ i $Q=0$. 
+
+Els mètodes iteratius com el NR i les seves variacions no tenen problemes a l'hora de calcular la solució final. La Taula \ref{tab:CAR13} mostra que malgrat necessitar més iteracions de l'habitual, tots ells convergeixen. Ho fan cap a la solució de la branca positiva. 
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR & 3,96.10$^{-15}$ & 6\\ 
+  NR Iwamoto & 7,18.10$^{-14}$ & 7\\
+  NR L-M & 4,18.10$^{-13}$ & 13\\ 
+  FDLF & 9,79.10$^{-11}$ & 101\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries a la Nord Pool amb mètodes tradicionals. $\lambda=$\ 2,3}
+  \label{tab:CAR13}
+  \end{center}
+\end{table}
+
+Altre cop, hi ha poca diferència entre aquests resultats i els extrets per les xarxes IEEE14 i IEEE30. Per a aquesta mena de xarxes de test, que pertanyen a sistemes reals i que no són fruit de la imaginació com el cas d'11 busos, tots els mètodes tradicionals de resolució que s'han considerat arriben a la solució. 
+
+La particularitat de la xarxa Nord Pool està en el fet que es tracta d'un sistema on les potències més extremes són de generació. Així, l'evolució de la tensió pot presentar diferències notables al costat de les típiques corbes PV. A la IEEE14 la tensió variava en funció del factor de càrrega tal com ho faria una corba PV. A la xarxa Nord Pool se selecciona un bus PQ com és el bus 2 per traçar primer la corba que determina com varia el mòdul de tensió respecte al factor de càrrega.
+
+El perfil obtingut es presenta a la Figura \ref{fig:CAR14}, on es mostra que no es tracta d'una evolució habitual. Difereix de la típica forma que segueixen les corbes PV i també de la Figura \ref{fig:CAR9}. En efecte, la tensió positiva amb prou feines varia al llarg de l'evolució de $\lambda$. Les dues branques (positiva i negativa) s'uneixen al final de tot. 
+
+Els aproximants de Thévenin han estat calculats amb les dues formulacions i en tots dos casos segueixen la mateixa tendència. A la Figura \ref{fig:CAR14} es presenten els obtinguts amb la formulació original. També s'ha calculat la solució amb el P-W a partir de la formulació original, és clar.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+  \begin{axis}[
+      /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{2}|$},xlabel={$\lambda$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+    a={mark=x,mark size=1.5pt,draw=black}, b={mark=o,mark size=1.5pt,draw=black}, c={mark=|,mark size=2pt,draw=black}%
+    ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/Nord_loadTH1.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/Nord_loadTH2.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/Nord_loadPW.csv};
+      \legend{Thévenin -, Thévenin +, P-W} %tocar
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Mòdul de tensió del bus 2 de la xarxa Nord Pool en funció de $\lambda$, amb P-W i Thévenin}
+  \label{fig:CAR14}
+  \end{center}
+\end{figure} 
+
+La corba de la Figura \ref{fig:CAR14} per definició no es tracta ni d'una corba PV ni d'una corba QV perquè les variacions de càrrega són a la vegada de potència activa i de reactiva. Se la pot entendre com un híbrid entre les dues. Es visualitza un perfil que contrasta amb els d'aquestes corbes perquè en el punt en què s'uneixen les dues branques dels aproximants de Thévenin, la tensió resulta molt propera a la unitat. No passa com en els altres casos on el voltatge esdevenia inacceptable des d'un punt de vista d'operació en aquest punt extrem.
+
+El P-W genera un perfil on la tensió disminueix de forma progressiva. Igual que la branca positiva dels aproximants de Thévenin, tot i que aquesta presenta algun pic. Segons Trias (2018) això és d'esperar. Aquests aproximants són adients per obtenir el perfil de tensions a prop del punt de col·lapse. La branca negativa dels aproximants de Thévenin també compta amb solucions que segueixen una tendència caòtica, però a partir de $\lambda=1$ no presenta salts abruptes. A la llarga les dues branques s'uneixen.
+
+Per altra banda, fins ara tots els resultats extrets amb el P-W s'han basat a utilitzar una profunditat igual en les sèries inicials que en les sèries del P-W. Però no necessàriament les dues han de ser idèntiques. Per exemple, una opció consisteix a utilitzar menys coeficients per calcular $V(s_0)$ per llavors afinar la solució amb força coeficients a les sèries del P-W. 
+
+A la Figura \ref{fig:CAR15} es contemplen dos casos. En un d'ells la profunditat del MIH bàsic, que s'anomena $n_i$, es fixa a 30 i es varia la profunditat del P-W, denotada per $n_{PW}$. En l'altre cas $n_{PW}=30$ i $n_i$ resulta variable. En totes dues situacions s'ha utilitzat el mateix vector $s_0=$[0,60; 0,65; 0,68; 0,72; 0,90]. 
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\log |\Delta S_{max}|$},xlabel={Profunditat},domain=-0.25:1.5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=11cm,height=8cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=1pt,draw=black},  g={mark=square,mark size=1pt,draw=black},  h={mark=pentagon,mark size=1pt,draw=black}}]]
+
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/Nord_PW1.csv};
+\addplot[scatter, scatter src=explicit symbolic]%
+table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/Nord_PW2.csv};
+
+      \legend{{$n_i=30$, $n_{PW}$ varia}, {$n_i$ varia, $n_{PW}=30$}} %tocar
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Evolució de l'error del P-W segons les profunditats}
+  \label{fig:CAR15}
+  \end{center}
+\end{figure}
+
+La Figura \ref{fig:CAR15} mostra que profunditats inferiors a 30 és millor que pertanyin a $n_{PW}$ que a $n_i$. Cal utilitzar prou coeficients per inicialitzar correctament les aproximacions $V(s_0)$. No obstant això, a partir d'una profunditat variable de 30, de les dues maneres l'error s'assimila molt. En aquesta situació i tal com s'ha vist també en d'altres, augmentar la profunditat no necessàriament es tradueix a minimitzar l'error, sinó que aquest arriba a un punt on s'estabilitza.
+
+\section{IEEE118}
+Tal com es mostra a la Figura \ref{fig:RES2}, totes les tensions dels busos de la IEEE118, en proporció amb la del bus oscil·lant, es mantenen entre el 0,9 i l'1,1. Tendeixen a apropar-se al límit inferior de la paràbola, i no al superior com a la Nord Pool. Això indica que la demanda d'activa és més extrema que la generació. Per tal d'acostar la xarxa cap al col·lapse de tensions, la potència del bus 117 passa de $-$0,33 a $-$8,50.
+
+La Figura \ref{fig:CAR16} presenta el gràfic Sigma per a $P_{117}=-$8,50 i per a $P_{117}=-$8,75. El primer d'ells es correspon a un estat d'operació a prop del col·lapse (per tant, mal condicionat), mentre que el segon no és operatiu. La demanda resulta excessiva. 
+
+Al primer gràfic hi ha quatre punts que se situen força més a prop del límit inferior de la paràbola en comparació amb el núvol de punts corresponents a la resta de busos. En aquest aspecte els busos més conflictius són el 73, el 74, el 75 i el 117. El bus 117 precisament és el que s'encarrega d'estirar els altres busos cap als límits. La topologia de la xarxa és tal que el bus 117 enllaça amb el 74 i el 75. El 73 connecta amb el 74. Per tant, en augmentar la demanda de potència activa al bus 117, els busos propers també noten les conseqüències.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=2 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},title={$P_{117}=-$8,50},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sigIEEE118_1.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+  \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, title={$P_{117}=-$8,75}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sigIEEE118_2.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de la IEEE118 per $P_{117}=-$8,50 i $P_{117}=-$8,75 amb sèries de 60 coeficients}
+  \label{fig:CAR16}
+  \end{center}
+\end{figure}
+
+Al segon gràfic, quan $P_{117}=-$8,75, els busos 74 i 75 abandonen l'interior de la paràbola. Per tant, no és directament el bus causant dels problemes el que queda fora la paràbola, sinó aquells que connecten directament amb ell. L'evolució dels punts del gràfic Sigma permet visualitzar quina zona del sistema està apropant la xarxa cap al col·lapse. A partir de la solució dels mètodes iteratius tradicionals es podria dibuixar el gràfic d'abans el col·lapse, però no una vegada el sistema no té solució. Amb els mètodes iteratius tradicionals, quan no s'assoleix un resultat factible, no es té informació de la causa. Per contra, amb el MIH també es pot representar el gràfic Sigma quan la solució és invàlida. Serveix per confirmar a quins busos apareixen els problemes. 
+
+Els mètodes iteratius també solucionen el sistema quan $P_{117}=-$8,50. A la Taula \ref{tab:CAR17x} es mostren les iteracions requerides per assolir un error inferior a 10$^{-10}$, així com l'error resultant. 
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR & 1,43.10$^{-13}$ & 6\\ 
+  NR Iwamoto & 3,87.10$^{-14}$ & 7\\
+  NR L-M & 1,35.10$^{-13}$ & 13\\ 
+  FDLF & 9,56.10$^{-11}$ & 114\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries a la IEEE118 amb mètodes tradicionals. $P_{117}=-$8,50}
+  \label{tab:CAR17x}
+  \end{center}
+\end{table}
+
+El nombre d'iteracions i els errors obtinguts s'assimilen als resultats de la Taula \ref{tab:CAR13}. Un increment de la dimensió no sembla influir a l'hora d'obtenir la solució amb la precisió desitjada quan els sistemes operen a prop del col·lapse.
+
+Per altra banda, s'extreu la corba PV del bus 117, que es plasma a la Figura \ref{fig:CAR17}.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+  \begin{axis}[
+      /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{117}|$},xlabel={$|P_{117}|$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+    a={mark=x,mark size=1.5pt,draw=black}, b={mark=o,mark size=1.5pt,draw=black}, c={mark=|,mark size=2pt,draw=black}%
+    ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_PV1_2.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_PV2_2.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_PV3_2.csv};
+      \legend{Thévenin -, Thévenin +, P-W} %tocar
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Corba PV del bus 117 de la IEEE118, amb P-W i aproximants de Thévenin}
+  \label{fig:CAR17}
+  \end{center}
+\end{figure}
+
+Les tensions obtingudes amb els aproximants de Thévenin per a la branca positiva són erràtiques per a les potències $|P_{117}|=$\ 0,25 i $|P_{117}|=$\ 0,5. Fora d'aquests dos punts, segueixen el mateix perfil que la solució extreta amb el P-W. Les tensions de la branca negativa que proporcionen els aproximants de Thévenin coincideixen en els dos punts inicials amb la solució del P-W. Llavors, a mesura que la potència creix, presenten un perfil amb algunes cavitats i salts, fins que a partir de $|P_{117}|\approx$7, tracen la forma que s'espera entorn del punt de col·lapse de tensions. Al final totes les solucions coincideixen. La potència al punt de col·lapse resulta $|P_{117}|=$\ 8,6669, pel que la selecció de $P_{117}=-$8,50 es troba realment a prop d'aquest punt crític. 
+
+Per la naturalesa del mètode d'incrustació holomòrfica, els aproximants de Thévenin no sempre proporcionen la tensió corresponent a la branca inestable que s'espera. Aquests aproximants es basen en l'osculació de les sèries. Per tant, no reprodueixen completament la branca inestable de forma correcta, però sí que ho fan en punts propers al col·lapse. D'acord amb l'observat en els sistemes estudiats fins ara, a major nombre de busos, més habitual que la branca inestable ofereixi un perfil erràtic lluny del col·lapse.
+
+A la Figura \ref{fig:CAR18} es mostra la corba QV generada amb els aproximants de Thévenin i amb el P-W. S'ha retornat la potència activa del bus 117 a $-$0,33 i es varia la potència reactiva.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+  \begin{axis}[
+      /pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$|V_{117}|$},xlabel={$|Q_{117}|$},domain=0:5,ylabel style={rotate=-90},legend style={at={(1,0)},anchor=south west},width=9cm,height=7.5cm,scatter/classes={%
+    a={mark=x,mark size=1.5pt,draw=black}, b={mark=o,mark size=1.5pt,draw=black}, c={mark=|,mark size=2pt,draw=black}%
+    ,d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_QV1.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_QV2.csv};
+\addplot[scatter,scatter src=explicit symbolic]%
+table[x=x,y=y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/118_QV3.csv};
+      \legend{Thévenin -, Thévenin +, P-W} %tocar
+  \end{axis}
+  \end{tikzpicture}
+  \caption{Corba QV del bus 117 de la IEEE118, amb aproximants de Thévenin i P-W}
+  \label{fig:CAR18}
+  \end{center}
+\end{figure}
+
+De forma similar a la Figura \ref{fig:CAR17}, s'observa que al final les dues branques s'uneixen, tot i que en general la branca inestable no és tan caòtica com abans. Per $|Q_{117}|<2$, els aproximants de Thévenin de les dues branques presenten solucions sense gaire sentit. Els primers punts de la branca inestable dels Thévenin coincideixen amb els valors obtinguts mitjançant el P-W. La tensió al punt de col·lapse és lleugerament inferior a la de la Figura \ref{fig:CAR17}.
+
+\section{PEGASE2869}
+Com el seu nom indica, el sistema PEGASE2869 compta amb 2.869 busos. S'ha observat que en el seu estat base el MIH és capaç de solucionar el flux de potències. Per tal d'acostar el sistema a un punt d'operació més mal condicionat, en aquest cas s'incrementa el consum de reactiva del bus 2.866. En lloc de ser de $-$0,5998, esdevé de $-$11,0. La Figura \ref{fig:CAR19} mostra el gràfic Sigma en aquesta situació.
+
+\begin{figure}[!ht] \footnotesize
+  \begin{center}
+  \begin{tikzpicture}
+
+  \begin{groupplot}[group style={group size=1 by 1, horizontal sep=3cm}]
+    \nextgroupplot[/pgf/number format/.cd, use comma, 1000 sep={.}, ylabel={$\sigma_{im}$},xlabel={$\sigma_{re}$},domain=-0.25:0.5,ylabel style={rotate=-90},legend style={at={(0,1)},anchor=north west},width=7cm,height=7cm,scatter/classes={a={mark=x,mark size=2pt,draw=black}, b={mark=*,mark size=2pt,draw=black}, c={mark=o,mark size=1pt,draw=black},d={mark=diamond,mark size=2pt,draw=black}, e={mark=+,mark size=2pt,draw=black}, f={mark=triangle,mark size=2pt,draw=black}}]]
+
+  \addplot[no marks] {(0.25+\x)^(1/2)};
+  \addplot[no marks] {-(0.25+\x)^(1/2)};
+  \addplot[no marks, densely dashed] {+(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashed] {-(1.1^2-(\x - 1.1^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {+(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[no marks, densely dashdotted] {-(0.9^2-(\x - 0.9^2)^2)^(1/2)};
+  \addplot[scatter, only marks,scatter src=explicit symbolic]%
+      table[x = x, y = y, meta = label, col sep=semicolon] {Inputs/Resultats_carrega/sigPegase_2.csv};
+      \legend{ , , {$V_x=$1,1}, ,{$V_x=$0,9}} %tocar
+
+  \end{groupplot}
+  \end{tikzpicture}
+  \caption{Gràfic Sigma de la PEGASE2869 amb $Q_{2.866}=-$11,0, amb 30 coeficients}
+  \label{fig:CAR19}
+  \end{center}
+\end{figure}
+
+En comparació amb el gràfic Sigma inicial d'aquesta xarxa (Figura \ref{fig:RES2}), hi ha uns quants punts que es desplacen cap a l'esquerra. Això quadra amb un increment de reactiva. Pel que s'ha justificat al capítol en què es detallen els aproximants Sigma, quan a les línies del sistema hi predominen les reactàncies inductives, precisament els punts més afectats per l'augment de consum de potència reactiva es desplacen cap a l'esquerra, i no cap avall, com passa per increments de demanda de potència activa. 
+
+El bus 2.866, que és el que ha patit l'increment de consum de reactiva, es tracta del bus amb la menor $\sigma_{re}$. Altra vegada s'observa com un només un augment de consum aconsegueix que uns quants busos s'acostin al col·lapse, i que precisament un dels busos que més s'hi aproxima és aquell on té lloc l'increment de demanda.
+
+Els mètodes iteratius considerats solucionen sense problemes el flux de potències. A la Taula \ref{tab:CAR20} es presenten les iteracions i els errors corresponents. 
+
+\begin{table}[!htb]
+  \begin{center}
+  \begin{tabular}{lll}
+  \hline
+  Mètode & Errors & Iteracions\\
+  \hline
+  \hline
+  NR & 3,25.10$^{-16}$ & 6\\ 
+  NR Iwamoto & 1,43.10$^{-11}$ & 7\\
+  NR L-M & 1,03.10$^{-13}$ & 24\\ 
+  FDLF & 8,96.10$^{-11}$ & 70\\
+  \hline 
+  \end{tabular}
+  \caption{Errors obtinguts i iteracions necessàries a la PEGASE2869 amb mètodes tradicionals. $Q_{2.866}=-$11,0}
+  \label{tab:CAR20}
+  \end{center}
+\end{table}
+
+Comparat amb l'estat de càrrega inicial, el NR i el FDLF iteren el mateix nombre de vegades, mentre que l'error tampoc varia. Al costat dels resultats extrets pels altres sistemes, les diferències són mínimes. El mètode de Levenberg-Marquardt requereix força més iteracions que per exemple per la xarxa IEEE118 (Taula \ref{tab:CAR17x}). En canvi, el FDLF finalitza amb menys iteracions. En global, a partir de les xarxes estudiades, se'n desprèn que el nombre d'iteracions no va massa lligat amb el nombre de busos del sistema. Més aviat, les iteracions requerides són similars en qualsevol sistema.
+
+Malgrat la dimensió del sistema, el mètode d'incrustació holomòrfica amb la formulació original combinada amb el P-W és capaç d'assolir un error satisfactori. Amb el vector $s_0=$[0,60; 0,65; 0,68; 0,72; 0,90] i una profunditat de 30 coeficients, l'error màxim resulta de 4,94.10$^{-11}$. En aquest i en tots els sistemes, l'error s'ha minimitzat per mitjà del P-W encara que treballin a prop del col·lapse.

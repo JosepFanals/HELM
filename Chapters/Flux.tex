@@ -1,0 +1,625 @@
+El flux de càrregues és la solució d'un sistema elèctric de potència equilibrat en règim permanent. En la seva versió més bàsica, el sistema es modelitza com un conjunt de generadors, transformadors, línies de distribució i/o transport i càrregues. Majoritàriament les càrregues es defineixen a partir de potències, no d'impedàncies. Això comporta una dificultat afegida a l'hora de solucionar les equacions del flux de potències, ja que esdevenen no lineals. 
+
+La informació principal que s'extreu de la resolució del sistema són el valor absolut de les tensions i el seu desfasament. Aleshores s'obtenen els fluxos de potència activa i reactiva que circulen per les línies, les pèrdues del sistema, així com la potència que aporten els generadors. 
+
+La Figura \ref{fig:bus} il·lustra un sistema simple de dos busos que es troben interconnectats per una línia d'impedància $Z$. La inversa d'aquesta és l'admitància $Y$. Les tensions dels busos es representen per $V_i$ i $V_j$ respectivament, les intensitats per $I_i$ i $I_j$ i les potències complexes per $S_i$ i $S_j$. En alguns casos hi ha impedàncies connectades entre els busos i el bus comú de terra. Per presentar el problema del flux de potències no s'ha afegit aquesta complicació. En aquest exemple, l'únic element que introdueix admitància és la línia que uneix els dos busos.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0, 0) circle (0.4);
+\draw (0, 0.4) -- (0, 1.5);
+\draw (0, 1.5) to [short, i=$I_i$] (1, 1.5);
+\draw [line width=2] (1,1) -- (1,2);
+\draw (0, -1) -- (0, -0.4);
+\draw (-0.25, -1) -- (0.25, -1);
+\draw (-0.17, -1.1) -- (0.17, -1.1);
+\draw (-0.07, -1.2) -- (0.07, -1.2);
+\draw (1, 1.5) -- (3, 1.5);
+\draw (3, 1.5) -- (3, 1.6);
+\draw (3, 1.6) -- (5, 1.6);
+\draw (5, 1.6) -- (5, 1.4);
+\draw (5, 1.4) -- (3, 1.4);
+\draw (3, 1.4) -- (3, 1.5);
+\draw (5, 1.5) -- (7, 1.5);
+\draw [line width=2] (7, 1) -- (7, 2);
+\draw (8, 1.5) to [short, i_=$I_j$] (7, 1.5); % _ per a moure el text a sobre
+\draw (8, 1.5) -- (8, 0.4);
+\draw (8, 0) circle (0.4);
+\draw (8, -1) -- (8, -0.4);
+\draw (8-0.25, -1) -- (8+0.25, -1);
+\draw (8-0.17, -1.1) -- (8+0.17, -1.1);
+\draw (8-0.07, -1.2) -- (8+0.07, -1.2);
+\draw (0.6, 2) node[anchor=south west] {Bus $i$};
+\draw (6.6, 2) node[anchor=south west] {Bus $j$};
+\draw (3.8, 1.6) node[anchor=south west] {$Z$};
+\draw (1, 1) node[anchor=north west] {$V_i$};
+\draw (7, 1) node[anchor=north east] {$V_j$};
+\draw (-0.4, 0) node[anchor=north east] {$S_i$};
+\draw (8.4, 0) node[anchor=north west] {$S_j$};
+    \end{tikzpicture}
+    \caption{Sistema simple de dos busos}
+    \label{fig:bus}
+    \end{center}
+    \end{figure}
+
+S'ha considerat el conveni positiu de signes, és a dir, que s'assumeix que les intensitats positives entren cap als busos. La potència complexa injectada al bus $i$ és: %cal que digui que * simbolitza conjugat!?
+\begin{equation}
+S_i = V_iI^*_i\ .
+\label{eq:pcomplexa}
+\end{equation}
+Al seu torn la intensitat injectada resulta:
+\begin{equation}
+I_i=V_iY_{ii} + V_jY_{ij}\ ,
+\label{eq:ii}
+\end{equation}
+on l'admitància $Y_{ii}$ i l'admitància $Y_{ij}$ són elements de la matriu d'admitàncies de bus. A vegades tal matriu s'anomena directament matriu d'admitàncies. En aquest exemple resulta que $Y_{ii}=1/Z$ i $Y_{ij}=-1/Z$.
+
+En combinar les Equacions \ref{eq:pcomplexa} i \ref{eq:ii} s'arriba a:
+\begin{equation}
+S_i=V_iV^*_iY^*_{ii} + V_iV^*_{j}Y^*_{ij}\ .
+\label{eq:Si}
+\end{equation}
+Si es descompon en part real i imaginària, de forma més genèrica l'Equació \ref{eq:Si} es converteix en:
+\begin{equation}
+\begin{cases}
+    \begin{split}
+    P_i&=|V_i|\sum_j|V_j||Y_{ij}|\cos({\delta_i - \delta_j - \gamma_{ij}})\ ,\\
+    Q_i&=|V_i|\sum_j|V_j||Y_{ij}|\sin({\delta_i - \delta_j - \gamma_{ij}})\ ,
+    \end{split}
+\end{cases}
+\label{eq:PiQi}
+\end{equation}
+on:
+
+$P_i$: potència activa injectada al bus $i$.
+\vs
+$Q_i$: potència reactiva injectada al bus $i$.
+\vs
+$|V_i|$: valor absolut de la tensió del bus $i$.
+\vs
+$|Y_{ij}|$: valor absolut de l'admitància entre els busos $i$ i $j$.
+\vs
+$\delta_i$: angle de la tensió del bus $i$.
+\vs
+$\gamma_{ij}$: angle de l'admitància entre els busos $i$ i $j$.
+
+S'observa que si per exemple les potències $P_i$ i $Q_i$ són dades i es coneix la tensió $V_j$ tant en mòdul com en angle, s'ha de trobar $|V_i|$ i l'angle $\delta_i$. Hi ha dues incògnites i dues equacions, però s'aprecia que són de caràcter no lineal. Per solucionar aquesta mena d'equacions s'han d'utilitzar els tradicionals mètodes numèrics, o bé, recórrer al mètode d'incrustació holomòrfica.
+
+\section{Tipus de busos}
+Cada bus està associat a quatre magnituds elèctriques (mòdul de la tensió, angle de la tensió, potència activa injectada i potència reactiva injectada). Tal com s'observa a l'Equació \ref{eq:PiQi}, es plantegen dues equacions per bus. Si el nombre total d'equacions ha de ser igual al nombre total d'incògnites, de les quatre magnituds, dues han de ser desconegudes i dues han de ser conegudes.
+
+En el flux de potències els busos es classifiquen en tres categories: PQ, PV i oscil·lant. A la Taula \ref{tab:T1} apareixen les incògnites i les dades per a cada un d'ells.
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{lll}
+    \hline
+    Bus & Incògnites & Dades\\
+    \hline
+    \hline
+    PQ & $|V_i|$, $\delta_i$ & $P_i$, $Q_i$\\
+    PV & $\delta_i$, $Q_i$ & $P_i$, $|V_i|$\\
+    Oscil·lant & $P_i$, $Q_i$ & $|V_i|$, $\delta_i$\\
+    \hline 
+    \end{tabular}
+    \caption{Incògnites i dades per a cada tipus de bus}
+    \label{tab:T1}
+    \end{center}
+  \end{table}
+
+Els busos PQ també s'anomenen busos de càrrega. En efecte, es coneix la potència activa i reactiva. Són busos PQ aquells on hi ha una demanda fixa o bé, on la generació és coneguda. També pot donar-se el cas que en un bus PQ hi hagi tant generació com consum. Aleshores, la potència injectada resultant surt de fer el balanç. Aquests busos són els més habituals en els sistemes elèctrics de potència reals. Segons Barrero (2004) suposen aproximadament un 80\% o 90\% de la totalitat.
+
+Per altra banda, en els busos PV es coneix la potència activa i el mòdul de la tensió. Tradicionalment hi tenen connectat un generador, en el qual es varia la potència entregada per mitjà de controlar la vàlvula d'admissió de la turbina, mentre que la tensió es regula amb el corrent d'excitació. Per això, els busos PV també se'ls coneix pel nom de busos de regulació. La Taula \ref{tab:T2} posa de manifest que són minoritaris.
+
+\begin{table}[!htb]
+    \begin{center}
+    \begin{tabular}{ll}
+    \hline
+    Sistema & \% busos PV\\
+    \hline
+    \hline
+    IEEE14 & 28,6\\
+    IEEE30 & 16,7\\
+    Nord Pool & 36,4\\
+    IEEE118 & 44,9\\
+    PEGASE2869 & 17,7\\
+    \hline 
+    \end{tabular}
+    \caption{Percentatge de busos PV en algunes xarxes de test}
+    \label{tab:T2}
+    \end{center}
+  \end{table}
+
+La tercera categoria de busos pertany als busos oscil·lants. Cada sistema necessita com a mínim un bus oscil·lant. Si per exemple tots els busos fossin PQ i/o PV, la potència activa seria una dada en qualsevol cas. Això és incompatible amb el balanç de potències de l'Equació \ref{eq:balanc}, on de fet les pèrdues són un dels resultats de solucionar el flux de càrregues. 
+\begin{equation}
+    P_{p}=\sum_iP_{G,i}-\sum_iP_{D,i}\ ,
+    \label{eq:balanc}
+\end{equation}
+on:
+
+$P_p$: pèrdues de potència activa totals en el sistema.
+\vs
+$P_{G,i}$: potència activa generada al bus $i$.
+\vs
+$P_{D,i}$: potència activa de consum al bus $i$.
+
+Així, una de les potències d'algun bus ha de ser desconeguda, ha de quedar lliure. Aquest bus serà l'anomenat bus oscil·lant, o en anglès, slack. Les dades són el mòdul de tensió i l'angle de la tensió. Aquest últim per conveniència es fixa a 0. Típicament el bus oscil·lant correspon a aquell on hi ha connectat el generador amb més capacitat del sistema.
+
+És possible que un sistema disposi de més d'un bus oscil·lant. En tal situació, interessa conèixer la participació de cada un d'ells. A les xarxes de test que s'estudien només hi ha un bus oscil·lant. 
+
+\section{Modelització d'elements}
+En els sistemes que es tracten, s'han de modelitzar transformadors, generadors, línies i càrregues, atès que principalment són els quatre tipus d'elements a considerar en règim permanent. A vegades, poden haver-hi bateries o elements de transmissió flexible. Tanmateix, en el flux de potències tradicional no es tenen en compte. A més a més, tampoc apareixen a les xarxes de test. 
+
+En un costat, les càrregues s'acostumen a modelitzar com un valor de potència constant aplicada a un bus concret. Malgrat que la demanda és variable al llarg del temps, hi ha arguments per considerar-la fixa: primer, es pot predir dins d'uns marges de precisió, i segon, sovint experimenta canvis lents. Això explica que a les xarxes de test la demanda vingui donada com una constant. En determinats casos els busos de càrrega també inclouen càrregues amb impedància coneguda.
+
+Els generadors es connecten al sistema amb transformadors elevadors. En l'estudi del flux de potències s'estudien les variables a la sortida d'aquest conjunt format per generador i transformador. De manera similar, no intervé la impedància interna del generador. És a la sortida d'aquest conjunt on es coneixen les dades i on es busquen les incògnites restants.
+
+%És a la sortida d'aquest conjunt on s'especifica la tensió dels busos PV i oscil·lant, on es coneix la potència activa injectada dels busos PQ i PV i on s'especifica la potència reactiva dels busos PQ.
+
+\subsection{Transformadors} % citar manual de GridCal!
+En l'anàlisi del flux de potències fa falta modelitzar els transformadors que interconnecten busos. Al cap i a la fi, influeixen en la matriu d'admitàncies. Un primer model apareix a la Figura \ref{fig:trafo1}.
+
+\ctikzset{bipoles/resistor/height=0.225} % empetitir la resistència
+\ctikzset{bipoles/resistor/width=0.6}
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0,0) to [short, *-, i=$I_i$] (1,0)
+(1, 0) to [R, l=$R_1$] (2.5, 0)
+to [L, l=$L_{d,1}$] (4,0)
+to [short] (4.5, 0) 
+to [short] (4.5, -0.5)
+to [short] (4.0, -0.5)
+to [short] (4.0, -0.8)
+to [R, l_=$R_p$] (4.0, -1.8)
+to [short] (4.0, -2.1)
+to [short] (4.5, -2.1)
+(4.5, -0.5) to [short] (5, -0.5)
+to [short] (5, -0.8)
+to [L, l=$L_m$] (5, -1.8)
+to [short] (5, -2.1)
+to [short] (4.5, -2.1)
+to [short] (4.5, -2.6)
+to [short, -*] (0, -2.6)
+(4.5, 0) to [short] (6.5, 0)
+to [short] (6.5, -0.8)
+to [L] (6.5, -1.8)
+to [short] (6.5, -2.6)
+to [short] (4.5, -2.6)
+(0, -2.6) to [open, v^=$V_i$] (0, 0)
+(12.2, -2.6) to [open, v_=$V_j$] (12.2, 0)
+(7.2, -2.6) to [L] (7.2, 0)
+to [short] (8.2, 0)
+to [R, l=$R_2$] (9.7, 0)
+to [L, l=$L_{d,2}$] (11.2, 0)
+(12.2, 0) to [short, *-, i_=$I_j$] (11.2, 0)
+(7.2, -2.6) to [short, -*] (12.2, -2.6);
+\draw (6.7, -0.5) node[anchor=north west] {$t$};
+    \end{tikzpicture}
+    \caption{Model complet del transformador}
+    \label{fig:trafo1}
+    \end{center}
+    \end{figure}
+Aquest model considera les pèrdues de potència activa en el ferro i en el coure per mitjà de les resistències $R_p$ i $R_1$ i $R_2$ respectivament. A més, inclou la inductància magnetitzant $L_m$ i les inductàncies de dispersió $L_{d,1}$ i $L_{d,2}$. També conté un transformador ideal amb relació d'espires $t$.
+
+Com que a l'hora de resoldre el flux de potències s'usen valors per unitat (que es detallen a l'annex), en assumir que les tensions nominals coincideixen amb les de base, el transformador amb relació de transformació $t$ de la Figura \ref{fig:trafo1} desapareix. També és raonable menysprear les pèrdues al ferro i el corrent de magnetització. Així es negligeix la branca en paral·lel. Amb tot, s'obté la versió simplificada del model del transformador, que es copsa a la Figura \ref{fig:trafo2}.
+
+\begin{figure}[!htb] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0, 0) to [short, *-, i=$I_i$] (1, 0)
+to [short] (2, 0)
+to [short] (2, 0.15)
+to [short] (3.5, 0.15)
+to [short] (3.5, -0.15)
+to [short] (2, -0.15)
+to [short] (2, 0)
+(0, -2.0) to [open, v^=$V_i$] (0, 0)
+(5.5, -2.0) to [open, v_=$V_j$] (5.5, 0)
+(5.5, 0) to [short, *-, i_=$I_j$] (4.5, 0)
+to [short] (3.5, 0)
+(0, -2) to [short, *-*] (5.5, -2);
+\draw (3.1, 0.15) node[anchor=south east] {$Z_{cc}$};
+    \end{tikzpicture}
+    \caption{Model simplificat del transformador}
+    \label{fig:trafo2}
+    \end{center}
+    \end{figure}
+Aquest model només conté la impedància de curtcircuit, que teòricament compta amb part real i imaginària. No obstant això, freqüentment es negligeixen les pèrdues al coure, de manera que es redueix a una reactància inductiva.
+
+A l'hora de treballar amb aquests models val la pena definir-los com un quadripol. Aquest lliga les dues intensitats amb les dues tensions a través d'admitàncies:
+\begin{equation}
+    \begin{pmatrix}
+        I_i \\
+        I_j 
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        Y_{cc} & -Y_{cc} \\
+        -Y_{cc} & Y_{cc} 
+    \end{pmatrix}
+    \begin{pmatrix}
+        V_i \\
+        V_j
+    \end{pmatrix}\ ,
+    \label{eq:quadri1}
+\end{equation}
+on $Y_{cc}$ és la inversa de $Z_{cc}$.
+
+El model anterior no és vàlid quan alguna de les tensions base de banda i banda del transformador no coincideixen amb les nominals de la màquina. Aleshores es recorre al model de la Figura \ref{fig:trafo3}. 
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0,0) to [short, *-, i=$I_i$] (1,0)
+to [short] (2, 0)
+to [short] (2, -0. 8)
+to [L] (2, -1.8)
+to [short] (2, -2.6)
+to [short, -*] (0, -2.6)
+(2.7, 0) to [short] (2.7, -0.8)
+(2.7, -1.8) to [L] (2.7, -0.8)
+(2.7, -1.8) to [short] (2.7, -2.6)
+to [short, -*] (6, -2.6)
+(6, 0) to [short, *-, i_=$I_j$] (5, 0)
+to [short] (5, 0.15)
+to [short] (3.5, 0.15)
+to [short] (3.5, -0.15)
+to [short] (5, -0.15)
+to [short] (5, 0)
+(0, -2.6) to [open, v^=$V_i$] (0, 0)
+(6, -2.6) to [open, v_=$V_j$] (6, 0)
+(2.7, 0) to [short] (3.5, 0);
+\draw (2.2, -0.5) node[anchor=north west] {$t$};
+\draw (4.6, 0.15) node[anchor=south east] {$Z_{cc}$};
+    \end{tikzpicture}
+    \caption{Model simplificat del transformador de relació variable}
+    \label{fig:trafo3}
+    \end{center}
+    \end{figure}
+
+A les xarxes de test s'utilitza aquest model amb presència de transformadors de relació variable. És necessari introduir la relació $t$ per considerar les diferències entre les tensions nominals i les tensions base. Habitualment el mòdul de la relació de transformació $t$ és proper a la unitat mentre que la seva fase tendeix a ser nul·la.
+
+En aquest cas el quadripol no es pot obtenir per observació tal com s'ha fet a l'Equació \ref{eq:quadri1}. Tanmateix, s'arriba a:
+\begin{equation}
+    \begin{pmatrix}
+        I_i \\
+        I_j 
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        Y_{cc}/|t|^2 & -Y_{cc}/t^* \\
+        -Y_{cc}/t & Y_{cc} 
+    \end{pmatrix}
+    \begin{pmatrix}
+        V_i \\
+        V_j
+    \end{pmatrix}\ .
+    \label{eq:quadri2}
+\end{equation}
+Quan $t$ és unitària i el seu angle nul, l'Equació \ref{eq:quadri2} resulta idèntica a l'Equació \ref{eq:quadri1}.
+
+\subsection{Línies}
+El model general de la línia inclou quatre paràmetres: la resistència $R_u$, la inductància $L_u$, la susceptància $G_u$ i la capacitat $C_u$, totes per unitat de longitud. La resistència i la inductància són les parts real i imaginària de la impedància de la branca en sèrie respectivament. Per altra banda, la susceptància i la capacitat representen les parts real i imaginària de l'admitància de la branca en paral·lel. En conjunt donen lloc a un model de paràmetres distribuïts (Barrero, 2004).
+
+Per a major simplicitat els paràmetres es combinen:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        Z_u&=R_u+j\omega L_u\ ,\\
+        Y_u&=G_u+j\omega C_u\ .
+    \end{split}
+\end{cases}
+    \label{eq:linia1}
+\end{equation}
+S'arriba al següent quadripol de paràmetres distribuïts:
+\begin{equation}
+    \begin{pmatrix}
+        V_i \\
+        I_i 
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        \cosh \zeta\iota  & Z_c\sinh \zeta\iota \\
+        \dfrac{\sinh \zeta\iota}{Z_c} & \cosh \zeta\iota
+    \end{pmatrix}
+    \begin{pmatrix}
+        V_j \\
+        I_j
+    \end{pmatrix}\ ,
+    \label{eq:quadri3}
+\end{equation}
+on:
+
+$\zeta=\sqrt{Z_uY_u}$. S'anomena constant de propagació, en m$^{-1}$.
+\vs
+$Z_c=\sqrt{Z_u/Y_u}$. És la impedància característica. Esdevé adimensional en operar amb unitaris.
+\vs
+$\iota$: longitud de la línia, en m.
+
+Segons Barrero (2004), el model de paràmetres distribuïts, que implica el càlcul de funcions hiperbòliques, només queda justificat per a línies llargues on les longituds són superiors als 200 km. En canvi, a les xarxes de test seleccionades els models se simplifiquen.
+
+Primerament la susceptància es negligeix, atès que la capacitat predomina sobre la susceptància, i ja de per si la branca en paral·lel té poca influència en el model. Per una línia de longitud mitjana (entre 100 i 200 km), s'assumeix que $\zeta\iota$ pren valors petits, força inferiors a la unitat. En resulta el model de la Figura \ref{fig:linia1}. Sovint se'l coneix pel nom de model en $\pi$.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0,0) to [short, *-, i=$I_i$] (1,0)
+to [short] (1.5, 0)
+to [short] (1.5, -0.8)
+to [C] (1.5, -1.8)
+to [short] (1.5, -2.6)
+to [short, -*] (0, -2.6)
+(1.5, 0) to [short] (3, 0)
+to [short] (3, 0.15)
+to [short] (4.5, 0.15)
+to [short] (4.5, -0.15)
+to [short] (3, -0.15)
+to [short] (3, 0)
+(4.5, 0) to [short] (6, 0)
+to [short] (6, -0.8)
+to [C] (6, -1.8)
+to [short] (6, -2.6)
+(6.5, 0) to [short] (6, 0)
+(6, -2.6) to [short] (1.5, -2.6)
+(6, -2.6) to [short, -*] (7.5, -2.6)
+(7.5, 0) to [short, *-, i_=$I_j$] (6.5, 0)
+(0, -2.6) to [open, v^=$V_i$] (0, 0)
+(7.5, -2.6) to [open, v_=$V_j$] (7.5, 0);
+\draw (3.95, 0.15) node[anchor=south east] {$Z$};
+\draw (1.9, -1.7) node[anchor=south west] {$j\dfrac{B}{2}$};
+\draw (5.6, -1.7) node[anchor=south east] {$j\dfrac{B}{2}$};
+    \end{tikzpicture}
+    \caption{Model simplificat de la línia de longitud mitjana}
+    \label{fig:linia1}
+    \end{center}
+\end{figure}
+
+El paràmetre $B$ recull l'efecte de la capacitat i és igual a $\omega C$. Té dimensions d'admitància. La branca en sèrie se simbolitza per la impedància $Z$, que equival a $R+j\omega L$. Aquesta vegada els paràmetres ja no s'expressen per unitat de longitud.
+
+Per a línies inferiors a 100 km la capacitat és menyspreable. Així queda el model de la Figura \ref{fig:linia2}, igual que el model simplificat del transformador de la Figura \ref{fig:trafo2}.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+    \begin{tikzpicture}
+\draw (0, 0) to [short, *-, i=$I_i$] (1, 0)
+to [short] (2, 0)
+to [short] (2, 0.15)
+to [short] (3.5, 0.15)
+to [short] (3.5, -0.15)
+to [short] (2, -0.15)
+to [short] (2, 0)
+(0, -2.0) to [open, v^=$V_i$] (0, 0)
+(5.5, -2.0) to [open, v_=$V_j$] (5.5, 0)
+(5.5, 0) to [short, *-, i_=$I_j$] (4.5, 0)
+to [short] (3.5, 0)
+(0, -2) to [short, *-*] (5.5, -2);
+\draw (2.95, 0.15) node[anchor=south east] {$Z$};
+    \end{tikzpicture}
+    \caption{Model simplificat de la línia de longitud curta}
+    \label{fig:linia2}
+    \end{center}
+\end{figure}
+
+En línies de transport típicament la resistència resulta força inferior a $\omega L$. En tals situacions el model pot no incloure la resistència. 
+
+
+\section{Mètodes tradicionals de resolució}
+Tal com s'ha justificat per mitjà l'Equació \ref{eq:PiQi}, a cada bus apareixen dues equacions no lineals. Això justifica l'ús de mètodes iteratius. De fet, tots els mètodes tradicionals que es consideren en aquest apartat ho són. Es caracteritzen per partir d'un valor inicial (també anomenat llavor) que amb el pas de les iteracions s'espera que convergeixi cap a la solució.
+
+El valor inicial a què es fa referència es pot escollir basant-se en l'experiència. Per exemple, com que les tensions acostumen a ser properes a la unitat, és habitual suposar-les unitàries. Tanmateix, la selecció dels valors inicials condiciona el mètode resolutiu. A vegades el mètode no convergeix per culpa d'una tria incorrecta. 
+
+Els principals algoritmes iteratius que es contemplen a l'hora de solucionar el flux de càrregues són el Gauss-Seidel, el Newton-Raphson (amb diverses variacions) i el flux en contínua. Aquest últim assumeix totes les tensions unitàries i no té en compte la potència reactiva. Al cap i a la fi les solucions que proporciona són força aproximades. Per això no serà detallat. 
+
+\subsection{Gauss-Seidel}
+
+El mètode de Gauss-Seidel (GS) soluciona un sistema d'equacions en el qual les incògnites $x_i$ són funció del conjunt d'incògnites del sistema:
+\begin{equation}
+    x_i^{(k+1)}=f_i(x^{(k+1)}_1, x^{(k+1)}_2, ... , x^{(k+1)}_{i-1}, x^{(k)}_i, ... , x^{(k)}_n)\ ,
+    \label{eq:GS1}
+\end{equation}
+on:
+
+$i$: índex d'una de les incògnites.
+\vs
+$k$: índex de la iteració. No eleva les incògnites, és només un indicador de la iteració.
+
+De l'Equació \ref{eq:GS1} s'observa que s'utilitzen les incògnites el més actualitzades possible. L'actualització segueix l'ordre que defineixen els índexs dels busos. 
+
+La seva implementació en el flux de càrregues considera que al bus oscil·lant li correspon l'índex 1, mentre que els altres busos s'indexen de 2 a $n$. S'han de solucionar les equacions per aquests últims. Es comença amb la definició de potència complexa:
+\begin{equation}
+    S_i=V_i\sum_{j=1}^{n}Y^*_{ij}V^*_j\ ,
+    \label{eq:GS2}
+\end{equation}
+que es reescriu com:
+\begin{equation}
+    S^*_i=V^*_i\sum_{j=1}^{n}Y_{ij}V_j\ .
+    \label{eq:GS3}
+\end{equation}
+En extreure del sumatori la tensió $V^*_i$ i el terme corresponent d'admitància, l'Equació \ref{eq:GS3} es desenvolupa per donar lloc a:
+\begin{equation}
+    V_i=\frac{1}{Y_{ii}}\biggl(\frac{S^*_i}{V^*_i}-\sum_{\substack{j=1 \\ j\neq i}}^n Y_{ij}V_j \biggr)\ ,
+    \label{eq:GS4}
+\end{equation}
+que en tenir en compte els índexs de les iteracions esdevé:
+\begin{equation}
+    V^{(k+1)}_i=\frac{1}{Y_{ii}}\biggl(\frac{P_i-jQ^{(k+1)}_i}{(V^{(k)}_i)^*}-\sum_{\substack{j=1}}^{i-1} Y_{ij}V^{(k+1)}_j -\sum_{\substack{j=i+1}}^n Y_{ij}V^{(k)}_j \biggr)\ .
+    \label{eq:GS5}
+\end{equation}
+La potència reactiva és una dada per als busos PQ, però per als PV roman desconeguda. Per a trobar-la, es treballa l'Equació \ref{eq:GS3} i en forma d'esquema iteratiu resulta:
+\begin{equation}
+    Q^{(k+1)}_i=-\Im\biggl[(V^{(k)}_i)^*\sum_{\substack{j=1}}^{i-1} Y_{ij}V^{(k+1)}_j + (V^{(k)}_i)^*\sum_{\substack{j=i}}^{n} Y_{ij}V^{(k)}_j\biggr]\ ,
+    \label{eq:GS6}
+\end{equation}
+on $\Im$[ ] denota la funció que extreu la part imaginària. 
+
+Als busos PV també s'ha de trobar l'angle de la tensió especificada. A partir de l'Equació \ref{eq:GS5} s'obté:
+\begin{equation}
+    \delta^{(k+1)}_i=\angle\biggl[\frac{1}{Y_{ii}}\biggl(\frac{P_i-jQ^{(k+1)}_i}{(V^{(k)}_i)^*}-\sum_{\substack{j=1}}^{i-1} Y_{ij}V^{(k+1)}_j -\sum_{\substack{j=i+1}}^n Y_{ij}V^{(k)}_j \biggr)\biggr]\ ,
+    \label{eq:GS7}
+\end{equation}
+on $\angle$[ ] simbolitza la funció que captura l'angle de l'expressió.
+
+L'algoritme considera que les tensions inicials són totes unitàries. És el que s'anomena un perfil pla de tensions. Les potències reactives desconegudes es poden inicialitzar a 0. Progressivament es calculen les incògnites dels busos PQ, que són mòdul i angle de la tensió, amb l'Equació \ref{eq:GS5}; per als busos PV es recorre a les Equacions \ref{eq:GS6} i \ref{eq:GS7}. S'itera fins que es compleix la condició de parada per a tots els busos:
+\begin{equation}
+    |V^{(k+1)}_i-V^{(k)}_i|<\epsilon\ ,
+    \label{eq:GS8}
+\end{equation}
+on $\epsilon$ és la màxima tolerància que es vol permetre. Això conclou l'algoritme perquè s'assumeix que ha convergit a una solució correcta. En cas que la solució mai convergeixi, el càlcul s'atura un cop s'excedeixi el límit d'iteracions fixat.
+
+El mètode de Gauss-Seidel és relativament senzill de programar. Necessita menys temps per completar una iteració que el mètode de Newton-Raphson i que el desacoblat ràpid. No obstant això, convergeix linealment, amb la qual cosa resulta més lent que els altres dos mètodes esmentats. Per tant, necessita més iteracions. Esdevé fiable només per a sistemes amb pocs busos. Tot plegat comporta que hagi quedat bastant en desús (Kothari i Nagrath, 2011). 
+
+\subsection{Newton-Raphson} % aquí dins comentar les variacions
+El mètode de Newton-Rapshon (NR) és un mètode amb aplicabilitat per a grans sistemes de potència. Convergeix en la majoria de casos en què el GS no ho fa (Glover et al., 2008). Cal afegir que la seva convergència és quadràtica. Requereix poques iteracions, sovint entre 3 i 5 (Kothari i Nagrath, 2011). 
+
+El mètode soluciona un sistema d'equacions de la forma:
+\begin{equation}
+    f_i(x_1, x_2, ..., x_i, ..., x_n)=0\ .
+\label{eq:NR1}
+\end{equation}
+El NR es fonamenta en l'expansió de les sèries de Taylor al voltant del valor inicial. Només es tenen en compte els termes que inclouen les primeres derivades. 
+Així, s'arriba a:
+\begin{equation}
+    \begin{pmatrix}
+        f^{(k)}_1\\
+        \vdots\\
+        f^{(k)}_n
+    \end{pmatrix}
+    = - \begin{pmatrix}
+        \biggl(\dfrac{\partial f_1}{\partial x_1}\biggr)^{(k)} & \dots & \biggl(\dfrac{\partial f_1}{\partial x_n}\biggr)^{(k)} \\
+        \vdots & \ddots & \vdots\\
+        \biggl(\dfrac{\partial f_n}{\partial x_1}\biggr)^{(k)} & \dots & \biggl(\dfrac{\partial f_n}{\partial x_n}\biggr)^{(k)}
+    \end{pmatrix}
+    \begin{pmatrix}
+        \Delta x^{(k)}_1 \\
+        \vdots \\
+        \Delta x^{(k)}_n
+    \end{pmatrix}\ ,
+\label{eq:NR2}
+\end{equation}
+que també s'expressa com $f^{(k)}=-J^{(k)}\Delta x^{(k)}$. Aleshores s'inverteix la matriu per solucionar el sistema d'equacions i s'actualitza el vector d'incògnites:
+\begin{equation}
+    x^{(k+1)}=x^{(k)} + \Delta x^{(k)}
+\label{eq:NR3}\ .
+\end{equation}
+Es para d'iterar una vegada se supera el nombre d'iteracions fixat o es compleix:
+\begin{equation}
+    |f_i(x^{(k)})|<\epsilon
+\label{eq:NR4}\ .
+\end{equation}
+El mètode de NR necessita més temps per iteració que el GS perquè ha de computar les funcions per avaluar l'Equació \ref{eq:NR4}, i sobretot, ha d'invertir o factoritzar a cada iteració la matriu de l'Equació \ref{eq:NR2}. Aquesta matriu s'anomena jacobià o matriu jacobiana. Se simbolitza per $J$.
+
+Quant a la seva aplicació per a la resolució del flux de potències, es comença amb la definició dels vectors d'incògnites i els residus de potència, tots ells transposats:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \Delta x^{(k)}&=\biggl[\Delta \delta^{(k)}_2, ..., \Delta \delta^{(k)}_n, \frac{|\Delta V^{(k)}_{m+1}|}{|V^{(k)}_{m+1}|}, ...,\frac{|\Delta V^{(k)}_{n}|}{|V^{(k)}_{n}|}\biggr]^T\ ,\\
+        f^{(k)}&=\biggl[\Delta P^{(k)}_2, ..., \Delta P^{(k)}_n, \Delta Q^{(k)}_{m+1}, ..., \Delta Q^{(k)}_{n}\biggr]^T\ .
+    \end{split}
+\end{cases}
+\label{eq:NR5}
+\end{equation}
+El conjunt de busos PQ s'indexen per $[m+1, m+2, ..., n]$, mentre que els busos PV porten per índexs $[2, 3, ..., m]$. L'índex 1 es reserva per al bus oscil·lant. Les variacions de tensió es divideixen per la tensió amb tal de simplificar el jacobià. 
+
+Els residus de potències són:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \Delta P^{(k)}_i&=P_{i,con}-|V^{(k)}_i|\sum_{j=1}^{n}|V^{(k)}_j||Y_{ij}|\cos (\delta^{(k)}_{ij}-\gamma_{ij})\ ,\\
+        \Delta Q^{(k)}_i&=Q_{i,con}-|V^{(k)}_i|\sum_{j=1}^{n}|V^{(k)}_j||Y_{ij}|\sin (\delta^{(k)}_{ij}-\gamma_{ij})\ ,\\
+    \end{split}
+\end{cases}
+\label{eq:NR6}
+\end{equation}
+on $P_{i,con}$ i $Q_{i,con}$ són les potències activa i reactiva conegudes respectivament, mentre que $\delta^{(k)}_{ij}=\delta^{(k)}_{i}-\delta^{(k)}_{j}$. 
+
+De forma compactada l'Equació \ref{eq:NR2} es converteix en:
+\begin{equation}
+    \begin{pmatrix}
+        \Delta P^{(k)}\\
+        \Delta Q^{(k)}
+    \end{pmatrix}
+    = \begin{pmatrix}
+        J1^{(k)} & J2^{(k)}\\
+        J3^{(k)} & J4^{(k)}
+    \end{pmatrix}
+    \begin{pmatrix}
+        \Delta \delta^{(k)}\\
+        |\Delta V^{(k)}|/|V^{(k)}|
+    \end{pmatrix}\ .
+\label{eq:NR7}
+\end{equation}
+El jacobià s'ha dividit en quatre blocs, l'expressió de les quals es troba a l'annex. Tal com apunta Barrero (2004), els termes fora la diagonal principal de cada bloc matricial contenen l'element en sèrie del circuit equivalent que interconnecta dos busos. Així, bona part dels elements del jacobià són nuls. 
+
+La Figura \ref{fig:dispersa_nord} mostra el jacobià de la xarxa de test Nord Pool de 44 busos en forma d'imatge.
+
+\begin{figure}[!ht] \footnotesize
+    \begin{center}
+        \incfig{dispersa_nord3}{0.48}
+    \caption{Jacobià en imatge de la primera iteració de la Nord Pool. Els elements nuls apareixen en blanc}
+    \label{fig:dispersa_nord}
+    \end{center}
+\end{figure}
+
+Aquesta mena de matrius s'anomenen disperses. Definir i treballar amb matrius disperses, en lloc de denses, permet reduir el temps de computació. De fet, el mètode d'incrustació holomòrfica també utilitza matrius disperses.  
+
+Per a sistemes de potència mal condicionats s'han ideat variacions que parteixen del NR, com per exemple, l'ús del multiplicador d'Iwamoto o del mètode de Levenberg-Marquardt.
+
+El multiplicador d'Iwamoto va ser introduït per Iwamoto i Tamura (1981) com un mètode simple que no utilitza aproximacions i que gairebé no empitjora el temps de computació del NR inicial. Es formula de la següent manera:
+\begin{equation}
+    \Delta x^{(k)} = -\mu ^{(k)} (J^{-1})^{(k)} f^{(k)}\ ,
+    \label{eq:iwamoto}
+\end{equation}
+on $\mu^{(k)}$ és el multiplicador òptim, de tipus escalar. 
+
+El multiplicador òptim permet determinar la llargada de la iteració per aconseguir que aquella iteració no degradi el procés resolutiu. L'expressió per al seu càlcul es deriva de la minimització per mínims quadrats i de la resolució d'una equació cúbica, tal com detallen Iwamoto i Tamura (1981) i Peñate (2020a).
+
+Per altra banda, el mètode de Levenberg-Marquardt també s'anomena mètode de mínims quadrats esmorteïts. Igual que el NR comença amb l'expansió de Taylor, però busca reduir els errors per mínims quadrats. Introdueix el factor d'esmorteïment $\lambda$, que segons Lagace et al. (2008) permet millorar les propietats de convergència tot i que necessita que l'aproximació inicial sigui propera a la solució. Igual que amb el multiplicador $\mu$, el factor $\lambda$ s'adapta durant el procés iteratiu. 
+
+De la deducció de Lagace et al. (2008) s'arriba a l'expressió final:
+\begin{equation}
+    \Delta x^{(k)} = -\bigl[(J^{(T)})^{(k)}J^{(k)}+\lambda^{(k)} I\bigr]^{-1}(J^{(T)})^{(k)}f^{(k)}\ ,
+    \label{eq:levenberg1}
+\end{equation}
+on $I$ és la matriu identitat. 
+
+Es nota que quan $\lambda=0$ el mètode equival al de Newton-Rapshon. En general, el mètode de Levenberg-Marquardt necessita més iteracions que el NR. Malgrat ser més lent, funciona millor per xarxes de grans dimensions i per a sistemes mal condicionats (Peñate, 2020a).
+
+
+\subsection{Desacoblat ràpid} % repassar la teoria d'aquest mètode
+El mètode del desacoblat ràpid (FDLF) es fonamenta en el mètode de Newton-Raphson. Aprofita el fet que el flux de potència activa depèn fortament de l'angle de les tensions mentre que el flux de reactiva està més relacionat amb els mòduls de tensió. Això es dedueix de l'Equació \ref{eq:PiQi} en considerar que a les línies de transmissió la reactància té més pes que la resistència i que els angles dels busos es mantenen propers al 0. 
+
+Amb tals assumpcions l'Equació \ref{eq:NR7} se simplifica en: 
+\begin{equation}
+    \begin{pmatrix}
+        \Delta P^{(k)}\\
+        \Delta Q^{(k)}
+    \end{pmatrix}
+    = \begin{pmatrix}
+        J1^{(k)} & 0\\
+        0 & J4^{(k)}
+    \end{pmatrix}
+    \begin{pmatrix}
+        \Delta \delta^{(k)}\\
+        |\Delta V^{(k)}|/|V^{(k)}|
+    \end{pmatrix}\ .
+\label{eq:FDLF1}
+\end{equation}
+Aquesta estructura s'anomena desacoblada perquè s'ha eliminat la dependència entre potència activa i tensió i entre potència reactiva i angle. Comparat amb el NR, redueix els requeriments de memòria. Kothari i Nagrath (2011) apunten que el temps per iteració es minimitza. Per contra, fan falta més iteracions a causa de les aproximacions dutes a terme. 
+
+El desacoblat ràpid consisteix a definir un jacobià constant que segueix l'estructura de l'Equació \ref{eq:FDLF1}. Va ser introduït per Stott i Alsac (1974) amb la idea de descriure un mètode veloç i adient per a l'anàlisi de contingències. Es basa en una sèrie de simplificacions i aproximacions addicionals.
+
+Principalment considera que $\cos \delta_{ij} \approx 1$ i que $\sin \delta_{ij} \approx 0$. Té en compte que la part imaginària de les impedàncies en sèrie predomina per sobre la part real. A la matriu $J4$ es menyspreen els transformadors que introdueixen desfasaments (quan $\angle[t]\neq 0$). A la matriu $J1$ es fixen les relacions de transformació variables a $t=1$ i s'ignoren els elements en paral·lel del model equivalent de les línies. Segons Barrero (2004), amb tot això s'arriba a:
+\begin{equation}
+    \begin{cases}
+    \begin{split}
+        \Delta P/|V|&=B'\Delta \delta\ ,\\
+        \Delta Q/|V|&=B''|\Delta V|\ ,
+    \end{split}
+\end{cases}
+    \label{eq:FDLF2}
+\end{equation}
+on les dues matrius $B'$ i $B''$ prenen les mateixes dimensions que $J1$ i $J4$ respectivament. Es detallen a l'annex. Tots els seus elements són reals. S'acostumen a definir com matrius disperses. El mètode itera a partir de calcular $\Delta \delta$ i $|\Delta V|$, actualitzar les incògnites i recalcular-les fins que els errors de potència activa i reactiva són inferiors a les toleràncies definides.
+
+El desacoblat ràpid es caracteritza per oferir una convergència que es troba a mig camí entre el GS i el NR. És una opció encertada a l'hora d'analitzar la seguretat d'un sistema i també quan s'estudia la seva optimització. Resulta més fiable que el Newton-Raphson bàsic. 

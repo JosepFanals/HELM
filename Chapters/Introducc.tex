@@ -1,0 +1,26 @@
+\section{Antecedents}
+El flux de càrregues, també anomenat flux de potències, és l'eina principal per estudiar els sistemes elèctrics de potència. Permet conèixer més a fons les xarxes de distribució i transport per determinar el millor punt d'operació dels sistemes així com per planificar futures expansions.
+
+En la seva essència, el problema del flux de càrregues tracta de trobar les tensions de tots els busos o nusos. Amb això es poden conèixer sense complicació les potències que circulen per les línies i les injectades a cada bus. Tanmateix, l'etapa inicial en què es calculen les tensions implica la resolució d'equacions no lineals. Tradicionalment s'han abordat a partir d'algoritmes iteratius, com el de Gauss-Seidel i sobretot el de Newton-Raphson. Tot i que avui en dia aquests mètodes encara s'utilitzen, poden no ser fiables en sistemes mal condicionats que per exemple operen molt carregats.
+
+L'any 2012 Antonio Trias va presentar un algoritme basat en la incrustació holomòrfica, comercialment anomenat HELM\textsuperscript{\scriptsize{TM}} (Holomorphic Embedding Load-Flow Method). A diferència dels anteriors, és directe i resulta capaç d'indicar si la solució és correcta. 
+
+% citar a algun lloc Trias (2018), que és la principal referència bibliogràfica
+
+\section{Objecte}
+Primerament l'objecte d'aquest treball consisteix a utilitzar el mètode d'incrustació holomòrfica per resoldre les equacions de sistemes de potència que treballen en condicions crítiques. És a dir, que la seva solució se situa molt propera respecte al límit d'estabilitat de tensions. El flux de càrregues esdevé irresoluble a partir d'aquest punt. Dins el ventall de possibilitats conegudes per computar la solució, es vol esbrinar quines esdevenen més atractives. 
+
+En segon lloc, per tal de comprovar si les solucions obtingudes són vàlides, es farà ús dels aproximants Sigma, que corresponen a una eina de diagnòstic. Caracteritzen quant propers estan els busos del col·lapse de tensió i permeten representar gràficament tal proximitat.
+
+També es busca avaluar si el mètode d'incrustació holomòrfica resulta avantatjós respecte als algoritmes tradicionals. Es valorarà si troba la solució del sistema quan els altres mètodes no ho fan i si les eines que el complementen proporcionen un valor afegit. 
+
+\section{Especificacions i abast}
+La implementació del mètode d'incrustació holomòrfica exigeix adaptar i desenvolupar les equacions que regeixen els fluxos de potència. L'obra de Trias (2018) és la referència bibliogràfica principal. Es treballarà la formulació original del mètode i es plantejarà una nova formulació per tal d'entendre fins on arriben les limitacions de cada una. Seran programades en Python, així com les funcions que utilitzen.
+
+S'empraran xarxes de test de l'Institut d'Enginyers Elèctrics i Electrònics (IEEE), en concret, els casos de 14, 30 i 118 busos. Altres sistemes elèctrics de testatge seran la xarxa nòrdica de 44 busos, la PEGASE (Pan European Grid Advanced Simulation and State Estimation) de 2.869 busos i un sistema d'11 busos mal condicionat (Bonini et al., 2015). Totes aquestes xarxes s'estudiaran en el seu estat inicial i en situacions variades de càrrega. També se simularan amb alguns dels mètodes tradicionals de resolució del flux de càrregues amb la idea de comparar les respostes d'ambdós enfocaments.
+
+Per obtenir els resultats finals de flux de potències s'utilitzaran tècniques de continuació analítica. En destaquen els mètodes recurrents i sobretot els aproximants de Padé, que fonamenten teòricament el mètode d'incrustació holomòrfica. Altres recursos són els aproximants de Thévenin. Serveixen per trobar els mòduls de tensió propis de punts de treball estables i inestables. A més a més, es descriurà la formulació i l'ús del mètode de Padé-Weierstrass com a eina definitiva per refinar la solució en casos en què els sistemes romanen mal condicionats.
+ 
+La correcció de la solució es validarà analíticament amb els aproximants Sigma. S'oferiran resultats gràfics sota les diverses condicions de càrrega i es donaran nocions qualitatives sobre la interpretació dels valors.
+
+Per altra banda, es mostrarà l'aplicació del mètode d'incrustació holomòrfica per un circuit de corrent continu i per un sistema amb una càrrega no lineal, el que pretén il·lustrar que el seu camp d'aplicació va més enllà dels sistemes elèctrics de potència de transport i distribució.
