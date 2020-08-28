@@ -1,19 +1,19 @@
-# Mètode d'incrustació holomòrfica
+# Holomorphic Embedding Load-Flow Method
 
-Aquest Treball Fi de Grau (TFG) tracta sobre el mètode d'incrustació holomòrfica (comercialment conegut com a HELM). 
+The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solving the power flow problem of an electric power system. This has been developed as part of the final year project for the electrical engineering degree. 
 
-### Eines que s'inclouen:
+### Tools:
 
-* **Aproximants de Padé:** utilitzats per a accelerar la convergència de les sèries.
-* **Aproximants de Thévenin:** permeten traçar les corbes PV i PQ, tant amb les solucions de la branca estable com de la inestable.
-* **Aproximants Sigma:** recurs de diagnòstic per a validar la solució. Generen el gràfic Sigma.
-* **Padé-Weierstrass:** a partir dels resultats inicials de la formulació inicial genera una solució amb menys error.
-* **Mètodes recurrents:** Delta d'Aitken, transformacions de Shanks, Rho de Wynn, Èpsilon de Wynn, Theta de Brezinski i Eta de Bauer. Per a computar la solució final de forma recurrent.
+* **Padé approximants:** analytical resource employed to obtain the final value of the power series.
+* **Recursive methods:** same usage as Padé approximants, only that they compute the solution in a recursive fashion. Specifically, the methods are: Aitken's delta-squared, Shanks transformation, Wynn's rho, Wynn's epsilon, Brezinski' theta and Bauer's eta.
+* **Thévenin approximants:** they are able to construct the PV and PQ curves, i.e. both the stable and unstable solution.
+* **Sigma approximants:** diagnostic tool that validates the solution of the system as a whole.
+* **Padé-Weierstrass:** subprogram that improves the results, useful when the mismatches become unacceptable. 
 
-### Arxius que incorpora:
+### Relevant files:
 
 ```
-MIH_original.py: formulació original. Altrament anomenat canonical embedding. Porta a dins el P-W.
-MIH_propi.py: formulació pròpia. Presenta variacions a la incrustació.
-Funcions.py: Padé, Thévenin, Sigma i mètodes recurrents.
+MIH_original.py: main program for the original formulation of the HELM, also called canonical embedding.
+MIH_propi.py: main program for the alternative approach to the embedding of equations. The thesis details its advantages and disadvantages in comparison to the canonical embedding.
+Funcions.py: contains the tools explained above.
 ```
