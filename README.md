@@ -7,14 +7,15 @@ The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solvi
 There are a couple of options to install the software:
 1. (Recommended) Install GridCal by following the instructions detailed [here](https://gridcal.readthedocs.io/en/latest/getting_started/install.html).
 2. Use the code provided in this repository. There are two ways to do that:
- 2.1. Clone the [HELM repository from GitHub][1]:
- *Use this option if you are familiar with Git*
+
+   2.1. Clone the [HELM repository from GitHub][1]:
+   *Use this option if you are familiar with Git*
     - From the command line:
         - `git clone https://github.com/JosepFanals/HELM`
     - Or from the [HELM GitHub repository page][1]:
         - Click the green **Clone or download** button, then **Open in Desktop**.
 
-2.2. Download the repository as a .zip file from the GitHub page.
+   2.2. Download the repository as a .zip file from the GitHub page.
     - Go to the [HELM GitHub repository page][1].
     - Click the green **Clone or download** button, then **Download ZIP**.
 
