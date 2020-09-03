@@ -1,6 +1,22 @@
 # Holomorphic Embedding Load-Flow Method
 
-The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solving the power flow problem of an electric power system. This has been developed as part of the final year project for the electrical engineering degree. 
+The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solving the power flow problem of an electric power system. This has been developed as part of the final year project for the electrical engineering degree and it has been partially implemented in [GridCal](https://github.com/SanPen/GridCal).
+
+### Installation:
+
+There are a couple of options to install the software:
+1. (Recommended) Install GridCal by following the instructions detailed [here](https://gridcal.readthedocs.io/en/latest/getting_started/install.html).
+2. Use the code provided in this repository. There are two ways to do that:
+ 2.1. Clone the [HELM repository from GitHub][1]:
+ *Use this option if you are familiar with Git*
+    - From the command line:
+        - `git clone https://github.com/JosepFanals/HELM`
+    - Or from the [HELM GitHub repository page][1]:
+        - Click the green **Clone or download** button, then **Open in Desktop**.
+
+2.2. Download the repository as a .zip file from the GitHub page.
+    - Go to the [HELM GitHub repository page][1].
+    - Click the green **Clone or download** button, then **Download ZIP**.
 
 ### Tools:
 
@@ -23,4 +39,6 @@ This works is distributed under the [MIT License](https://opensource.org/license
 
 ### Acknowledgements:
 
-All this was possible thanks to the help I received from [Santiago Peñate Vera](https://github.com/SanPen). You can find a more polished code in [GridCal](https://github.com/SanPen/GridCal).
+All this was possible thanks to the help I received from [Santiago Peñate Vera](https://github.com/SanPen).
+
+[1]: https://github.com/JosepFanals/HELM
