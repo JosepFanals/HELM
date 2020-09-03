@@ -17,3 +17,4 @@ The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solvi
 * ***Codi/MIH_propi.py***: main program for the alternative approach to the embedding of equations. The thesis details its advantages and disadvantages in comparison to the canonical embedding.
 * ***Codi/Funcions.py***: contains the tools explained above.
 
+All this was possible thanks to the help I received from [Santiago Peñate Vera](https://github.com/SanPen). You can find a more polished code in [GridCal](https://github.com/SanPen/GridCal).
