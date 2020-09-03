@@ -2,6 +2,7 @@
 
 The Holomorphic Embedding Load-Flow Method (HELM) is a novel technique for solving the power flow problem of an electric power system. This has been developed as part of the final year project for the electrical engineering degree and it has been partially implemented in [GridCal](https://github.com/SanPen/GridCal).
 
+-----------------
 ### Installation:
 
 There are a couple of options to install the software:
@@ -21,6 +22,7 @@ There are a couple of options to install the software:
     - Go to the [HELM GitHub repository page][1].
     - Click the green **Clone or download** button, then **Download ZIP**.
 
+----------
 ### Tools:
 
 * **Padé approximants:** analytical resource employed to obtain the final value of the power series.
@@ -29,6 +31,7 @@ There are a couple of options to install the software:
 * **Sigma approximants:** diagnostic tool that validates the solution of the system as a whole.
 * **Padé-Weierstrass:** subprogram that improves the results, useful when the mismatches become unacceptable. 
 
+-------------------
 ### Relevant files:
 
 * ***main.pdf***: the thesis as such, with details about the method, development of equations and interesting results
@@ -36,10 +39,12 @@ There are a couple of options to install the software:
 * ***Codi/MIH_propi.py***: main program for the alternative approach to the embedding of equations. The thesis details its advantages and disadvantages in comparison to the canonical embedding.
 * ***Codi/Funcions.py***: contains the tools explained above.
 
+------------
 ### License:
 
 This works is distributed under the [MIT License](https://opensource.org/licenses/MIT).
 
+---------------------
 ### Acknowledgements:
 
 All this was possible thanks to the help I received from [Santiago Peñate Vera](https://github.com/SanPen).
